@@ -1,6 +1,6 @@
 {
   "name": "@mahmoudshata23/genix-ui",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Genix UI — Angular 19 component library built on native HTML + Angular CDK and the GlobeMed design system.",
   "license": "UNLICENSED",
   "sideEffects": false,

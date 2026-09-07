@@ -41,11 +41,11 @@ Versions are published to **GitHub Packages**. CI does the publishing; you only
 push a tag.
 
 ```bash
-# 1. bump the version in projects/genix-ui/package.json (e.g. 0.2.0 -> 0.2.1)
+# 1. bump the version in projects/genix-ui/package.json (e.g. 0.2.1 -> 0.2.2)
 # 2. commit it
-git commit -am "release: 0.2.1"
+git commit -am "release: 0.2.2"
 # 3. tag and push — the tag must match the manifest version or the job fails
-git tag v0.2.1
+git tag v0.2.2
 git push origin main --tags
 ```
 

@@ -1,43 +1,111 @@
 <header class="pg-header">
   <h1>Genix UI</h1>
   <gm-badge value="v0.2.2" severity="info" />
-  <span class="pg-header__note">consuming <code>dist/genix-ui</code>, the published build output</span>
+  <span class="pg-header__note">
+    every component, resolved from <code>dist/genix-ui</code> — the published build output
+  </span>
 </header>
 
-<main class="pg-main">
-  <gm-tabs [(value)]="activeTab">
-    <gm-tab value="controls" label="Form controls">
-      <gm-card header="Reactive form" subheader="Bound with ReactiveFormsModule, validated on submit">
+<div class="pg-layout">
+  <nav class="pg-nav" aria-label="Sections">
+    <ol>
+      @for (section of sections; track section.id) {
+        <li><a [href]="'#' + section.id">{{ section.label }}</a></li>
+      }
+    </ol>
+  </nav>
+
+  <main class="pg-main">
+    <!-- ── Reactive form ────────────────────────────────────────────────── -->
+    <section id="form">
+      <h2>Reactive form</h2>
+      <p class="pg-lead">
+        Every form control bound with <code>formControlName</code>. Submit with the
+        fields empty to see each control pick up its own invalid state from the
+        control, not from a manually passed <code>error</code>.
+      </p>
+
+      <gm-card header="Provider registration" subheader="ControlValueAccessor end to end">
         <form class="pg-form" [formGroup]="form" (ngSubmit)="submit()">
-          <gm-input
-            formControlName="fullName"
-            label="Full name"
-            placeholder="Jane Doe"
-            hint="As it appears on the provider record"
+          <div class="pg-grid">
+            <gm-input
+              formControlName="fullName"
+              label="Full name"
+              placeholder="Jane Doe"
+              hint="At least 3 characters"
+              required
+            />
+
+            <gm-input
+              formControlName="email"
+              type="email"
+              label="Email"
+              placeholder="jane@example.com"
+              autocomplete="email"
+              required
+            />
+
+            <gm-select
+              formControlName="country"
+              label="Country"
+              placeholder="Select a country"
+              [options]="countries"
+              optionLabel="name"
+              optionValue="code"
+              filter
+              filterPlaceholder="Search countries"
+              clearable
+              required
+            />
+
+            <gm-multiselect
+              formControlName="specialities"
+              label="Specialities"
+              placeholder="Select specialities"
+              [options]="plainOptions"
+              display="chip"
+              filter
+            />
+
+            <gm-datepicker
+              formControlName="startDate"
+              label="Start date"
+              placeholder="dd/mm/yyyy"
+              clearable
+              showButtonBar
+              required
+            />
+          </div>
+
+          <gm-textarea
+            formControlName="notes"
+            label="Notes"
+            placeholder="Anything worth recording"
+            [rows]="3"
+            [maxLength]="280"
+            hint="Optional, 280 characters max"
+          />
+
+          <fieldset class="pg-fieldset">
+            <legend>Contract</legend>
+            <gm-radio formControlName="status" name="contract" value="standard" label="Standard" />
+            <gm-radio formControlName="status" name="contract" value="preferred" label="Preferred" />
+            <gm-radio formControlName="status" name="contract" value="restricted" label="Restricted" />
+          </fieldset>
+
+          <gm-checkbox
+            formControlName="acceptsTerms"
+            label="I accept the terms"
             required
           />
 
-          <gm-select
-            formControlName="country"
-            label="Country"
-            placeholder="Select a country"
-            [options]="countries"
-            optionLabel="name"
-            optionValue="code"
-            filter
-            clearable
-            required
-          />
-
-          <gm-checkbox formControlName="acceptsTerms" label="I accept the terms" />
-
-          <div class="pg-form__actions">
-            <gm-button type="submit" label="Submit" severity="primary" />
-            <gm-button
-              label="Reset"
-              severity="secondary"
-              variant="outlined"
-              (onClick)="form.reset()"
+          <div class="pg-row">
+            <gm-button type="submit" label="Submit" severity="primary" icon="pi pi-check" />
+            <gm-button label="Reset" severity="secondary" variant="outlined" (onClick)="resetForm()" />
+            <gm-badge
+              [value]="form.valid ? 'valid' : 'invalid'"
+              [severity]="form.valid ? 'success' : 'danger'"
+              rounded
             />
           </div>
         </form>
@@ -46,43 +114,560 @@
           <pre class="pg-output">{{ payload }}</pre>
         }
       </gm-card>
-    </gm-tab>
+    </section>
 
-    <gm-tab value="display" label="Display">
-      <gm-card header="Buttons" subheader="Severity x variant">
-        <div class="pg-row">
-          <gm-button label="Primary" severity="primary" />
-          <gm-button label="Secondary" severity="secondary" />
-          <gm-button label="Danger" severity="danger" />
-          <gm-button label="Outlined" severity="primary" variant="outlined" />
-          <gm-button label="Text" severity="primary" variant="text" />
+    <!-- ── Button ──────────────────────────────────────────────────────── -->
+    <section id="button">
+      <h2>Button</h2>
+
+      <gm-card header="Severity × variant">
+        @for (variant of ['filled', 'outlined', 'text']; track variant) {
+          <div class="pg-row pg-row--labelled">
+            <span class="pg-row__label">{{ variant }}</span>
+            @for (severity of severities; track severity) {
+              <gm-button
+                [label]="severity"
+                [severity]="severity"
+                [variant]="variant === 'filled' ? 'filled' : variant === 'outlined' ? 'outlined' : 'text'"
+              />
+            }
+          </div>
+        }
+      </gm-card>
+
+      <gm-card header="Size, icon and state">
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">sizes</span>
+          @for (size of sizes; track size) {
+            <gm-button [label]="size" [size]="size" severity="primary" />
+          }
+        </div>
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">icons</span>
+          <gm-button label="Left icon" icon="pi pi-plus" severity="primary" />
+          <gm-button label="Right icon" icon="pi pi-arrow-right" iconPosition="right" severity="primary" />
+          <gm-button icon="pi pi-cog" ariaLabel="Settings" severity="secondary" />
+          <gm-button icon="pi pi-trash" ariaLabel="Delete" severity="danger" variant="text" />
+        </div>
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">state</span>
           <gm-button label="Loading" severity="primary" loading />
           <gm-button label="Disabled" severity="primary" disabled />
+          <gm-button label="Disabled outline" severity="primary" variant="outlined" disabled />
+        </div>
+        <div class="pg-stack">
+          <span class="pg-row__label">full width</span>
+          <gm-button label="Full width" severity="primary" fullWidth />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Input ───────────────────────────────────────────────────────── -->
+    <section id="input">
+      <h2>Input</h2>
+
+      <gm-card header="Sizes and types">
+        <div class="pg-grid">
+          @for (size of sizes; track size) {
+            <gm-input [formControl]="demoText" [label]="size" [size]="size" />
+          }
+          <gm-input [formControl]="demoNumber" type="number" label="Number" hint="Commits a number, not a string" />
+          <gm-input type="password" label="Password" placeholder="••••••••" autocomplete="current-password" />
+          <gm-input type="search" label="Search" placeholder="Find a provider" />
+          <gm-input type="tel" label="Phone" placeholder="+961 …" />
+          <gm-input type="url" label="Website" placeholder="https://" />
         </div>
       </gm-card>
 
-      <gm-card header="Badges, chips and spinner">
-        <div class="pg-row">
-          <gm-badge value="8" severity="primary" />
+      <gm-card header="States">
+        <div class="pg-grid">
+          <gm-input label="Required" placeholder="Marked and aria-required" required />
+          <gm-input label="With hint" hint="Helper text sits below the control" />
+          <gm-input label="With error" error="This value is already taken" [formControl]="demoText" />
+          <gm-input label="Read-only" readonly [formControl]="demoText" />
+          <gm-input label="Disabled" [formControl]="demoDisabled" />
+          <gm-input label="Max length 10" [maxLength]="10" placeholder="Stops at 10" />
+          <gm-input label="No label, aria only" ariaLabel="Search providers" placeholder="Labelled by aria-label" />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Textarea ────────────────────────────────────────────────────── -->
+    <section id="textarea">
+      <h2>Textarea</h2>
+      <gm-card header="Rows, resize and states">
+        <div class="pg-grid">
+          <gm-textarea [formControl]="demoTextarea" label="Default (3 rows)" />
+          <gm-textarea label="6 rows" [rows]="6" placeholder="Taller" />
+          <gm-textarea label="No resize" resize="none" placeholder="resize: none" />
+          <gm-textarea label="Both axes" resize="both" placeholder="resize: both" />
+          <gm-textarea label="With error" error="Notes are required" />
+          <gm-textarea label="Read-only" readonly [formControl]="demoTextarea" />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Checkbox & radio ────────────────────────────────────────────── -->
+    <section id="choice">
+      <h2>Checkbox &amp; radio</h2>
+
+      <gm-card header="Checkbox">
+        <div class="pg-stack">
+          <gm-checkbox [formControl]="demoCheckbox" label="Bound and checked" />
+          <gm-checkbox label="Unchecked" />
+          <gm-checkbox label="Indeterminate" indeterminate />
+          <gm-checkbox label="Required" required />
+          <gm-checkbox label="With hint" hint="Explains the consequence" />
+          <gm-checkbox label="With error" error="You must accept this" />
+          <gm-checkbox label="Disabled" disabled />
+          <gm-checkbox label="Read-only" readonly [formControl]="demoCheckbox" />
+        </div>
+      </gm-card>
+
+      <gm-card header="Radio group" subheader="One form control, three instances sharing a name">
+        <div class="pg-stack">
+          <gm-radio [formControl]="demoRadio" name="demo-tier" value="standard" label="Standard" />
+          <gm-radio [formControl]="demoRadio" name="demo-tier" value="preferred" label="Preferred" />
+          <gm-radio [formControl]="demoRadio" name="demo-tier" value="restricted" label="Restricted" />
+        </div>
+        <p class="pg-readout">Selected: <code>{{ demoRadio.value }}</code></p>
+
+        <!-- Deliberately control-free. A bare `disabled` next to `[formControl]`
+             binds to Angular's own reactive-forms `disabled` input, which takes a
+             boolean and disables the whole control, not this one option. -->
+        <div class="pg-stack">
+          <gm-radio name="demo-standalone" value="unavailable" label="Disabled option" disabled />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Select & multiselect ────────────────────────────────────────── -->
+    <section id="dropdown">
+      <h2>Select &amp; multiselect</h2>
+      <p class="pg-lead">
+        These render through the CDK overlay, which is the part most likely to
+        break once the library is bundled — so they are worth opening.
+      </p>
+
+      <gm-card header="Select">
+        <div class="pg-grid">
+          <gm-select
+            [formControl]="demoSelect"
+            label="Object options"
+            [options]="countries"
+            optionLabel="name"
+            optionValue="code"
+            placeholder="Select a country"
+          />
+          <gm-select
+            [formControl]="demoSelectPlain"
+            label="Primitive options"
+            [options]="plainOptions"
+            placeholder="No optionLabel needed"
+          />
+          <gm-select
+            label="Filterable + clearable"
+            [options]="countries"
+            optionLabel="name"
+            optionValue="code"
+            placeholder="Type to filter"
+            filter
+            clearable
+          />
+          <gm-select label="Loading" [options]="[]" placeholder="Fetching…" loading />
+          <gm-select label="Empty" [options]="[]" placeholder="Nothing to pick" emptyMessage="No countries configured" />
+          <gm-select label="With error" [options]="plainOptions" error="Pick a speciality" />
+          <gm-select label="Disabled" [options]="plainOptions" placeholder="Unavailable" disabled />
+        </div>
+      </gm-card>
+
+      <gm-card header="Multiselect">
+        <div class="pg-grid">
+          <gm-multiselect
+            [formControl]="demoMultiselectMenu"
+            label="Menu display"
+            [options]="countries"
+            optionLabel="name"
+            optionValue="code"
+            placeholder="Select countries"
+            filter
+          />
+          <gm-multiselect
+            [formControl]="demoMultiselectChip"
+            label="Chip display"
+            [options]="countries"
+            optionLabel="name"
+            optionValue="code"
+            placeholder="Select countries"
+            display="chip"
+            clearable
+          />
+          <gm-multiselect
+            label="No toggle-all"
+            [options]="plainOptions"
+            placeholder="Select specialities"
+            [showToggleAll]="false"
+          />
+          <gm-multiselect
+            label="Collapses after 2"
+            [options]="plainOptions"
+            placeholder="Select specialities"
+            [maxSelectedLabels]="2"
+            selectedItemsLabel="{0} specialities selected"
+          />
+        </div>
+        <p class="pg-readout">
+          Menu control value: <code>{{ demoMultiselectMenu.value }}</code>
+        </p>
+      </gm-card>
+    </section>
+
+    <!-- ── Datepicker ──────────────────────────────────────────────────── -->
+    <section id="datepicker">
+      <h2>Datepicker</h2>
+      <gm-card header="Formats, bounds and button bar">
+        <div class="pg-grid">
+          <gm-datepicker [formControl]="demoDate" label="Default (dd/MM/yyyy)" />
+          <gm-datepicker label="ISO format" dateFormat="yyyy-MM-dd" placeholder="yyyy-mm-dd" />
+          <gm-datepicker
+            [formControl]="demoDateBounded"
+            label="This month only"
+            [minDate]="monthStart"
+            [maxDate]="monthEnd"
+            hint="Days outside the current month are disabled"
+          />
+          <gm-datepicker label="Clearable + button bar" clearable showButtonBar />
+          <gm-datepicker label="Week starts Monday" [firstDayOfWeek]="1" />
+          <gm-datepicker label="With error" error="A start date is required" />
+          <gm-datepicker label="Disabled" disabled placeholder="Unavailable" />
+        </div>
+        <p class="pg-readout">Bound value: <code>{{ demoDate.value }}</code></p>
+      </gm-card>
+    </section>
+
+    <!-- ── Card ────────────────────────────────────────────────────────── -->
+    <section id="card">
+      <h2>Card</h2>
+      <div class="pg-grid">
+        <gm-card header="Elevated" subheader="The default variant">
+          <p>Body content sits in the default slot.</p>
+        </gm-card>
+
+        <gm-card header="Flat" subheader="No shadow" variant="flat">
+          <p>Use inside an already-elevated surface.</p>
+        </gm-card>
+
+        <gm-card header="With actions" subheader="Projected into [gmCardActions]">
+          <div gmCardActions>
+            <gm-button icon="pi pi-pencil" ariaLabel="Edit" severity="secondary" variant="text" size="small" />
+            <gm-button icon="pi pi-trash" ariaLabel="Delete" severity="danger" variant="text" size="small" />
+          </div>
+          <p>Actions render on the header row, opposite the title.</p>
+        </gm-card>
+
+        <gm-card header="Interactive" subheader="Hover and focus affordances" interactive>
+          <p>Signals the whole card is clickable.</p>
+        </gm-card>
+
+        <gm-card padding="none">
+          <div class="pg-bleed">padding="none" — content bleeds to the edge</div>
+        </gm-card>
+
+        <gm-card>
+          <p>No header at all: header markup is skipped entirely.</p>
+        </gm-card>
+      </div>
+    </section>
+
+    <!-- ── Badge, chip, spinner ────────────────────────────────────────── -->
+    <section id="badge">
+      <h2>Badge, chip, spinner</h2>
+
+      <gm-card header="Badge">
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">severity</span>
+          @for (severity of severities; track severity) {
+            <gm-badge [value]="severity" [severity]="severity" />
+          }
+        </div>
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">size</span>
+          @for (size of sizes; track size) {
+            <gm-badge value="8" [size]="size" severity="primary" />
+          }
+        </div>
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">rounded</span>
+          <gm-badge value="24" severity="info" rounded />
           <gm-badge value="Active" severity="success" rounded />
-          <gm-badge value="Overdue" severity="danger" />
-          <gm-chip label="Cardiology" />
-          <gm-chip label="Removable" severity="info" removable />
-          <gm-spinner size="small" ariaLabel="Loading" />
-          <span
-            class="pg-tooltip-target"
-            gmTooltip
-            content="Rendered through the CDK overlay — the riskiest thing to package, so it is here on purpose."
-            position="top"
-          >
-            hover me
-          </span>
+          <gm-badge value="99+" severity="danger" rounded ariaLabel="99 or more unread" />
         </div>
       </gm-card>
-    </gm-tab>
 
-    <gm-tab value="disabled" label="Disabled tab" disabled>
-      <p>Never reachable.</p>
-    </gm-tab>
-  </gm-tabs>
-</main>
+      <gm-card header="Chip">
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">severity</span>
+          @for (severity of severities; track severity) {
+            <gm-chip [label]="severity" [severity]="severity" />
+          }
+        </div>
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">variants</span>
+          <gm-chip label="With icon" icon="pi pi-user" severity="info" />
+          <gm-chip label="Removable" severity="primary" removable removeAriaLabel="Remove Cardiology" />
+          <gm-chip label="Disabled" severity="secondary" disabled />
+        </div>
+      </gm-card>
+
+      <gm-card header="Spinner">
+        <div class="pg-row pg-row--labelled">
+          <span class="pg-row__label">size</span>
+          @for (size of sizes; track size) {
+            <gm-spinner [size]="size" [ariaLabel]="'Loading (' + size + ')'" />
+          }
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Tooltip ─────────────────────────────────────────────────────── -->
+    <section id="tooltip">
+      <h2>Tooltip</h2>
+      <gm-card header="Positions" subheader="Also overlay-driven — hover or focus each target">
+        <!-- The directive's inputs are aliased: the text goes on `gmTooltip`
+             itself, and the others are `tooltipPosition` / `tooltipDisabled`.
+             Writing `content=` or `position=` sets a dead HTML attribute and the
+             tooltip silently shows nothing. -->
+        <div class="pg-row pg-row--spacious">
+          @for (position of tooltipPositions; track position) {
+            <gm-button
+              [label]="position"
+              severity="secondary"
+              variant="outlined"
+              [gmTooltip]="'Positioned ' + position + ' of the host'"
+              [tooltipPosition]="position"
+            />
+          }
+          <span class="pg-tooltip-target" gmTooltip="Works on any element, not just buttons.">
+            plain span
+          </span>
+          <gm-button
+            label="Tooltip suppressed"
+            severity="secondary"
+            variant="text"
+            gmTooltip="You should never see this"
+            tooltipDisabled
+          />
+          <gm-button
+            label="Empty content"
+            severity="secondary"
+            variant="text"
+            gmTooltip=""
+          />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Tabs ────────────────────────────────────────────────────────── -->
+    <section id="tabs">
+      <h2>Tabs</h2>
+      <p class="pg-lead">
+        Arrow keys, Home and End move between tabs; activation follows focus. A
+        panel is created when its tab becomes active and destroyed when it leaves.
+      </p>
+
+      <gm-card>
+        <gm-tabs [(value)]="activeTab">
+          <gm-tab value="summary" label="Summary">
+            <p>Plain string label.</p>
+          </gm-tab>
+
+          <gm-tab value="rich">
+            <ng-template gmTabLabel>
+              Rich header <gm-badge value="3" severity="danger" rounded />
+            </ng-template>
+            <p>This tab's header comes from a <code>gmTabLabel</code> template.</p>
+          </gm-tab>
+
+          <gm-tab value="nested" label="Nested content">
+            <gm-card header="A card inside a tab" variant="flat">
+              <gm-input label="Recreated on every visit" placeholder="Type, switch away, come back" />
+            </gm-card>
+          </gm-tab>
+
+          <gm-tab value="off" label="Disabled" disabled>
+            <p>Unreachable.</p>
+          </gm-tab>
+        </gm-tabs>
+        <p class="pg-readout">Active tab: <code>{{ activeTab() }}</code></p>
+      </gm-card>
+    </section>
+
+    <!-- ── Accordion ───────────────────────────────────────────────────── -->
+    <section id="accordion">
+      <h2>Accordion</h2>
+
+      <gm-card header="Single" subheader="Re-clicking the open panel closes it">
+        <gm-accordion [(value)]="accordionSingle">
+          <gm-accordion-panel value="what">
+            <gm-accordion-header>What is in the package?</gm-accordion-header>
+            <gm-accordion-content>
+              Eighteen standalone components, no PrimeNG or Material dependency.
+            </gm-accordion-content>
+          </gm-accordion-panel>
+          <gm-accordion-panel value="how">
+            <gm-accordion-header>How is it installed?</gm-accordion-header>
+            <gm-accordion-content>
+              From GitHub Packages, aliased to whatever name the consumer already imports.
+            </gm-accordion-content>
+          </gm-accordion-panel>
+          <gm-accordion-panel value="locked" disabled>
+            <gm-accordion-header>Disabled panel</gm-accordion-header>
+            <gm-accordion-content>Never opens.</gm-accordion-content>
+          </gm-accordion-panel>
+        </gm-accordion>
+      </gm-card>
+
+      <gm-card header="Multiple" subheader="Two panels open at once">
+        <gm-accordion [(value)]="accordionMultiple" multiple>
+          <gm-accordion-panel value="tokens">
+            <gm-accordion-header>Design tokens</gm-accordion-header>
+            <gm-accordion-content>
+              Shipped as <code>styles/tokens.css</code>; every component reads only <code>--gm-*</code>.
+            </gm-accordion-content>
+          </gm-accordion-panel>
+          <gm-accordion-panel value="peers">
+            <gm-accordion-header>Peer dependencies</gm-accordion-header>
+            <gm-accordion-content>
+              Angular common, core, forms and the CDK.
+            </gm-accordion-content>
+          </gm-accordion-panel>
+          <gm-accordion-panel value="release">
+            <gm-accordion-header>Releasing</gm-accordion-header>
+            <gm-accordion-content>
+              Push a <code>v*</code> tag; CI verifies it matches the manifest, then publishes.
+            </gm-accordion-content>
+          </gm-accordion-panel>
+        </gm-accordion>
+      </gm-card>
+    </section>
+
+    <!-- ── Pagination ──────────────────────────────────────────────────── -->
+    <section id="pagination">
+      <h2>Pagination</h2>
+      <gm-card header="43 records" subheader="Deliberately a partial last page">
+        <ul class="pg-records">
+          @for (record of pagedRecords(); track record) {
+            <li>{{ record }}</li>
+          }
+        </ul>
+
+        <gm-pagination
+          [page]="page()"
+          [pageSize]="pageSize()"
+          [totalItems]="allRecords.length"
+          [pageSizeOptions]="[5, 10, 20]"
+          showCurrentPageReport
+          (pageChange)="onPageChange($event)"
+        />
+
+        <p class="pg-readout">
+          page <code>{{ page() }}</code>, pageSize <code>{{ pageSize() }}</code>
+        </p>
+      </gm-card>
+
+      <gm-card header="Variants" variant="flat">
+        <div class="pg-stack">
+          <gm-pagination [page]="1" [pageSize]="10" [totalItems]="0" />
+          <gm-pagination [page]="3" [pageSize]="10" [totalItems]="500" [maxPageLinks]="7" />
+          <gm-pagination [page]="2" [pageSize]="10" [totalItems]="80" disabled />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Table ───────────────────────────────────────────────────────── -->
+    <section id="table">
+      <h2>Table</h2>
+      <p class="pg-lead">
+        Client-side sorting and filtering, multiple selection, a templated cell
+        per column and a custom empty state. Sort a column, then filter — the
+        text, select, boolean and numeric filter types are all here.
+      </p>
+
+      <gm-card header="Providers" subheader="Sortable, filterable, selectable">
+        <div gmCardActions>
+          <gm-button label="Simulate load" size="small" severity="secondary" variant="outlined" (onClick)="simulateLoad()" />
+          <gm-button
+            [label]="showEmptyTable() ? 'Show rows' : 'Show empty'"
+            size="small"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="toggleEmpty()"
+          />
+        </div>
+
+        <gm-table
+          [data]="tableRows()"
+          [columns]="columns"
+          [(selection)]="selectedProviders"
+          [loading]="tableLoading()"
+          selectionMode="multiple"
+          rowKey="id"
+          sortMode="client"
+          filterMode="client"
+          caption="Contracted providers"
+          minWidth="52rem"
+          striped
+          gridlines
+          reorderableColumns
+        >
+          <ng-template gmTableCell="active" let-row>
+            <gm-badge
+              [value]="row.active ? 'Active' : 'Inactive'"
+              [severity]="row.active ? 'success' : 'secondary'"
+              rounded
+            />
+          </ng-template>
+
+          <ng-template gmTableCell="score" let-row>
+            <gm-badge [value]="row.score" [severity]="scoreSeverity(row.score)" />
+          </ng-template>
+
+          <ng-template gmTableCell="actions" let-row>
+            <gm-button
+              icon="pi pi-pencil"
+              ariaLabel="Edit provider"
+              severity="secondary"
+              variant="text"
+              size="small"
+              gmTooltip="Edit"
+              (onClick)="rowAction('Edit', row)"
+            />
+            <gm-button
+              icon="pi pi-trash"
+              ariaLabel="Delete provider"
+              severity="danger"
+              variant="text"
+              size="small"
+              gmTooltip="Delete"
+              (onClick)="rowAction('Delete', row)"
+            />
+          </ng-template>
+
+          <ng-template gmTableEmpty>
+            <div class="pg-empty">
+              <gm-badge value="0" severity="secondary" rounded />
+              <p>No providers match the current filters.</p>
+            </div>
+          </ng-template>
+        </gm-table>
+
+        <p class="pg-readout">
+          Selected: <code>{{ selectedProviders().length }}</code>
+          @if (lastRowAction(); as action) {
+            · last action: <code>{{ action }}</code>
+          }
+        </p>
+      </gm-card>
+    </section>
+  </main>
+</div>

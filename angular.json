@@ -62,6 +62,7 @@
             "tsConfig": "projects/playground/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "styles": [
+              "node_modules/primeicons/primeicons.css",
               "dist/genix-ui/styles/tokens.css",
               "projects/playground/src/styles.scss"
             ]

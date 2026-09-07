@@ -1,7 +1,12 @@
-/* Playground chrome only. Component appearance is the package's business —
-   nothing here reaches into a `gm-*` element. */
+/* Playground chrome only.
+   Component appearance is the package's business — no selector here targets a
+   `gm-*` element or reaches inside one. If a component looks wrong on this
+   page, the bug is in the library, not in this file. */
 
 .pg-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: var(--gm-space-3);
@@ -22,28 +27,136 @@
   font-size: var(--gm-font-size-sm);
 }
 
-.pg-main {
-  max-width: 60rem;
+.pg-layout {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: var(--gm-space-6);
+  max-width: 82rem;
   margin: 0 auto;
   padding: var(--gm-space-6);
+}
+
+.pg-nav {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  a {
+    display: block;
+    padding: var(--gm-space-2) var(--gm-space-3);
+    border-radius: var(--gm-radius-sm);
+    color: var(--gm-gray-700);
+    font-size: var(--gm-font-size-sm);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--gm-gray-100);
+      color: var(--gm-gray-900);
+    }
+  }
+}
+
+.pg-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-10);
+  min-width: 0;
+}
+
+section {
   display: flex;
   flex-direction: column;
   gap: var(--gm-space-4);
+  /* Clears the sticky header when an anchor link jumps here. */
+  scroll-margin-top: 5rem;
+
+  h2 {
+    margin: 0;
+    font-size: var(--gm-font-size-xl);
+    font-weight: var(--gm-font-weight-semibold);
+  }
+}
+
+.pg-lead {
+  margin: 0;
+  max-width: 46rem;
+  color: var(--gm-gray-600);
+  font-size: var(--gm-font-size-sm);
+  line-height: 1.6;
+}
+
+/* ── Layout helpers used inside the cards ─────────────────────────────── */
+
+.pg-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gm-space-3);
+
+  & + & {
+    margin-top: var(--gm-space-3);
+  }
+}
+
+.pg-row--spacious {
+  gap: var(--gm-space-6);
+  padding: var(--gm-space-4) 0;
+}
+
+.pg-row--labelled .pg-row__label {
+  flex: 0 0 5rem;
+}
+
+.pg-row__label {
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-3);
+  align-items: flex-start;
+}
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--gm-space-4);
+  align-items: start;
 }
 
 .pg-form {
   display: flex;
   flex-direction: column;
   gap: var(--gm-space-4);
-  max-width: 26rem;
 }
 
-.pg-form__actions,
-.pg-row {
+.pg-fieldset {
+  margin: 0;
+  padding: var(--gm-space-3) var(--gm-space-4);
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-md);
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--gm-space-3);
+  gap: var(--gm-space-4);
+
+  legend {
+    padding: 0 var(--gm-space-2);
+    color: var(--gm-gray-600);
+    font-size: var(--gm-font-size-sm);
+  }
 }
 
 .pg-output {
@@ -52,9 +165,71 @@
   border-radius: var(--gm-radius-md);
   background: var(--gm-gray-100);
   font-size: var(--gm-font-size-sm);
+  white-space: pre-wrap;
+}
+
+.pg-readout {
+  margin: var(--gm-space-3) 0 0;
+  color: var(--gm-gray-600);
+  font-size: var(--gm-font-size-sm);
+
+  code {
+    padding: 1px 4px;
+    border-radius: var(--gm-radius-sm);
+    background: var(--gm-gray-100);
+  }
+}
+
+.pg-bleed {
+  padding: var(--gm-space-4);
+  background: var(--gm-gray-100);
+  color: var(--gm-gray-600);
+  font-size: var(--gm-font-size-sm);
+  text-align: center;
 }
 
 .pg-tooltip-target {
   text-decoration: underline dotted;
   cursor: help;
+}
+
+.pg-records {
+  margin: 0 0 var(--gm-space-4);
+  padding-inline-start: var(--gm-space-5);
+  columns: 2;
+  color: var(--gm-gray-700);
+  font-size: var(--gm-font-size-sm);
+}
+
+.pg-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gm-space-2);
+  padding: var(--gm-space-6);
+  color: var(--gm-gray-600);
+
+  p {
+    margin: 0;
+    font-size: var(--gm-font-size-sm);
+  }
+}
+
+code {
+  font-size: 0.9em;
+}
+
+@media (max-width: 60rem) {
+  .pg-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pg-nav {
+    position: static;
+
+    ol {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
 }

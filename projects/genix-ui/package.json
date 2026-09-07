@@ -1,0 +1,27 @@
+{
+  "name": "@mahmoudshata23/genix-ui",
+  "version": "0.2.0",
+  "description": "Genix UI — Angular 19 component library built on native HTML + Angular CDK and the GlobeMed design system.",
+  "license": "UNLICENSED",
+  "sideEffects": false,
+  "keywords": ["angular", "components", "ui", "design-system", "genix"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MahmoudShata23/genix-ui.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "exports": {
+    "./styles/*": "./styles/*"
+  },
+  "peerDependencies": {
+    "@angular/cdk": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/forms": "^19.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}

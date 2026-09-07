@@ -1,0 +1,7 @@
+@use '../core/styles/dropdown' as dropdown;
+
+:host {
+  display: block;
+}
+
+@include dropdown.gm-dropdown-shell;

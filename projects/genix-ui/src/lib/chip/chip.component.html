@@ -1,0 +1,24 @@
+<span
+  class="gm-chip"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-disabled]="disabled() ? 'true' : null"
+>
+  @if (icon()) {
+    <i class="gm-chip__icon" [class]="icon()" aria-hidden="true"></i>
+  }
+  @if (label()) {
+    <span class="gm-chip__label">{{ label() }}</span>
+  }
+  <ng-content />
+
+  @if (removable() && !disabled()) {
+    <button
+      type="button"
+      class="gm-chip__remove"
+      [attr.aria-label]="removeAriaLabel()"
+      (click)="onRemove($event)"
+    >
+      <span class="gm-chip__remove-icon" aria-hidden="true"></span>
+    </button>
+  }
+</span>

@@ -1,0 +1,258 @@
+<!-- Scroll container: the table scrolls locally, never widening the page. It is
+     also the containing block for sticky offsets. -->
+<div
+  class="gm-table__scroll"
+  [class.gm-table__scroll--capped]="maxHeightCss()"
+  [style.max-height]="maxHeightCss()"
+>
+  <table
+    class="gm-table"
+    [attr.id]="tableId"
+    [class.gm-table--sticky-header]="stickyHeader()"
+    [class.gm-table--striped]="striped()"
+    [class.gm-table--gridlines]="gridlines()"
+    [style.min-width]="minWidth()"
+  >
+    @if (caption()) {
+      <caption class="gm-table__caption">{{ caption() }}</caption>
+    }
+
+    <thead class="gm-table__head">
+      @if (headerContent()) {
+        <!-- The template owns the rows, so grouped headers, rowspan and colspan
+             are just native table markup. -->
+        <ng-container [ngTemplateOutlet]="headerContent()!" />
+      } @else {
+      <tr
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        [cdkDropListDisabled]="!reorderableColumns()"
+        [cdkDropListSortPredicate]="sameBand"
+        (cdkDropListDropped)="onColumnDrop($event)"
+      >
+        @if (selectionMode()) {
+          <th
+            class="gm-table__th gm-table__th--select"
+            scope="col"
+            [class.gm-table__cell--frozen]="selectionFrozen()"
+            [class.gm-table__cell--frozen-start]="selectionFrozen()"
+            [style.inset-inline-start]="selectionFrozen() ? '0px' : null"
+          >
+            @if (selectionMode() === 'multiple') {
+              <!-- gm-checkbox is a ControlValueAccessor, so a standalone
+                   ngModel is how its state is driven without a parent form. -->
+              <gm-checkbox
+                ariaLabel="Select all rows"
+                [indeterminate]="!allSelected() && selection().length > 0"
+                [ngModel]="allSelected()"
+                [ngModelOptions]="{ standalone: true }"
+                (valueChange)="toggleAll()"
+              />
+            } @else {
+              <span class="gm-table__sr-only">Select</span>
+            }
+          </th>
+        }
+
+        @for (column of columns(); track column.header) {
+          <th
+            class="gm-table__th"
+            scope="col"
+            [style.width]="column.width"
+            [style.min-width]="column.minWidth"
+            [style.text-align]="column.align"
+            [attr.aria-sort]="ariaSortOf(column)"
+            [class.gm-table__cell--frozen]="column.frozen"
+            [class.gm-table__cell--frozen-start]="isFrozenStart(column)"
+            [class.gm-table__cell--frozen-end]="isFrozenEnd(column)"
+            [class.gm-table__cell--frozen-edge-start]="isFrozenStartEdge(column)"
+            [class.gm-table__cell--frozen-edge-end]="isFrozenEndEdge(column)"
+            [style.inset-inline-start]="frozenInsetStart(column)"
+            [style.inset-inline-end]="frozenInsetEnd(column)"
+            cdkDrag
+            [cdkDragData]="column"
+            [cdkDragDisabled]="!isReorderable(column)"
+          >
+            @if (isReorderable(column)) {
+              <!-- Dragging is confined to this grip, so it can never be
+                   mistaken for a click on the sort button. -->
+              <span
+                class="gm-table__drag-handle"
+                cdkDragHandle
+                aria-hidden="true"
+                [title]="reorderHandleLabel()"
+              ></span>
+            }
+            @if (column.sortable && column.field) {
+              <!-- A real button, so the header is reachable and activatable. -->
+              <button
+                type="button"
+                class="gm-table__sort"
+                (click)="toggleSort(column)"
+              >
+                <span>{{ column.header }}</span>
+                <span
+                  class="gm-table__sort-icon"
+                  [class.gm-table__sort-icon--asc]="sortStateOf(column) === 'asc'"
+                  [class.gm-table__sort-icon--desc]="sortStateOf(column) === 'desc'"
+                  aria-hidden="true"
+                ></span>
+              </button>
+            } @else {
+              {{ column.header }}
+            }
+          </th>
+        }
+      </tr>
+      }
+
+      @if (hasFilterRow()) {
+        <tr class="gm-table__filter-row">
+          @if (selectionMode()) {
+            <th
+              class="gm-table__th gm-table__th--filter"
+              [class.gm-table__cell--frozen]="selectionFrozen()"
+              [class.gm-table__cell--frozen-start]="selectionFrozen()"
+              [style.inset-inline-start]="selectionFrozen() ? '0px' : null"
+            ></th>
+          }
+
+          @for (column of columns(); track column.header) {
+            <th
+              class="gm-table__th gm-table__th--filter"
+              [class.gm-table__cell--frozen]="column.frozen"
+              [class.gm-table__cell--frozen-start]="isFrozenStart(column)"
+              [class.gm-table__cell--frozen-end]="isFrozenEnd(column)"
+              [class.gm-table__cell--frozen-edge-start]="isFrozenStartEdge(column)"
+              [class.gm-table__cell--frozen-edge-end]="isFrozenEndEdge(column)"
+              [style.inset-inline-start]="frozenInsetStart(column)"
+              [style.inset-inline-end]="frozenInsetEnd(column)"
+            >
+              @if (column.filterable && column.field) {
+                @if (filterTemplateFor(column)) {
+                  <ng-container
+                    [ngTemplateOutlet]="filterTemplateFor(column)!"
+                    [ngTemplateOutletContext]="{
+                      $implicit: filterValueOf(column),
+                      value: filterValueOf(column),
+                      column: column
+                    }"
+                  />
+                } @else {
+                  <gm-table-filter-cell
+                    [type]="column.filterType ?? 'text'"
+                    [options]="column.filterOptions ?? []"
+                    [placeholder]="column.filterPlaceholder ?? ''"
+                    [ariaLabel]="'Filter by ' + column.header"
+                    [value]="filterValueOf(column)"
+                    (valueChange)="onFilterValue(column, $event)"
+                  />
+                }
+              }
+
+              @if ($last && showClearFilters() && hasActiveFilters()) {
+                <!-- Anchored to the last cell, which always exists, rather than
+                     to a column that happens to be unfiltered. -->
+                <button
+                  type="button"
+                  class="gm-table__clear-filters"
+                  [attr.aria-label]="clearFiltersLabel()"
+                  [title]="clearFiltersLabel()"
+                  (click)="clearAllFilters()"
+                >
+                  <span class="gm-table__clear-icon" aria-hidden="true"></span>
+                </button>
+              }
+            </th>
+          }
+        </tr>
+      }
+    </thead>
+
+    <tbody class="gm-table__body">
+      <!-- Exactly one of loading / empty / rows renders, so the states can
+           never contradict each other. -->
+      @if (loading()) {
+        <tr>
+          <td class="gm-table__state" [attr.colspan]="columnCount()">
+            <gm-spinner ariaLabel="Loading records" />
+          </td>
+        </tr>
+      } @else if (isEmpty()) {
+        <tr>
+          <td class="gm-table__state" [attr.colspan]="columnCount()">
+            @if (emptyContent()) {
+              <ng-container [ngTemplateOutlet]="emptyContent()!" />
+            } @else {
+              {{ emptyMessage() }}
+            }
+          </td>
+        </tr>
+      } @else {
+        @for (row of rows(); track trackRow(row); let i = $index) {
+          <tr
+            class="gm-table__row"
+            [class.gm-table__row--selected]="selectionMode() && isSelected(row)"
+          >
+            @if (selectionMode()) {
+              <td
+                class="gm-table__td gm-table__td--select"
+                [class.gm-table__cell--frozen]="selectionFrozen()"
+                [class.gm-table__cell--frozen-start]="selectionFrozen()"
+                [style.inset-inline-start]="selectionFrozen() ? '0px' : null"
+              >
+                @if (selectionMode() === 'multiple') {
+                  <gm-checkbox
+                    [ariaLabel]="rowLabel(i)"
+                    [ngModel]="isSelected(row)"
+                    [ngModelOptions]="{ standalone: true }"
+                    (valueChange)="toggleRow(row)"
+                  />
+                } @else {
+                  <!-- Single selection is a radio group: the platform then gives
+                       exclusivity and arrow-key movement for free. -->
+                  <gm-radio
+                    [name]="tableId + '-selection'"
+                    [value]="i"
+                    [ariaLabel]="rowLabel(i)"
+                    [ngModel]="selectedIndex()"
+                    [ngModelOptions]="{ standalone: true }"
+                    (valueChange)="toggleRow(row)"
+                  />
+                }
+              </td>
+            }
+
+            @for (column of columns(); track column.header) {
+              <td
+                class="gm-table__td"
+                [style.text-align]="column.align"
+                [class.gm-table__cell--frozen]="column.frozen"
+                [class.gm-table__cell--frozen-start]="isFrozenStart(column)"
+                [class.gm-table__cell--frozen-end]="isFrozenEnd(column)"
+                [class.gm-table__cell--frozen-edge-start]="isFrozenStartEdge(column)"
+                [class.gm-table__cell--frozen-edge-end]="isFrozenEndEdge(column)"
+                [style.inset-inline-start]="frozenInsetStart(column)"
+                [style.inset-inline-end]="frozenInsetEnd(column)"
+              >
+                @if (templateFor(column)) {
+                  <ng-container
+                    [ngTemplateOutlet]="templateFor(column)!"
+                    [ngTemplateOutletContext]="{
+                      $implicit: row,
+                      row: row,
+                      column: column,
+                      index: i
+                    }"
+                  />
+                } @else {
+                  {{ cellText(row, column) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,6 @@
+<span
+  class="gm-badge"
+  [class]="'gm-badge--' + severity() + ' gm-badge--' + size()"
+  [class.gm-badge--rounded]="rounded()"
+  [attr.aria-label]="ariaLabel()"
+>{{ value() }}</span>

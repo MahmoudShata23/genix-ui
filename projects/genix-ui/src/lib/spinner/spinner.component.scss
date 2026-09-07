@@ -1,0 +1,55 @@
+/* ==========================================================================
+   gm-spinner
+   --------------------------------------------------------------------------
+   A rotating ring: one border with a transparent top edge. `currentColor` for
+   the arc so the spinner inherits its context (a primary button, body text),
+   with the track drawn from a neutral token.
+   ========================================================================== */
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gm-primary);
+}
+
+.gm-spinner {
+  --gm-spinner-size: 24px;
+  --gm-spinner-width: 3px;
+
+  display: block;
+  width: var(--gm-spinner-size);
+  height: var(--gm-spinner-size);
+
+  border: var(--gm-spinner-width) solid var(--gm-gray-200);
+  border-top-color: currentColor;
+  border-radius: var(--gm-radius-full);
+
+  animation: gm-spinner-spin var(--gm-duration-slow) linear infinite;
+}
+
+:host(.gm-spinner-host--small) .gm-spinner {
+  --gm-spinner-size: 16px;
+  --gm-spinner-width: 2px;
+}
+
+:host(.gm-spinner-host--large) .gm-spinner {
+  --gm-spinner-size: 40px;
+  --gm-spinner-width: 4px;
+}
+
+@keyframes gm-spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* With motion suppressed the ring would read as an arbitrary broken circle, so
+   it becomes an even, static track instead. */
+@media (prefers-reduced-motion: reduce) {
+  .gm-spinner {
+    animation: none;
+    border-color: var(--gm-gray-300);
+    border-top-color: currentColor;
+  }
+}

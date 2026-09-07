@@ -1,0 +1,45 @@
+# Gate on every push and PR: the library must build, its specs must pass, and
+# the playground must compile against the BUILD OUTPUT — not against source.
+# That last step is what catches a public-API or template break that only
+# shows up once the package is packed.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the library
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build the playground against dist/genix-ui
+        run: npx ng build playground
+
+      - name: Show exactly what a publish would contain
+        run: npm publish ./dist/genix-ui --dry-run
+
+      - name: Pack the tarball
+        run: npm pack ./dist/genix-ui --pack-destination dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: genix-ui-tarball
+          path: dist/*.tgz
+          if-no-files-found: error

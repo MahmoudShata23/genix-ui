@@ -1,0 +1,88 @@
+<header class="pg-header">
+  <h1>Genix UI</h1>
+  <gm-badge value="v0.2.0" severity="info" />
+  <span class="pg-header__note">consuming <code>dist/genix-ui</code>, the published build output</span>
+</header>
+
+<main class="pg-main">
+  <gm-tabs [(value)]="activeTab">
+    <gm-tab value="controls" label="Form controls">
+      <gm-card header="Reactive form" subheader="Bound with ReactiveFormsModule, validated on submit">
+        <form class="pg-form" [formGroup]="form" (ngSubmit)="submit()">
+          <gm-input
+            formControlName="fullName"
+            label="Full name"
+            placeholder="Jane Doe"
+            hint="As it appears on the provider record"
+            required
+          />
+
+          <gm-select
+            formControlName="country"
+            label="Country"
+            placeholder="Select a country"
+            [options]="countries"
+            optionLabel="name"
+            optionValue="code"
+            filter
+            clearable
+            required
+          />
+
+          <gm-checkbox formControlName="acceptsTerms" label="I accept the terms" />
+
+          <div class="pg-form__actions">
+            <gm-button type="submit" label="Submit" severity="primary" />
+            <gm-button
+              label="Reset"
+              severity="secondary"
+              variant="outlined"
+              (onClick)="form.reset()"
+            />
+          </div>
+        </form>
+
+        @if (submitted(); as payload) {
+          <pre class="pg-output">{{ payload }}</pre>
+        }
+      </gm-card>
+    </gm-tab>
+
+    <gm-tab value="display" label="Display">
+      <gm-card header="Buttons" subheader="Severity x variant">
+        <div class="pg-row">
+          <gm-button label="Primary" severity="primary" />
+          <gm-button label="Secondary" severity="secondary" />
+          <gm-button label="Danger" severity="danger" />
+          <gm-button label="Outlined" severity="primary" variant="outlined" />
+          <gm-button label="Text" severity="primary" variant="text" />
+          <gm-button label="Loading" severity="primary" loading />
+          <gm-button label="Disabled" severity="primary" disabled />
+        </div>
+      </gm-card>
+
+      <gm-card header="Badges, chips and spinner">
+        <div class="pg-row">
+          <gm-badge value="8" severity="primary" />
+          <gm-badge value="Active" severity="success" rounded />
+          <gm-badge value="Overdue" severity="danger" />
+          <gm-chip label="Cardiology" />
+          <gm-chip label="Removable" severity="info" removable />
+          <gm-spinner size="small" ariaLabel="Loading" />
+          <span
+            class="pg-tooltip-target"
+            gmTooltip
+            content="Rendered through the CDK overlay — the riskiest thing to package, so it is here on purpose."
+            position="top"
+          >
+            hover me
+          </span>
+        </div>
+      </gm-card>
+    </gm-tab>
+
+    <gm-tab value="disabled" label="Disabled tab" disabled>
+      <p>Never reachable.</p>
+    </gm-tab>
+  </gm-tabs>
+</main>

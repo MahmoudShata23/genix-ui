@@ -1,0 +1,26 @@
+<h3 class="gm-accordion__heading">
+  <button
+    type="button"
+    class="gm-accordion__trigger"
+    [id]="headerId"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="contentId"
+    [disabled]="disabled()"
+    (click)="toggle()"
+  >
+    <ng-content select="gm-accordion-header" />
+    <span class="gm-accordion__icon" aria-hidden="true"></span>
+  </button>
+</h3>
+
+<!-- Kept in the DOM while collapsed, matching PrimeNG's accordion: content is
+     hidden rather than destroyed, so a form inside a panel keeps its state. -->
+<div
+  class="gm-accordion__content"
+  role="region"
+  [id]="contentId"
+  [attr.aria-labelledby]="headerId"
+  [hidden]="!expanded()"
+>
+  <ng-content select="gm-accordion-content" />
+</div>

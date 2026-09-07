@@ -1,0 +1,38 @@
+<div class="gm-choice">
+  <label class="gm-choice__row">
+    <input
+      type="radio"
+      class="gm-choice__control"
+      [attr.id]="controlId()"
+      [attr.name]="name()"
+      [value]="optionValue()"
+      [checked]="checked()"
+      [disabled]="isDisabled()"
+      [attr.required]="required() ? '' : null"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.aria-readonly]="readOnly() ? 'true' : null"
+      (change)="handleChange($event)"
+    />
+
+    @if (label()) {
+      <span class="gm-choice__label">
+        {{ label() }}
+        @if (required()) {
+          <span class="gm-choice__required" aria-hidden="true">*</span>
+        }
+      </span>
+    }
+  </label>
+
+  @if (errorText()) {
+    <small class="gm-choice__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-choice__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>

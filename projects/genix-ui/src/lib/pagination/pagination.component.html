@@ -1,0 +1,92 @@
+<nav class="gm-pagination" [attr.aria-label]="ariaLabel()">
+  @if (showCurrentPageReport()) {
+    <!-- Announced on change so screen-reader users hear the new range. -->
+    <span class="gm-pagination__report" aria-live="polite">{{ report() }}</span>
+  }
+
+  <ul class="gm-pagination__list">
+    <li>
+      <button
+        type="button"
+        class="gm-pagination__nav"
+        aria-label="First page"
+        [disabled]="navDisabled() || isFirstPage()"
+        (click)="goTo(1)"
+      >
+        <span class="gm-pagination__chevron gm-pagination__chevron--first" aria-hidden="true"></span>
+      </button>
+    </li>
+    <li>
+      <button
+        type="button"
+        class="gm-pagination__nav"
+        aria-label="Previous page"
+        [disabled]="navDisabled() || isFirstPage()"
+        (click)="goTo(currentPage() - 1)"
+      >
+        <span class="gm-pagination__chevron gm-pagination__chevron--prev" aria-hidden="true"></span>
+      </button>
+    </li>
+
+    @for (slot of slots(); track $index) {
+      <li>
+        @if (slot === 'ellipsis') {
+          <!-- Presentational: a gap is not a control. -->
+          <span class="gm-pagination__gap" aria-hidden="true">…</span>
+        } @else {
+          <button
+            type="button"
+            class="gm-pagination__page"
+            [class.gm-pagination__page--current]="slot === currentPage()"
+            [attr.aria-label]="'Page ' + slot"
+            [attr.aria-current]="slot === currentPage() ? 'page' : null"
+            [disabled]="disabled()"
+            (click)="goTo(slot)"
+          >
+            {{ slot }}
+          </button>
+        }
+      </li>
+    }
+
+    <li>
+      <button
+        type="button"
+        class="gm-pagination__nav"
+        aria-label="Next page"
+        [disabled]="navDisabled() || isLastPage()"
+        (click)="goTo(currentPage() + 1)"
+      >
+        <span class="gm-pagination__chevron gm-pagination__chevron--next" aria-hidden="true"></span>
+      </button>
+    </li>
+    <li>
+      <button
+        type="button"
+        class="gm-pagination__nav"
+        aria-label="Last page"
+        [disabled]="navDisabled() || isLastPage()"
+        (click)="goTo(totalPages())"
+      >
+        <span class="gm-pagination__chevron gm-pagination__chevron--last" aria-hidden="true"></span>
+      </button>
+    </li>
+  </ul>
+
+  @if (pageSizeOptions().length) {
+    <div class="gm-pagination__size">
+      <!-- gm-select is a ControlValueAccessor, so a standalone ngModel is how
+           its value is driven without a parent form. -->
+      <gm-select
+        [inputId]="pageSizeId"
+        [ariaLabel]="pageSizeLabel()"
+        [options]="pageSizeOptions()"
+        [ngModel]="pageSize()"
+        [ngModelOptions]="{ standalone: true }"
+        [disabled]="disabled()"
+        (valueChange)="onPageSizeChange($event)"
+        size="small"
+      />
+    </div>
+  }
+</nav>

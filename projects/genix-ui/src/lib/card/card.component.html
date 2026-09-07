@@ -1,0 +1,18 @@
+<div class="gm-card">
+  @if (header() || subheader()) {
+    <div class="gm-card__header">
+      <div>
+        @if (header()) {
+          <h3 class="gm-card__title">{{ header() }}</h3>
+        }
+        @if (subheader()) {
+          <p class="gm-card__subtitle">{{ subheader() }}</p>
+        }
+      </div>
+      <ng-content select="[gmCardActions]" />
+    </div>
+  }
+
+  <ng-content select="[gmCardHeader]" />
+  <ng-content />
+</div>

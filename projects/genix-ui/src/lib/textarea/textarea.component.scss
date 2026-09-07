@@ -1,0 +1,12 @@
+@use '../core/styles/field' as field;
+
+:host {
+  display: block;
+}
+
+@include field.gm-field-shell('.gm-field__control');
+
+/* `rows` sets the initial height; a floor keeps a 1-row textarea usable. */
+.gm-field__control {
+  min-height: calc(2.5rem + var(--gm-space-2));
+}

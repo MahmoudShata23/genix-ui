@@ -1,0 +1,96 @@
+/* ==========================================================================
+   gm-badge
+   --------------------------------------------------------------------------
+   Mirrors the design system's `.gm-badge` pill (uppercase, xs semibold, full
+   radius) and its severity tints. Each severity sets two colour slots, so the
+   shared rule stays one block.
+   ========================================================================== */
+
+:host {
+  display: inline-flex;
+}
+
+.gm-badge {
+  --gm-badge-bg: var(--gm-primary-light);
+  --gm-badge-fg: var(--gm-primary-dark);
+
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--gm-space-3);
+  border-radius: var(--gm-radius-full);
+
+  background: var(--gm-badge-bg);
+  color: var(--gm-badge-fg);
+
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-xs);
+  font-weight: var(--gm-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+
+  /* ---- Severities ---------------------------------------------------- */
+
+  &--secondary {
+    --gm-badge-bg: var(--gm-gray-200);
+    --gm-badge-fg: var(--gm-gray-700);
+  }
+
+  &--success {
+    --gm-badge-bg: var(--gm-success-light);
+    --gm-badge-fg: var(--gm-success-text);
+  }
+
+  &--info {
+    --gm-badge-bg: var(--gm-info-light);
+    --gm-badge-fg: var(--gm-info-text);
+  }
+
+  &--warning {
+    --gm-badge-bg: var(--gm-warning-light);
+    --gm-badge-fg: var(--gm-warning-text);
+  }
+
+  &--danger {
+    --gm-badge-bg: var(--gm-danger-light);
+    --gm-badge-fg: var(--gm-danger-text);
+  }
+
+  &--contrast {
+    --gm-badge-bg: var(--gm-gray-900);
+    --gm-badge-fg: var(--gm-white);
+  }
+
+  /* ---- Sizes --------------------------------------------------------- */
+
+  &--small {
+    padding: 1px var(--gm-space-2);
+  }
+
+  &--large {
+    padding: var(--gm-space-1) var(--gm-space-4);
+    font-size: var(--gm-font-size-sm);
+  }
+
+  /* Count form: a circle that stays circular for a single digit, matching
+     the design system's `.gm-badge-count` footprint. */
+  &--rounded {
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    font-weight: var(--gm-font-weight-bold);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  &--rounded#{&}--small {
+    min-width: 18px;
+    height: 18px;
+  }
+
+  &--rounded#{&}--large {
+    min-width: 26px;
+    height: 26px;
+  }
+}

@@ -1,0 +1,27 @@
+<button
+  #native
+  class="gm-button"
+  [class]="stateClasses()"
+  [attr.type]="type()"
+  [disabled]="disabled() || loading()"
+  [attr.aria-label]="resolvedAriaLabel()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  (click)="handleClick($event)"
+>
+  @if (loading()) {
+    <span class="gm-button__spinner" aria-hidden="true"></span>
+  } @else if (icon() && iconPosition() === 'left') {
+    <i class="gm-button__icon" [class]="icon()" aria-hidden="true"></i>
+  }
+
+  @if (label()) {
+    <span class="gm-button__label">{{ label() }}</span>
+  }
+
+  <!-- Escape hatch for callers that need richer content than `label`. -->
+  <ng-content />
+
+  @if (!loading() && icon() && iconPosition() === 'right') {
+    <i class="gm-button__icon" [class]="icon()" aria-hidden="true"></i>
+  }
+</button>

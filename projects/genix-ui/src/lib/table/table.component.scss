@@ -1,0 +1,398 @@
+/* ==========================================================================
+   gm-table
+   --------------------------------------------------------------------------
+   Mirrors the design system's data-grid contract: a light grey header with
+   small semibold labels, hairline row rules, and a primary-tint hover/selected
+   row. Values come from the datatable token block in the theme preset.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+/* The only responsive behaviour in core: the table scrolls inside its own box
+   rather than forcing the page wider. No viewport widths are hardcoded. */
+.gm-table__scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.gm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-base);
+}
+
+/* Present for assistive technology, without taking layout space. */
+.gm-table__caption,
+.gm-table__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.gm-table__th {
+  padding: var(--gm-space-3) var(--gm-space-4);
+  background: var(--gm-gray-50);
+  border-bottom: 1px solid var(--gm-gray-200);
+  color: var(--gm-gray-600);
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-semibold);
+  text-align: start;
+  white-space: nowrap;
+
+  &--select {
+    width: 1%;
+  }
+}
+
+/* Sortable header: a button that fills the cell so the whole label is a
+   target, but keeps the header's own typography. */
+.gm-table__sort {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--gm-gray-800);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+    border-radius: var(--gm-radius-sm);
+  }
+}
+
+/* Two stacked triangles; the active direction is tinted and the other fades.
+   Drawn in CSS so the library needs no icon font. */
+.gm-table__sort-icon {
+  position: relative;
+  width: 0.5rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    border-left: 0.25rem solid transparent;
+    border-right: 0.25rem solid transparent;
+  }
+
+  &::before {
+    top: 0.05rem;
+    border-bottom: 0.28rem solid var(--gm-gray-400);
+  }
+
+  &::after {
+    bottom: 0.05rem;
+    border-top: 0.28rem solid var(--gm-gray-400);
+  }
+
+  &--asc::before {
+    border-bottom-color: var(--gm-primary);
+  }
+
+  &--asc::after {
+    border-top-color: var(--gm-gray-300);
+  }
+
+  &--desc::after {
+    border-top-color: var(--gm-primary);
+  }
+
+  &--desc::before {
+    border-bottom-color: var(--gm-gray-300);
+  }
+}
+
+.gm-table__td {
+  padding: var(--gm-space-3) var(--gm-space-4);
+  border-bottom: 1px solid var(--gm-gray-100);
+  color: var(--gm-gray-700);
+  vertical-align: middle;
+
+  &--select {
+    width: 1%;
+  }
+}
+
+.gm-table__row {
+  transition: background-color var(--gm-transition-fast);
+
+  &:hover {
+    background: var(--gm-primary-light);
+  }
+
+  &--selected {
+    background: var(--gm-primary-light);
+
+    .gm-table__td {
+      color: var(--gm-primary-dark);
+    }
+  }
+}
+
+/* Loading and empty share one centred cell, so the table does not jump between
+   the two states. */
+.gm-table__state {
+  padding: var(--gm-space-8) var(--gm-space-4);
+  border-bottom: 1px solid var(--gm-gray-100);
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+  text-align: center;
+}
+
+.gm-table__state gm-spinner {
+  display: inline-flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-table__row {
+    transition: none;
+  }
+}
+
+/* ---- Filter row -------------------------------------------------------- */
+
+.gm-table__filter-row .gm-table__th--filter {
+  padding: var(--gm-space-2) var(--gm-space-3);
+  background: var(--gm-white);
+  border-bottom: 1px solid var(--gm-gray-200);
+  /* Controls set their own type scale, so the header's bold/uppercase must not
+     leak into them. */
+  font-weight: var(--gm-font-weight-normal);
+  vertical-align: top;
+}
+
+.gm-table__clear-filters {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--gm-radius-sm);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--gm-danger-light);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+}
+
+/* A funnel with a slash through it: "remove filters". */
+.gm-table__clear-icon {
+  position: relative;
+  width: 0.7rem;
+  height: 0.7rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    border-left: 0.35rem solid transparent;
+    border-right: 0.35rem solid transparent;
+    border-top: 0.45rem solid var(--gm-gray-500);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -0.1rem;
+    width: 0.9rem;
+    height: 1.5px;
+    background: var(--gm-danger);
+    transform: rotate(-45deg);
+  }
+}
+
+/* ==========================================================================
+   Frozen columns + sticky header
+   --------------------------------------------------------------------------
+   Reuses the approach already proven in the app's `table-v2` stylesheet:
+   `position: sticky` cells, a z-index tier per cell kind, and an explicit
+   background so scrolling content cannot show through.
+
+   Two deliberate improvements on that original:
+   - offsets use `inset-inline-start/end`, so RTL is handled by the browser
+     instead of an `isRtl()` class swap in the template;
+   - backgrounds come from `--gm-*` tokens rather than `--p-datatable-*`.
+
+   The z-index scale is local and tiny — page-level tokens like `--gm-z-sticky`
+   describe app layers, not cells inside one table's stacking context.
+   ========================================================================== */
+
+.gm-table {
+  --gm-table-z-frozen-cell: 1;
+  --gm-table-z-frozen-head: 2;
+  --gm-table-z-head: 2;
+  /* The header/frozen intersection has to sit above both. */
+  --gm-table-z-head-frozen: 3;
+}
+
+.gm-table__scroll--capped {
+  overflow-y: auto;
+}
+
+.gm-table__cell--frozen {
+  position: sticky;
+  /* Without an opaque surface, scrolling cells show through. */
+  background: var(--gm-white);
+  z-index: var(--gm-table-z-frozen-cell);
+}
+
+/* Header cells are already sticky-stacked, so a frozen header cell needs to
+   outrank both a frozen body cell and a plain header cell. */
+.gm-table__th.gm-table__cell--frozen {
+  background: var(--gm-gray-50);
+  z-index: var(--gm-table-z-frozen-head);
+}
+
+.gm-table__filter-row .gm-table__th.gm-table__cell--frozen {
+  background: var(--gm-white);
+}
+
+/* Frozen cells opt out of the row's background, so hover and selection have to
+   be repainted onto them explicitly. */
+.gm-table__row:hover .gm-table__cell--frozen,
+.gm-table__row--selected .gm-table__cell--frozen {
+  background: var(--gm-primary-light);
+}
+
+/* A single divider at each boundary, composed from the neutral token the app's
+   existing frozen styles already used. */
+.gm-table__cell--frozen-edge-start {
+  box-shadow: 2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+}
+
+.gm-table__cell--frozen-edge-end {
+  box-shadow: -2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+}
+
+/* The shadow is directional, so it flips with the writing direction. */
+:host-context([dir='rtl']) .gm-table__cell--frozen-edge-start {
+  box-shadow: -2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+}
+
+:host-context([dir='rtl']) .gm-table__cell--frozen-edge-end {
+  box-shadow: 2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+}
+
+/* ---- Sticky header ----------------------------------------------------- */
+
+.gm-table--sticky-header {
+  .gm-table__head .gm-table__th {
+    position: sticky;
+    top: 0;
+    z-index: var(--gm-table-z-head);
+  }
+
+  /* The filter row sits directly under the header row. `top` cannot be derived
+     in CSS, so it uses the header's own line-height plus its padding. */
+  .gm-table__filter-row .gm-table__th {
+    top: calc(var(--gm-font-size-sm) * 1.5 + var(--gm-space-3) * 2);
+  }
+
+  .gm-table__head .gm-table__th.gm-table__cell--frozen {
+    z-index: var(--gm-table-z-head-frozen);
+  }
+}
+
+// ── Column reorder ─────────────────────────────────────────────────────────
+// Drag lives on a grip rather than the whole cell, so the header's sort button
+// and filter controls keep working untouched.
+
+.gm-table__drag-handle {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.9rem;
+  margin-inline-end: var(--gm-space-1);
+  vertical-align: middle;
+  cursor: grab;
+  opacity: 0.45;
+  // Two dotted columns, the conventional grip, drawn from a token colour.
+  background-image: radial-gradient(
+    circle at center,
+    var(--gm-gray-600) 40%,
+    transparent 42%
+  );
+  background-size: 0.25rem 0.3rem;
+  background-repeat: repeat;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// CDK's own state classes — not a third-party UI kit's, just the drag utility.
+.gm-table__th.cdk-drag-preview {
+  display: flex;
+  align-items: center;
+  padding: var(--gm-space-2) var(--gm-space-3);
+  border-radius: var(--gm-radius-sm);
+  background: var(--gm-gray-50);
+  box-shadow: var(--gm-shadow-md);
+  color: var(--gm-gray-600);
+  font-weight: var(--gm-font-weight-semibold);
+}
+
+.gm-table__th.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+.cdk-drop-list-dragging .gm-table__th:not(.cdk-drag-placeholder) {
+  transition: transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// ── Optional presentation ──────────────────────────────────────────────────
+
+.gm-table--striped .gm-table__row:nth-child(even) > .gm-table__td {
+  background: var(--gm-gray-50);
+}
+
+// Frozen cells repaint their own background, so they need the stripe too or
+// they show as opaque white gaps in an even row.
+.gm-table--striped
+  .gm-table__row:nth-child(even)
+  > .gm-table__td.gm-table__cell--frozen {
+  background: var(--gm-gray-50);
+}
+
+.gm-table--gridlines {
+  .gm-table__th,
+  .gm-table__td {
+    border-inline-end: 1px solid var(--gm-gray-200);
+
+    &:last-child {
+      border-inline-end: 0;
+    }
+  }
+}

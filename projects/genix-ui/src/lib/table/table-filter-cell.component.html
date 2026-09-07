@@ -1,0 +1,85 @@
+@switch (type()) {
+  @case ('select') {
+    <gm-select
+      size="small"
+      [options]="options()"
+      optionLabel="label"
+      optionValue="value"
+      [placeholder]="placeholder()"
+      [ariaLabel]="ariaLabel()"
+      [clearable]="true"
+      [disabled]="disabled()"
+      [ngModel]="value()"
+      [ngModelOptions]="{ standalone: true }"
+      (valueChange)="emit($event)"
+    />
+  }
+
+  @case ('boolean') {
+    <gm-select
+      size="small"
+      [options]="booleanOptions"
+      optionLabel="label"
+      optionValue="value"
+      [placeholder]="placeholder()"
+      [ariaLabel]="ariaLabel()"
+      [clearable]="true"
+      [disabled]="disabled()"
+      [ngModel]="value()"
+      [ngModelOptions]="{ standalone: true }"
+      (valueChange)="emit($event)"
+    />
+  }
+
+  @case ('multiselect') {
+    <gm-multiselect
+      [options]="options()"
+      optionLabel="label"
+      optionValue="value"
+      [placeholder]="placeholder()"
+      [ariaLabel]="ariaLabel()"
+      [clearable]="true"
+      [disabled]="disabled()"
+      [ngModel]="asArray(value())"
+      [ngModelOptions]="{ standalone: true }"
+      (valueChange)="emit($event)"
+    />
+  }
+
+  @case ('date') {
+    <gm-datepicker
+      [placeholder]="placeholder()"
+      [ariaLabel]="ariaLabel()"
+      [clearable]="true"
+      [disabled]="disabled()"
+      [ngModel]="asDate(value())"
+      [ngModelOptions]="{ standalone: true }"
+      (valueChange)="emit($event)"
+    />
+  }
+
+  @case ('numeric') {
+    <gm-input
+      size="small"
+      type="number"
+      [placeholder]="placeholder()"
+      [ariaLabel]="ariaLabel()"
+      [disabled]="disabled()"
+      [ngModel]="asText(value())"
+      [ngModelOptions]="{ standalone: true }"
+      (valueChange)="emit($event)"
+    />
+  }
+
+  @default {
+    <gm-input
+      size="small"
+      [placeholder]="placeholder()"
+      [ariaLabel]="ariaLabel()"
+      [disabled]="disabled()"
+      [ngModel]="asText(value())"
+      [ngModelOptions]="{ standalone: true }"
+      (valueChange)="emit($event)"
+    />
+  }
+}

@@ -1,0 +1,163 @@
+/* ==========================================================================
+   gm-pagination
+   --------------------------------------------------------------------------
+   Matches the design system's paginator contract: transparent nav buttons that
+   tint on hover, and a filled primary chip for the current page.
+
+   Laid out with logical properties and flexbox only, so the whole strip mirrors
+   correctly under `dir="rtl"`; the chevrons are the one thing that needs an
+   explicit flip, handled at the bottom.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.gm-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gm-space-3);
+  padding: var(--gm-space-3) var(--gm-space-4);
+  font-family: var(--gm-font-family);
+}
+
+.gm-pagination__report {
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-pagination__list {
+  /* It is a <ul>: drop the list chrome. */
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gm-pagination__nav,
+.gm-pagination__page {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--gm-space-2);
+  border: 0;
+  border-radius: var(--gm-radius-sm);
+  background: transparent;
+  color: var(--gm-gray-600);
+  font-family: inherit;
+  font-size: var(--gm-font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--gm-transition-fast),
+    color var(--gm-transition-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--gm-primary-light);
+    color: var(--gm-primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    color: var(--gm-gray-300);
+    cursor: not-allowed;
+  }
+}
+
+.gm-pagination__page--current {
+  background: var(--gm-primary);
+  color: var(--gm-white);
+  font-weight: var(--gm-font-weight-semibold);
+
+  /* Stays filled on hover — it is the active page, not a target. */
+  &:hover:not(:disabled) {
+    background: var(--gm-primary-dark);
+    color: var(--gm-white);
+  }
+}
+
+.gm-pagination__gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 2rem;
+  color: var(--gm-gray-400);
+  user-select: none;
+}
+
+/* Chevrons drawn in CSS, so the library needs no icon font. `--first`/`--last`
+   add a bar to read as "jump to the end". */
+.gm-pagination__chevron {
+  position: relative;
+  width: 0.4rem;
+  height: 0.4rem;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+
+  &--prev,
+  &--first {
+    transform: rotate(135deg);
+  }
+
+  &--next,
+  &--last {
+    transform: rotate(-45deg);
+  }
+
+  /* The end-stop bar. Rotated with the arrow, so it is positioned in the
+     chevron's own rotated space. */
+  &--first::after,
+  &--last::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    bottom: -4px;
+    left: -4px;
+    border-left: 2px solid currentColor;
+  }
+
+  &--last::after {
+    left: auto;
+    right: -4px;
+    top: -4px;
+    bottom: -2px;
+    border-left: 0;
+    border-right: 2px solid currentColor;
+  }
+}
+
+.gm-pagination__size {
+  /* Wide enough for the largest option without the trigger jumping. */
+  min-width: 6rem;
+}
+
+/* RTL: the strip itself mirrors via flexbox, but a chevron is a rotated box, so
+   its direction has to be flipped explicitly. */
+:host-context([dir='rtl']) {
+  .gm-pagination__chevron--prev,
+  .gm-pagination__chevron--first {
+    transform: rotate(-45deg);
+  }
+
+  .gm-pagination__chevron--next,
+  .gm-pagination__chevron--last {
+    transform: rotate(135deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-pagination__nav,
+  .gm-pagination__page {
+    transition: none;
+  }
+}

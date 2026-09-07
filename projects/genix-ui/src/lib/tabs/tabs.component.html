@@ -1,0 +1,26 @@
+<div class="gm-tabs__list" role="tablist" (keydown)="onKeydown($event)">
+  @for (tab of tabs(); track tab.tabId) {
+    <button
+      type="button"
+      class="gm-tabs__tab"
+      role="tab"
+      [id]="tab.tabId"
+      [class.gm-tabs__tab--active]="tab.active()"
+      [attr.aria-selected]="tab.active()"
+      [attr.aria-controls]="tab.panelId"
+      [attr.tabindex]="tab.active() ? 0 : -1"
+      [disabled]="tab.disabled()"
+      (click)="select(tab)"
+    >
+      @if (tab.labelTemplate()) {
+        <ng-container [ngTemplateOutlet]="tab.labelTemplate()!.template" />
+      } @else {
+        {{ tab.label() }}
+      }
+    </button>
+  }
+</div>
+
+<div class="gm-tabs__panels">
+  <ng-content />
+</div>

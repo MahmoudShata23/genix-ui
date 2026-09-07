@@ -1,0 +1,7 @@
+@use '../core/styles/field' as field;
+
+:host {
+  display: block;
+}
+
+@include field.gm-field-shell('.gm-field__control');

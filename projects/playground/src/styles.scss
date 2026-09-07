@@ -1,0 +1,21 @@
+/* The design tokens themselves come from the package, loaded ahead of this
+   file in angular.json (`dist/genix-ui/styles/tokens.css`). A real consumer
+   points that entry at `node_modules/@mahmoudshata23/genix-ui/styles/tokens.css`
+   instead — same file, same result. Nothing here restyles a component; the
+   whole point of the playground is to see them exactly as shipped. */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-base);
+  color: var(--gm-gray-900);
+  background: var(--gm-gray-50);
+}

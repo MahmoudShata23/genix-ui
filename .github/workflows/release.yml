@@ -1,0 +1,50 @@
+# Publishes to GitHub Packages when a tag like v0.2.0 is pushed.
+#
+# The tag is the trigger, but projects/genix-ui/package.json is the source of
+# truth for the version — the job refuses to publish if the two disagree, so a
+# mistyped tag fails loudly instead of shipping the wrong version.
+#
+# No PAT is needed: GITHUB_TOKEN carries packages:write for this repository.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+
+      - run: npm ci
+
+      - name: Tag must match the package version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./projects/genix-ui/package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::tag v$tag does not match package version $pkg"
+            exit 1
+          fi
+          echo "Publishing version $pkg"
+
+      - run: npm run build
+
+      - run: npm test
+
+      - name: Publish to GitHub Packages
+        run: npm publish ./dist/genix-ui
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

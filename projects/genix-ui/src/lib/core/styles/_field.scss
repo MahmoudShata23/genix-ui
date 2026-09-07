@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Shared text-field styling — gm-input / gm-textarea
+   --------------------------------------------------------------------------
+   Values mirror the design system's field contract (`.gm-field`,
+   `.gm-field-label`, `.gm-form-error`) and the token-driven `.form-control`
+   rules, so a `gm-*` field is pixel-identical to the fields it replaces —
+   without inheriting from Bootstrap or PrimeNG.
+
+   `@mixin gm-field-shell` is applied by each component's own stylesheet so the
+   rules stay inside that component's encapsulation.
+   ========================================================================== */
+
+@mixin gm-field-shell($control-selector) {
+  .gm-field {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .gm-field__label {
+    font-size: var(--gm-font-size-sm);
+    font-weight: var(--gm-font-weight-medium);
+    color: var(--gm-gray-700);
+    margin-bottom: var(--gm-space-1);
+  }
+
+  .gm-field__required {
+    color: var(--gm-danger);
+    margin-inline-start: var(--gm-space-1);
+  }
+
+  #{$control-selector} {
+    /* Sizing slots — overridden by the size classes on the host. */
+    --gm-field-padding-x: var(--gm-space-3);
+    --gm-field-padding-y: var(--gm-space-2);
+    --gm-field-font-size: var(--gm-font-size-base);
+
+    width: 100%;
+    padding: var(--gm-field-padding-y) var(--gm-field-padding-x);
+    border: 1px solid var(--gm-gray-300);
+    border-radius: var(--gm-radius-md);
+
+    background-color: var(--gm-white);
+    color: var(--gm-gray-800);
+
+    font-family: var(--gm-font-family);
+    font-size: var(--gm-field-font-size);
+    line-height: 1.5;
+
+    transition: border-color var(--gm-transition-fast),
+      box-shadow var(--gm-transition-fast);
+
+    &::placeholder {
+      color: var(--gm-gray-400);
+    }
+
+    &:hover:not(:disabled):not([readonly]) {
+      border-color: var(--gm-gray-400);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--gm-primary);
+      box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+    }
+
+    &:disabled {
+      background-color: var(--gm-gray-100);
+      color: var(--gm-gray-500);
+      cursor: not-allowed;
+    }
+
+    /* Read-only stays readable and selectable, but reads as non-editable. */
+    &[readonly] {
+      background-color: var(--gm-gray-50);
+      color: var(--gm-gray-700);
+      cursor: default;
+    }
+
+    &[readonly]:focus {
+      border-color: var(--gm-gray-300);
+      box-shadow: none;
+    }
+  }
+
+  /* A field holding a value gets a slightly stronger edge than an empty one. */
+  :host(.gm-field-host--filled) #{$control-selector}:not(:disabled):not([readonly]) {
+    border-color: var(--gm-gray-400);
+  }
+
+  :host(.gm-field-host--invalid) #{$control-selector} {
+    border-color: var(--gm-danger);
+
+    &:focus {
+      box-shadow: 0 0 0 var(--gm-focus-ring-width)
+        var(--gm-focus-ring-color-danger);
+    }
+  }
+
+  :host(.gm-field-host--small) #{$control-selector} {
+    --gm-field-padding-x: var(--gm-space-2);
+    --gm-field-padding-y: var(--gm-space-1);
+    --gm-field-font-size: var(--gm-font-size-sm);
+  }
+
+  :host(.gm-field-host--large) #{$control-selector} {
+    --gm-field-padding-x: var(--gm-space-4);
+    --gm-field-padding-y: var(--gm-space-3);
+    --gm-field-font-size: var(--gm-font-size-md);
+  }
+
+  .gm-field__error {
+    font-size: var(--gm-font-size-xs);
+    color: var(--gm-danger);
+    margin-top: var(--gm-space-1);
+  }
+
+  .gm-field__hint {
+    font-size: var(--gm-font-size-xs);
+    color: var(--gm-gray-500);
+    margin-top: var(--gm-space-1);
+  }
+}

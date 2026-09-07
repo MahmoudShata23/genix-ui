@@ -1,0 +1,148 @@
+<div class="gm-field">
+  @if (label()) {
+    <label class="gm-field__label" [attr.for]="controlId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="gm-field__required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <button
+    type="button"
+    class="gm-dropdown__trigger"
+    role="combobox"
+    [attr.id]="controlId()"
+    [attr.name]="name()"
+    [disabled]="isDisabled()"
+    [attr.aria-haspopup]="'listbox'"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="open() ? listboxId : null"
+    [attr.aria-activedescendant]="activeOptionId()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-required]="required() ? 'true' : null"
+    [attr.aria-readonly]="readOnly() ? 'true' : null"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (click)="toggle()"
+    (keydown)="onKeydown($event)"
+  >
+    @if (!hasValue()) {
+      <span class="gm-dropdown__placeholder">{{ placeholder() }}</span>
+    } @else if (display() === 'chip') {
+      <span class="gm-multiselect__chips">
+        @for (option of selectedOptions(); track $index) {
+          <gm-chip
+            severity="primary"
+            [label]="labelOf(option)"
+            [removable]="!readOnly() && !isDisabled()"
+            [removeAriaLabel]="'Remove ' + labelOf(option)"
+            (remove)="removeValue(option)"
+          />
+        }
+      </span>
+    } @else {
+      <span class="gm-dropdown__value">{{ summary() }}</span>
+    }
+
+    <span class="gm-dropdown__actions">
+      @if (loading()) {
+        <gm-spinner size="small" ariaLabel="Loading options" />
+      } @else {
+        @if (clearable() && hasValue() && !readOnly()) {
+          <!-- A real button so it is reachable and announced on its own. -->
+          <button
+            type="button"
+            class="gm-dropdown__clear"
+            aria-label="Clear selection"
+            [disabled]="isDisabled()"
+            (click)="clear($event)"
+          >
+            <span class="gm-dropdown__clear-icon" aria-hidden="true"></span>
+          </button>
+        }
+        <span class="gm-dropdown__chevron" aria-hidden="true"></span>
+      }
+    </span>
+  </button>
+
+  @if (errorText()) {
+    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-field__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>
+
+<!-- Rendered into a CDK overlay, but created in this component's context so
+     its styles still apply. -->
+<ng-template #panel>
+  <div class="gm-dropdown__panel" (keydown)="onKeydown($event)">
+    @if (filter()) {
+      <div class="gm-dropdown__filter">
+        <input
+          type="text"
+          class="gm-dropdown__filter-input"
+          autocomplete="off"
+          [attr.placeholder]="filterPlaceholder()"
+          [attr.aria-label]="filterPlaceholder() || 'Filter options'"
+          [value]="filterText()"
+          (input)="onFilterInput($event)"
+        />
+      </div>
+    }
+
+    @if (showToggleAll() && visibleOptions().length) {
+      <button
+        type="button"
+        class="gm-multiselect__toggle-all"
+        [attr.aria-pressed]="allVisibleSelected()"
+        (click)="toggleAll()"
+      >
+        <span
+          class="gm-multiselect__tick"
+          [class.gm-multiselect__tick--checked]="allVisibleSelected()"
+          aria-hidden="true"
+        ></span>
+        {{ toggleAllLabel() }}
+      </button>
+    }
+
+    <ul
+      class="gm-dropdown__list"
+      role="listbox"
+      aria-multiselectable="true"
+      [attr.id]="listboxId"
+    >
+      @for (option of visibleOptions(); track $index; let i = $index) {
+        <li
+          class="gm-dropdown__option"
+          role="option"
+          [attr.id]="optionId(i)"
+          [class.gm-dropdown__option--selected]="isSelected(option)"
+          [class.gm-dropdown__option--active]="i === activeIndex()"
+          [attr.aria-selected]="isSelected(option)"
+          (click)="commitActive(option)"
+          (mouseenter)="activeIndex.set(i)"
+        >
+          <!-- Presentational only: a real checkbox here would add a focusable
+               element inside a role="option", which breaks the listbox pattern.
+               `aria-selected` already conveys the state. -->
+          <span
+            class="gm-multiselect__tick"
+            [class.gm-multiselect__tick--checked]="isSelected(option)"
+            aria-hidden="true"
+          ></span>
+          {{ labelOf(option) }}
+        </li>
+      } @empty {
+        <li class="gm-dropdown__empty" role="presentation">
+          {{ filterText() ? emptyFilterMessage() : emptyMessage() }}
+        </li>
+      }
+    </ul>
+  </div>
+</ng-template>

@@ -1,0 +1,185 @@
+/* ==========================================================================
+   Shared choice-control styling — gm-checkbox / gm-radio
+   --------------------------------------------------------------------------
+   Both controls are a native `<input>` styled with `appearance: none`, so the
+   browser keeps all of the behaviour (Space to toggle, arrow-key navigation
+   within a radio group, form participation) while the box itself is drawn from
+   `--gm-*` tokens.
+
+   Colours mirror the checkbox/radio contract in `globemed-preset.ts`, so a
+   `gm-*` control sits next to a not-yet-migrated PrimeNG one without a visible
+   seam. Hint/error text matches `_field.scss`.
+   ========================================================================== */
+
+@mixin gm-choice-shell($shape) {
+  .gm-choice {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* The label wraps the input, so clicking the text toggles the control
+     without needing a `for`/`id` round trip — the id is still emitted for
+     `aria-describedby` and for external labels. */
+  .gm-choice__row {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gm-space-2);
+    cursor: pointer;
+  }
+
+  .gm-choice__control {
+    /* Drop the platform rendering so the box can be drawn from tokens. */
+    appearance: none;
+    -webkit-appearance: none;
+
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+
+    border: 1px solid var(--gm-gray-300);
+    background-color: var(--gm-white);
+    cursor: pointer;
+
+    display: inline-grid;
+    place-content: center;
+
+    transition: background-color var(--gm-transition-fast),
+      border-color var(--gm-transition-fast),
+      box-shadow var(--gm-transition-fast);
+
+    @if $shape == 'circle' {
+      border-radius: var(--gm-radius-full);
+    } @else {
+      border-radius: var(--gm-radius-sm);
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--gm-gray-400);
+    }
+
+    &:checked,
+    &:indeterminate {
+      background-color: var(--gm-primary);
+      border-color: var(--gm-primary);
+    }
+
+    &:checked:hover:not(:disabled),
+    &:indeterminate:hover:not(:disabled) {
+      background-color: var(--gm-primary-dark);
+      border-color: var(--gm-primary-dark);
+    }
+
+    /* The mark is a pseudo-element so no icon font is required. */
+    &::before {
+      content: '';
+      display: block;
+      transform: scale(0);
+      transition: transform var(--gm-transition-fast);
+    }
+
+    @if $shape == 'circle' {
+      &::before {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: var(--gm-radius-full);
+        background-color: var(--gm-white);
+      }
+
+      &:checked::before {
+        transform: scale(1);
+      }
+    } @else {
+      /* Checkmark: two borders on a rotated box. */
+      &::before {
+        width: 0.3rem;
+        height: 0.6rem;
+        margin-top: -0.12rem;
+        border: solid var(--gm-white);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg) scale(0);
+      }
+
+      &:checked::before {
+        transform: rotate(45deg) scale(1);
+      }
+
+      /* Indeterminate replaces the tick with a bar. */
+      &:indeterminate::before {
+        width: 0.6rem;
+        height: 0;
+        margin-top: 0;
+        border-width: 0 0 2px 0;
+        transform: none;
+      }
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--gm-primary);
+      box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+    }
+
+    &:disabled {
+      background-color: var(--gm-gray-100);
+      border-color: var(--gm-gray-300);
+      cursor: not-allowed;
+    }
+
+    &:disabled:checked,
+    &:disabled:indeterminate {
+      background-color: var(--gm-gray-400);
+      border-color: var(--gm-gray-400);
+    }
+  }
+
+  .gm-choice__label {
+    font-size: var(--gm-font-size-base);
+    color: var(--gm-gray-700);
+    /* The wrapping <label> already handles the click, so the text must not
+       introduce a second, differently-sized hit target. */
+    line-height: 1.5;
+    user-select: none;
+  }
+
+  .gm-choice__required {
+    color: var(--gm-danger);
+    margin-inline-start: var(--gm-space-1);
+  }
+
+  :host(.gm-choice-host--invalid) .gm-choice__control {
+    border-color: var(--gm-danger);
+
+    &:focus-visible {
+      box-shadow: 0 0 0 var(--gm-focus-ring-width)
+        var(--gm-focus-ring-color-danger);
+    }
+  }
+
+  /* Disabled and read-only both read as non-interactive; read-only keeps the
+     normal surface because the value is still meaningful, just not editable. */
+  :host(.gm-choice-host--disabled) .gm-choice__row {
+    cursor: not-allowed;
+
+    .gm-choice__label {
+      color: var(--gm-gray-500);
+    }
+  }
+
+  :host(.gm-choice-host--readonly) .gm-choice__row,
+  :host(.gm-choice-host--readonly) .gm-choice__control {
+    cursor: default;
+  }
+
+  .gm-choice__error {
+    font-size: var(--gm-font-size-xs);
+    color: var(--gm-danger);
+    margin-top: var(--gm-space-1);
+  }
+
+  .gm-choice__hint {
+    font-size: var(--gm-font-size-xs);
+    color: var(--gm-gray-500);
+    margin-top: var(--gm-space-1);
+  }
+}

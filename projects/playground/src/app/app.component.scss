@@ -1,0 +1,60 @@
+/* Playground chrome only. Component appearance is the package's business —
+   nothing here reaches into a `gm-*` element. */
+
+.pg-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-3);
+  padding: var(--gm-space-4) var(--gm-space-6);
+  background: var(--gm-white);
+  border-bottom: 1px solid var(--gm-gray-200);
+
+  h1 {
+    margin: 0;
+    font-size: var(--gm-font-size-lg);
+    font-weight: var(--gm-font-weight-semibold);
+  }
+}
+
+.pg-header__note {
+  margin-inline-start: auto;
+  color: var(--gm-gray-600);
+  font-size: var(--gm-font-size-sm);
+}
+
+.pg-main {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: var(--gm-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-4);
+}
+
+.pg-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-4);
+  max-width: 26rem;
+}
+
+.pg-form__actions,
+.pg-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gm-space-3);
+}
+
+.pg-output {
+  margin: var(--gm-space-4) 0 0;
+  padding: var(--gm-space-3);
+  border-radius: var(--gm-radius-md);
+  background: var(--gm-gray-100);
+  font-size: var(--gm-font-size-sm);
+}
+
+.pg-tooltip-target {
+  text-decoration: underline dotted;
+  cursor: help;
+}

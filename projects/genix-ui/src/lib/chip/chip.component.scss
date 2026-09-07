@@ -1,0 +1,139 @@
+/* ==========================================================================
+   gm-chip
+   --------------------------------------------------------------------------
+   Mirrors the design system's `.gm-chip` pill. The DS base rule is styled for
+   an interactive chip (pointer + hover tint); this component is a display chip,
+   so it keeps the shape and tint but not the affordance — nothing here is
+   clickable, and suggesting otherwise would be misleading.
+
+   The colour slots are declared on the *host*, not on the inner span, so a
+   caller can retint a chip with an inline `--gm-chip-bg` (inline styles beat a
+   class declaration) instead of reaching into the component's DOM. That is the
+   supported extension point; `::ng-deep` is never needed.
+   ========================================================================== */
+
+:host {
+  --gm-chip-bg: var(--gm-white);
+  --gm-chip-fg: var(--gm-gray-700);
+  --gm-chip-border: var(--gm-gray-300);
+  --gm-chip-radius: var(--gm-radius-full);
+
+  display: inline-flex;
+}
+
+:host(.gm-chip-host--primary) {
+  --gm-chip-bg: var(--gm-primary-light);
+  --gm-chip-fg: var(--gm-primary-dark);
+  --gm-chip-border: var(--gm-primary);
+}
+
+:host(.gm-chip-host--success) {
+  --gm-chip-bg: var(--gm-success-light);
+  --gm-chip-fg: var(--gm-success-text);
+  --gm-chip-border: var(--gm-success);
+}
+
+:host(.gm-chip-host--info) {
+  --gm-chip-bg: var(--gm-info-light);
+  --gm-chip-fg: var(--gm-info-text);
+  --gm-chip-border: var(--gm-info);
+}
+
+:host(.gm-chip-host--warning) {
+  --gm-chip-bg: var(--gm-warning-light);
+  --gm-chip-fg: var(--gm-warning-text);
+  --gm-chip-border: var(--gm-warning);
+}
+
+:host(.gm-chip-host--danger) {
+  --gm-chip-bg: var(--gm-danger-light);
+  --gm-chip-fg: var(--gm-danger-text);
+  --gm-chip-border: var(--gm-danger);
+}
+
+:host(.gm-chip-host--contrast) {
+  --gm-chip-bg: var(--gm-gray-900);
+  --gm-chip-fg: var(--gm-white);
+  --gm-chip-border: var(--gm-gray-900);
+}
+
+.gm-chip {
+  /* Fills the host so host-level sizing (min-width, width) applies. */
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gm-space-2);
+  padding: 6px var(--gm-space-3);
+
+  border: 1px solid var(--gm-chip-border);
+  border-radius: var(--gm-chip-radius);
+  background: var(--gm-chip-bg);
+  color: var(--gm-chip-fg);
+
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+  line-height: 1.5;
+  white-space: nowrap;
+
+  &__icon {
+    font-size: var(--gm-font-size-base);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+}
+
+:host(.gm-chip-host--disabled) .gm-chip {
+  opacity: 0.55;
+}
+
+/* Dismiss button — a real <button> so it is focusable and announced. */
+.gm-chip__remove {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gm-radius-full);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(var(--gm-gray-900-rgb), 0.08);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--gm-focus-ring-color);
+  }
+}
+
+/* An "×" from two rotated bars, inheriting the chip's text colour. */
+.gm-chip__remove-icon {
+  position: relative;
+  width: 0.5rem;
+  height: 0.5rem;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    background: currentColor;
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(-45deg);
+  }
+}

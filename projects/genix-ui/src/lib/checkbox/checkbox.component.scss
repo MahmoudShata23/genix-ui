@@ -1,0 +1,7 @@
+@use '../core/styles/choice' as choice;
+
+:host {
+  display: block;
+}
+
+@include choice.gm-choice-shell('square');

@@ -1,0 +1,22 @@
+/* ==========================================================================
+   gm-tooltip bubble
+   --------------------------------------------------------------------------
+   Matches the design system's tooltip contract (dark surface, sm radius,
+   space-2/3 padding, md shadow) from the preset's `tooltip` tokens.
+   ========================================================================== */
+
+.gm-tooltip {
+  max-width: 18rem;
+  padding: var(--gm-space-2) var(--gm-space-3);
+
+  border-radius: var(--gm-radius-sm);
+  background: var(--gm-gray-900);
+  color: var(--gm-white);
+  box-shadow: var(--gm-shadow-md);
+
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-xs);
+  line-height: 1.4;
+  /* Long labels wrap rather than forcing the overlay off-screen. */
+  overflow-wrap: anywhere;
+}

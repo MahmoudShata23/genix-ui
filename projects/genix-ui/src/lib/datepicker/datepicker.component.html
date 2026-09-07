@@ -1,0 +1,155 @@
+<div class="gm-field">
+  @if (label()) {
+    <label class="gm-field__label" [attr.for]="controlId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="gm-field__required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <button
+    type="button"
+    class="gm-datepicker__trigger"
+    [attr.id]="controlId()"
+    [attr.name]="name()"
+    [disabled]="isDisabled()"
+    [attr.aria-haspopup]="'dialog'"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="open() ? calendarId : null"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-required]="required() ? 'true' : null"
+    [attr.aria-readonly]="readOnly() ? 'true' : null"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (click)="toggle()"
+    (keydown)="onTriggerKeydown($event)"
+  >
+    @if (displayText()) {
+      <span class="gm-datepicker__value">{{ displayText() }}</span>
+    } @else {
+      <span class="gm-datepicker__placeholder">{{ placeholder() }}</span>
+    }
+
+    <span class="gm-datepicker__actions">
+      @if (clearable() && selected() && !readOnly()) {
+        <!-- A real button so it is reachable and announced on its own. -->
+        <button
+          type="button"
+          class="gm-datepicker__clear"
+          aria-label="Clear date"
+          [disabled]="isDisabled()"
+          (click)="clear($event)"
+        >
+          <span class="gm-datepicker__clear-icon" aria-hidden="true"></span>
+        </button>
+      }
+      <span class="gm-datepicker__icon" aria-hidden="true"></span>
+    </span>
+  </button>
+
+  @if (errorText()) {
+    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-field__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>
+
+<!-- Rendered into the shared CDK overlay, but created in this component's
+     context so its styles still apply. -->
+<ng-template #panel>
+  <div
+    class="gm-datepicker__panel"
+    role="dialog"
+    aria-modal="false"
+    [attr.id]="calendarId"
+    [attr.aria-label]="monthLabel()"
+  >
+    <div class="gm-datepicker__header">
+      <button
+        type="button"
+        class="gm-datepicker__nav"
+        aria-label="Previous month"
+        [disabled]="!canGoBack()"
+        (click)="shiftMonth(-1)"
+      >
+        <span class="gm-datepicker__chevron gm-datepicker__chevron--prev" aria-hidden="true"></span>
+      </button>
+
+      <!-- aria-live so the month change is announced during keyboard paging. -->
+      <span class="gm-datepicker__month" aria-live="polite">{{ monthLabel() }}</span>
+
+      <button
+        type="button"
+        class="gm-datepicker__nav"
+        aria-label="Next month"
+        [disabled]="!canGoForward()"
+        (click)="shiftMonth(1)"
+      >
+        <span class="gm-datepicker__chevron gm-datepicker__chevron--next" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <table class="gm-datepicker__grid" role="grid" (keydown)="onCalendarKeydown($event)">
+      <thead>
+        <tr role="row">
+          @for (day of weekdays(); track $index) {
+            <th scope="col" class="gm-datepicker__weekday" [attr.abbr]="day">
+              {{ day }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (week of weeks(); track $index) {
+          <tr role="row">
+            @for (day of week; track dayId(day)) {
+              <td role="gridcell" class="gm-datepicker__cell">
+                <!-- A real button, never a clickable div: keyboard activation
+                     and disabled semantics come from the platform. -->
+                <button
+                  type="button"
+                  class="gm-datepicker__day"
+                  [attr.id]="dayId(day)"
+                  [class.gm-datepicker__day--selected]="isSelected(day)"
+                  [class.gm-datepicker__day--today]="isToday(day)"
+                  [class.gm-datepicker__day--outside]="isOutsideMonth(day)"
+                  [disabled]="isDisabledDay(day)"
+                  [attr.aria-label]="dayLabel(day)"
+                  [attr.aria-selected]="isSelected(day)"
+                  [attr.aria-current]="isToday(day) ? 'date' : null"
+                  [attr.tabindex]="isFocused(day) ? 0 : -1"
+                  (click)="select(day)"
+                >
+                  {{ day.getDate() }}
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (showButtonBar()) {
+      <div class="gm-datepicker__footer">
+        <gm-button
+          variant="text"
+          size="small"
+          [label]="todayLabel()"
+          (onClick)="selectToday()"
+        />
+        <gm-button
+          variant="text"
+          size="small"
+          severity="secondary"
+          [label]="clearLabel()"
+          (onClick)="clear()"
+        />
+      </div>
+    }
+  </div>
+</ng-template>

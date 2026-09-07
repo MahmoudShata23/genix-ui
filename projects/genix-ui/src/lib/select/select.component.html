@@ -1,0 +1,107 @@
+<div class="gm-field">
+  @if (label()) {
+    <label class="gm-field__label" [attr.for]="controlId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="gm-field__required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <button
+    type="button"
+    class="gm-dropdown__trigger"
+    role="combobox"
+    [attr.id]="controlId()"
+    [attr.name]="name()"
+    [disabled]="isDisabled()"
+    [attr.aria-haspopup]="'listbox'"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="open() ? listboxId : null"
+    [attr.aria-activedescendant]="activeOptionId()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-required]="required() ? 'true' : null"
+    [attr.aria-readonly]="readOnly() ? 'true' : null"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (click)="toggle()"
+    (keydown)="onKeydown($event)"
+  >
+    @if (displayLabel()) {
+      <span class="gm-dropdown__value">{{ displayLabel() }}</span>
+    } @else {
+      <span class="gm-dropdown__placeholder">{{ placeholder() }}</span>
+    }
+
+    <span class="gm-dropdown__actions">
+      @if (loading()) {
+        <gm-spinner size="small" ariaLabel="Loading options" />
+      } @else {
+        @if (clearable() && hasValue() && !readOnly()) {
+          <!-- A real button so it is reachable and announced on its own. -->
+          <button
+            type="button"
+            class="gm-dropdown__clear"
+            aria-label="Clear selection"
+            [disabled]="isDisabled()"
+            (click)="clear($event)"
+          >
+            <span class="gm-dropdown__clear-icon" aria-hidden="true"></span>
+          </button>
+        }
+        <span class="gm-dropdown__chevron" aria-hidden="true"></span>
+      }
+    </span>
+  </button>
+
+  @if (errorText()) {
+    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-field__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>
+
+<!-- Rendered into a CDK overlay, but created in this component's context so
+     its styles still apply. -->
+<ng-template #panel>
+  <div class="gm-dropdown__panel" (keydown)="onKeydown($event)">
+    @if (filter()) {
+      <div class="gm-dropdown__filter">
+        <input
+          type="text"
+          class="gm-dropdown__filter-input"
+          autocomplete="off"
+          [attr.placeholder]="filterPlaceholder()"
+          [attr.aria-label]="filterPlaceholder() || 'Filter options'"
+          [value]="filterText()"
+          (input)="onFilterInput($event)"
+        />
+      </div>
+    }
+
+    <ul class="gm-dropdown__list" role="listbox" [attr.id]="listboxId">
+      @for (option of visibleOptions(); track $index; let i = $index) {
+        <li
+          class="gm-dropdown__option"
+          role="option"
+          [attr.id]="optionId(i)"
+          [class.gm-dropdown__option--selected]="isSelected(option)"
+          [class.gm-dropdown__option--active]="i === activeIndex()"
+          [attr.aria-selected]="isSelected(option)"
+          (click)="commitActive(option)"
+          (mouseenter)="activeIndex.set(i)"
+        >
+          {{ labelOf(option) }}
+        </li>
+      } @empty {
+        <li class="gm-dropdown__empty" role="presentation">
+          {{ filterText() ? emptyFilterMessage() : emptyMessage() }}
+        </li>
+      }
+    </ul>
+  </div>
+</ng-template>

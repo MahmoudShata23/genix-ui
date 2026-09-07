@@ -1,0 +1,263 @@
+/* ==========================================================================
+   gm-button
+   --------------------------------------------------------------------------
+   Every visual value resolves to a GlobeMed design-system token (`--gm-*`).
+   Nothing is hard-coded and no PrimeNG selector is referenced.
+
+   Colour is applied indirectly: a severity class sets a few local custom
+   properties (`--gm-btn-*`) and the shared `.gm-button` rule consumes them, so
+   each severity is a handful of lines instead of a whole block per
+   severity/variant pair. Geometry follows the same idea via the size classes.
+   ========================================================================== */
+
+.gm-button-host {
+  display: inline-flex;
+
+  &--full-width {
+    display: flex;
+    width: 100%;
+
+    .gm-button {
+      width: 100%;
+    }
+  }
+}
+
+.gm-button {
+  /* Colour slots — overridden per severity/variant below. */
+  --gm-btn-surface: transparent;
+  --gm-btn-surface-hover: transparent;
+  --gm-btn-surface-active: transparent;
+  --gm-btn-border: transparent;
+  --gm-btn-color: var(--gm-gray-700);
+  --gm-btn-tint: var(--gm-gray-100);
+  --gm-btn-ring: var(--gm-focus-ring-color);
+
+  /* Geometry slots — overridden per size below. */
+  --gm-btn-padding-x: var(--gm-space-5);
+  --gm-btn-padding-y: var(--gm-space-2);
+  --gm-btn-font-size: var(--gm-font-size-base);
+  --gm-btn-icon-size: 1.125rem;
+  --gm-btn-square: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gm-space-2);
+
+  padding: var(--gm-btn-padding-y) var(--gm-btn-padding-x);
+  border: 1px solid var(--gm-btn-border);
+  border-radius: var(--gm-radius-md);
+
+  background: var(--gm-btn-surface);
+  color: var(--gm-btn-color);
+
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-btn-font-size);
+  font-weight: var(--gm-font-weight-medium);
+  line-height: 1.5;
+  white-space: nowrap;
+
+  cursor: pointer;
+  user-select: none;
+  transition: var(--gm-transition-fast);
+  transition-property: background-color, border-color, color, box-shadow;
+
+  &:hover:not(:disabled) {
+    background: var(--gm-btn-surface-hover);
+    border-color: var(--gm-btn-surface-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--gm-btn-surface-active);
+    border-color: var(--gm-btn-surface-active);
+  }
+
+  /* Keyboard-only focus ring — pointer clicks stay clean. */
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-btn-ring);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* ---- Parts ----------------------------------------------------------- */
+
+  &__icon {
+    font-size: var(--gm-btn-icon-size);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  &__spinner {
+    width: var(--gm-btn-icon-size);
+    height: var(--gm-btn-icon-size);
+    flex-shrink: 0;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: var(--gm-radius-full);
+    animation: gm-button-spin var(--gm-duration-slow) linear infinite;
+  }
+
+  /* ---- Sizes ----------------------------------------------------------- */
+
+  &--small {
+    --gm-btn-padding-x: var(--gm-space-3);
+    --gm-btn-padding-y: var(--gm-space-1);
+    --gm-btn-font-size: var(--gm-font-size-sm);
+    --gm-btn-icon-size: 1rem;
+    --gm-btn-square: 32px;
+  }
+
+  &--large {
+    --gm-btn-padding-x: var(--gm-space-8);
+    --gm-btn-padding-y: var(--gm-space-3);
+    --gm-btn-font-size: var(--gm-font-size-md);
+    --gm-btn-icon-size: 1.25rem;
+    --gm-btn-square: 44px;
+  }
+
+  &--icon-only {
+    width: var(--gm-btn-square);
+    height: var(--gm-btn-square);
+    padding: 0;
+  }
+
+  /* ---- Severities (filled form) ---------------------------------------- */
+
+  &--primary {
+    --gm-btn-surface: var(--gm-primary);
+    --gm-btn-surface-hover: var(--gm-primary-dark);
+    --gm-btn-surface-active: var(--gm-primary-dark);
+    --gm-btn-border: var(--gm-primary);
+    --gm-btn-color: var(--gm-white);
+    --gm-btn-tint: var(--gm-primary-light);
+    --gm-btn-accent: var(--gm-primary);
+    --gm-btn-ring: var(--gm-focus-ring-color);
+  }
+
+  /* The design system's secondary button is a neutral *outlined* button even in
+     its filled form — kept that way so a migrated `severity="secondary"` looks
+     identical to the button it replaces. */
+  &--secondary {
+    --gm-btn-surface: var(--gm-white);
+    --gm-btn-surface-hover: var(--gm-gray-50);
+    --gm-btn-surface-active: var(--gm-gray-100);
+    --gm-btn-border: var(--gm-gray-300);
+    --gm-btn-color: var(--gm-gray-700);
+    --gm-btn-tint: var(--gm-gray-100);
+    --gm-btn-accent: var(--gm-gray-700);
+    --gm-btn-ring: var(--gm-focus-ring-color);
+  }
+
+  &--success {
+    --gm-btn-surface: var(--gm-success);
+    --gm-btn-surface-hover: var(--gm-success-hover);
+    --gm-btn-surface-active: var(--gm-success-hover);
+    --gm-btn-border: var(--gm-success);
+    --gm-btn-color: var(--gm-white);
+    --gm-btn-tint: var(--gm-success-light);
+    --gm-btn-accent: var(--gm-success);
+    --gm-btn-ring: rgba(var(--gm-success-rgb), 0.1);
+  }
+
+  &--info {
+    --gm-btn-surface: var(--gm-info);
+    --gm-btn-surface-hover: var(--gm-info-text);
+    --gm-btn-surface-active: var(--gm-info-text);
+    --gm-btn-border: var(--gm-info);
+    --gm-btn-color: var(--gm-white);
+    --gm-btn-tint: var(--gm-info-light);
+    --gm-btn-accent: var(--gm-info);
+    --gm-btn-ring: rgba(var(--gm-info-rgb), 0.1);
+  }
+
+  /* Amber is too light for white text, so the filled form uses dark text. */
+  &--warning {
+    --gm-btn-surface: var(--gm-warning);
+    --gm-btn-surface-hover: var(--gm-warning-text);
+    --gm-btn-surface-active: var(--gm-warning-text);
+    --gm-btn-border: var(--gm-warning);
+    --gm-btn-color: var(--gm-gray-900);
+    --gm-btn-tint: var(--gm-warning-light);
+    --gm-btn-accent: var(--gm-warning-text);
+    --gm-btn-ring: rgba(var(--gm-warning-rgb), 0.1);
+  }
+
+  /* The hover shade is dark, so the dark filled text has to flip to white. */
+  &--filled#{&}--warning:hover:not(:disabled),
+  &--filled#{&}--warning:active:not(:disabled) {
+    color: var(--gm-white);
+  }
+
+  &--danger {
+    --gm-btn-surface: var(--gm-danger);
+    --gm-btn-surface-hover: var(--gm-danger-hover);
+    --gm-btn-surface-active: var(--gm-danger-hover);
+    --gm-btn-border: var(--gm-danger);
+    --gm-btn-color: var(--gm-white);
+    --gm-btn-tint: var(--gm-danger-light);
+    --gm-btn-accent: var(--gm-danger);
+    --gm-btn-ring: var(--gm-focus-ring-color-danger);
+  }
+
+  &--contrast {
+    --gm-btn-surface: var(--gm-gray-900);
+    --gm-btn-surface-hover: var(--gm-gray-800);
+    --gm-btn-surface-active: var(--gm-gray-800);
+    --gm-btn-border: var(--gm-gray-900);
+    --gm-btn-color: var(--gm-white);
+    --gm-btn-tint: var(--gm-gray-100);
+    --gm-btn-accent: var(--gm-gray-900);
+    --gm-btn-ring: rgba(var(--gm-gray-900-rgb), 0.1);
+  }
+
+  /* ---- Variants -------------------------------------------------------- */
+
+  /* Outlined and text both move the severity colour to the foreground and tint
+     only on hover. `--gm-btn-accent` carries the severity colour, so this is
+     one rule for every severity rather than one per pair. */
+  &--outlined,
+  &--text {
+    --gm-btn-surface: transparent;
+    --gm-btn-surface-hover: var(--gm-btn-tint);
+    --gm-btn-surface-active: var(--gm-btn-tint);
+    --gm-btn-color: var(--gm-btn-accent);
+
+    /* The hover tint must not drag the border along with it. */
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      border-color: var(--gm-btn-border);
+      color: var(--gm-btn-accent);
+    }
+  }
+
+  &--text {
+    --gm-btn-border: transparent;
+  }
+
+  &--loading {
+    cursor: progress;
+  }
+}
+
+@keyframes gm-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Respect a reduced-motion preference: the spinner stays as a static
+   affordance instead of animating. */
+@media (prefers-reduced-motion: reduce) {
+  .gm-button {
+    transition: none;
+  }
+
+  .gm-button__spinner {
+    animation: none;
+  }
+}

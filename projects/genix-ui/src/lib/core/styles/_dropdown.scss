@@ -1,0 +1,199 @@
+/* ==========================================================================
+   Shared dropdown styling — gm-select / gm-multiselect
+   --------------------------------------------------------------------------
+   The trigger reuses the field shell so it lines up with `gm-input` exactly
+   (same border, radius, padding, focus ring, error treatment). Everything
+   below is the dropdown-specific chrome: actions, chevron, clear button, the
+   overlay panel and its option list.
+   ========================================================================== */
+
+@use './field' as field;
+
+@mixin gm-dropdown-shell {
+  @include field.gm-field-shell('.gm-dropdown__trigger');
+
+  .gm-dropdown__trigger {
+    /* The shell styles an <input>; a <button> needs its own chrome cleared and
+       its content laid out. */
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gm-space-2);
+    text-align: start;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  .gm-dropdown__value {
+    color: var(--gm-gray-800);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gm-dropdown__placeholder {
+    color: var(--gm-gray-400);
+  }
+
+  .gm-dropdown__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gm-space-1);
+    flex-shrink: 0;
+  }
+
+  /* Chevron drawn from borders, matching the accordion's icon approach. */
+  .gm-dropdown__chevron {
+    width: 0.45rem;
+    height: 0.45rem;
+    border: solid var(--gm-gray-500);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform var(--gm-transition-fast);
+  }
+
+  :host(.gm-dropdown-host--open) .gm-dropdown__chevron {
+    transform: rotate(-135deg) translateY(-2px);
+  }
+
+  .gm-dropdown__clear {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--gm-radius-full);
+    background: transparent;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--gm-gray-100);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--gm-focus-ring-color);
+    }
+  }
+
+  /* An "×" from two rotated bars, so no icon font is needed. */
+  .gm-dropdown__clear-icon {
+    position: relative;
+    width: 0.55rem;
+    height: 0.55rem;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1.5px;
+      background: var(--gm-gray-500);
+    }
+
+    &::before {
+      transform: rotate(45deg);
+    }
+
+    &::after {
+      transform: rotate(-45deg);
+    }
+  }
+
+  /* ---- Overlay panel --------------------------------------------------- */
+
+  .gm-dropdown__panel {
+    background: var(--gm-white);
+    border: 1px solid var(--gm-gray-200);
+    border-radius: var(--gm-radius-md);
+    box-shadow: var(--gm-shadow-lg);
+    overflow: hidden;
+    font-family: var(--gm-font-family);
+  }
+
+  .gm-dropdown__filter {
+    padding: var(--gm-space-2);
+    border-bottom: 1px solid var(--gm-gray-100);
+  }
+
+  .gm-dropdown__filter-input {
+    width: 100%;
+    padding: var(--gm-space-1) var(--gm-space-2);
+    border: 1px solid var(--gm-gray-300);
+    border-radius: var(--gm-radius-sm);
+    background: var(--gm-white);
+    color: var(--gm-gray-800);
+    font-family: inherit;
+    font-size: var(--gm-font-size-sm);
+
+    &::placeholder {
+      color: var(--gm-gray-400);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--gm-primary);
+      box-shadow: 0 0 0 2px var(--gm-focus-ring-color);
+    }
+  }
+
+  .gm-dropdown__list {
+    /* It is a <ul>: drop the list chrome. */
+    margin: 0;
+    padding: var(--gm-space-1);
+    list-style: none;
+    /* Roughly eight rows before the list scrolls. */
+    max-height: 16rem;
+    overflow-y: auto;
+  }
+
+  .gm-dropdown__option {
+    display: flex;
+    align-items: center;
+    gap: var(--gm-space-2);
+    padding: var(--gm-space-2) var(--gm-space-3);
+    border-radius: var(--gm-radius-sm);
+    color: var(--gm-gray-700);
+    font-size: var(--gm-font-size-base);
+    cursor: pointer;
+
+    /* Hover and keyboard highlight are the same state, so they share styling —
+       `--active` is set by both pointer and arrow-key movement. */
+    &--active {
+      background: var(--gm-gray-100);
+      color: var(--gm-gray-900);
+    }
+
+    &--selected {
+      background: var(--gm-primary-light);
+      color: var(--gm-primary-dark);
+      font-weight: var(--gm-font-weight-medium);
+    }
+
+    &--selected#{&}--active {
+      background: var(--gm-primary-light);
+    }
+  }
+
+  .gm-dropdown__empty {
+    padding: var(--gm-space-3);
+    color: var(--gm-gray-500);
+    font-size: var(--gm-font-size-sm);
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gm-dropdown__chevron {
+      transition: none;
+    }
+  }
+}

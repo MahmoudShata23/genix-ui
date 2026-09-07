@@ -1,0 +1,167 @@
+/* ==========================================================================
+   GlobeMed Genix UI — DESIGN TOKENS
+   --------------------------------------------------------------------------
+   Every component in this package styles itself only through the `--gm-*`
+   custom properties defined below. Import this file once, globally, in the
+   consuming application — without it the components render unstyled.
+
+   In angular.json (architect > build > options > styles):
+
+       "node_modules/@mahmoudshata23/genix-ui/styles/tokens.css"
+
+   ...or from the application's global stylesheet:
+
+       @use "@mahmoudshata23/genix-ui/styles/tokens.css";
+
+   To re-theme, redefine any token on `:root` *after* this file loads; the
+   values here are the GlobeMed design-system kit defaults.
+
+   Scope: the kit token layer only. Genix Portal's app-shell geometry
+   (`--gm-app-*`, `--gm-z-app-*`) and nav-rail surface treatment are
+   deliberately excluded — those belong to that application's shell, not to a
+   component library.
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------- */
+  /* 1. Kit tokens (verbatim from globemed-design-system.css)         */
+  /* ---------------------------------------------------------------- */
+
+  /* Primary Colors */
+  --gm-primary: #0b6ea8;
+  --gm-primary-dark: #094d75;
+  --gm-primary-light: #e6f4ff;
+  --gm-primary-hover: #0a5f91;
+
+  /* Navigation */
+  --gm-nav-bg: #003d66;
+  --gm-nav-hover: #00527a;
+  --gm-nav-active: #0b6ea8;
+
+  /* Semantic Colors */
+  --gm-success: #28a745;
+  --gm-success-light: #d4edda;
+  --gm-danger: #dc3545;
+  --gm-danger-light: #f8d7da;
+  --gm-warning: #f0ad4e;
+  --gm-warning-light: #fff3cd;
+  --gm-info: #17a2b8;
+  --gm-info-light: #d1ecf1;
+
+  /* Neutrals */
+  --gm-white: #ffffff;
+  --gm-gray-50: #f8f9fa;
+  --gm-gray-100: #eef2f5;
+  --gm-gray-200: #e3e7ec;
+  --gm-gray-300: #d1d5db;
+  --gm-gray-400: #9ca3af;
+  --gm-gray-500: #6b7280;
+  --gm-gray-600: #4b5563;
+  --gm-gray-700: #374151;
+  --gm-gray-800: #1f2937;
+  --gm-gray-900: #111827;
+
+  /* Typography */
+  --gm-font-family: 'Segoe UI', 'Arial', sans-serif;
+  --gm-font-size-xs: 0.75rem;
+  --gm-font-size-sm: 0.8125rem;
+  --gm-font-size-base: 0.875rem;
+  --gm-font-size-md: 1rem;
+  --gm-font-size-lg: 1.125rem;
+  --gm-font-size-xl: 1.25rem;
+  --gm-font-size-2xl: 1.5rem;
+  --gm-font-size-3xl: 1.75rem;
+  --gm-font-weight-normal: 400;
+  --gm-font-weight-medium: 500;
+  --gm-font-weight-semibold: 600;
+  --gm-font-weight-bold: 700;
+
+  /* Spacing */
+  --gm-space-1: 0.25rem;
+  --gm-space-2: 0.5rem;
+  --gm-space-3: 0.75rem;
+  --gm-space-4: 1rem;
+  --gm-space-5: 1.25rem;
+  --gm-space-6: 1.5rem;
+  --gm-space-8: 2rem;
+  --gm-space-10: 2.5rem;
+  --gm-space-12: 3rem;
+
+  /* Border Radius */
+  --gm-radius-sm: 4px;
+  --gm-radius-md: 6px;
+  --gm-radius-lg: 8px;
+  --gm-radius-xl: 12px;
+  --gm-radius-full: 9999px;
+
+  /* Shadows */
+  --gm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --gm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --gm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --gm-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Transitions (full shorthand: duration + easing) */
+  --gm-transition-fast: 150ms ease;
+  --gm-transition-base: 250ms ease;
+  --gm-transition-slow: 350ms ease;
+
+  /* Z-index scale */
+  --gm-z-dropdown: 100;
+  --gm-z-sticky: 200;
+  --gm-z-overlay: 300;
+  --gm-z-modal: 400;
+  --gm-z-slide-panel: 450;
+  --gm-z-toast: 500;
+
+  /* ---------------------------------------------------------------- */
+  /* 2. Kit-derived tokens                                            */
+  /*    Values the kit states inline in a component rule; promoted    */
+  /*    here so nothing repeats a literal.                            */
+  /* ---------------------------------------------------------------- */
+
+  /* Extra neutral step, needed by the PrimeNG surface ramp (0…950).
+     The kit stops at gray-900; 950 continues the same ramp. */
+  --gm-gray-0: #ffffff;
+  --gm-gray-950: #0a0f1a;
+
+  /* Button hover shades (kit: .gm-btn-success:hover / .gm-btn-danger:hover) */
+  --gm-success-hover: #218838;
+  --gm-danger-hover: #c82333;
+
+  /* On-tint text colors (kit: .gm-badge-* / .gm-info-banner.*) */
+  --gm-success-text: #155724;
+  --gm-danger-text: #721c24;
+  --gm-warning-text: #856404;
+  --gm-info-text: #0c5460;
+
+  /* RGB triples — needed wherever a color must be composed into rgba()
+     (Bootstrap's `--bs-*-rgb` utilities, translucent overlays). These mirror
+     the hex tokens above; keep the two in sync. */
+  --gm-primary-rgb: 11, 110, 168;
+  --gm-primary-dark-rgb: 9, 77, 117;
+  --gm-success-rgb: 40, 167, 69;
+  --gm-danger-rgb: 220, 53, 69;
+  --gm-warning-rgb: 240, 173, 78;
+  --gm-info-rgb: 23, 162, 184;
+  --gm-white-rgb: 255, 255, 255;
+  --gm-nav-bg-rgb: 0, 61, 102;
+  --gm-gray-50-rgb: 248, 249, 250;
+  --gm-gray-100-rgb: 238, 242, 245;
+  --gm-gray-500-rgb: 107, 114, 128;
+  --gm-gray-800-rgb: 31, 41, 55;
+  --gm-gray-900-rgb: 17, 24, 39;
+
+  /* Focus halo (kit: `box-shadow: 0 0 0 3px rgba(11,110,168,.1)`) */
+  --gm-focus-ring-width: 3px;
+  --gm-focus-ring-color: rgba(11, 110, 168, 0.1);
+  --gm-focus-ring-color-danger: rgba(220, 53, 69, 0.1);
+
+  /* Overlay / mask (kit: .gm-overlay) */
+  --gm-overlay-bg: rgba(0, 0, 0, 0.5);
+
+  /* Bare durations — for `transition-duration` properties that must not
+     carry an easing function (e.g. PrimeNG's transitionDuration token). */
+  --gm-duration-fast: 150ms;
+  --gm-duration-base: 250ms;
+  --gm-duration-slow: 350ms;
+}

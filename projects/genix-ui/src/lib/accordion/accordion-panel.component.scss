@@ -1,0 +1,98 @@
+/* ==========================================================================
+   gm-accordion-panel
+   --------------------------------------------------------------------------
+   Matches the design system's accordion contract: panels separated by a single
+   bottom rule, a white header that tints on hover and turns primary when open,
+   and content padded on three sides (the header supplies the top gap).
+   ========================================================================== */
+
+:host {
+  display: block;
+  border-bottom: 1px solid var(--gm-gray-200);
+}
+
+.gm-accordion__heading {
+  /* An <h3> for the landmark, but the design system's type comes from the
+     button inside it. */
+  margin: 0;
+  font: inherit;
+}
+
+.gm-accordion__trigger {
+  appearance: none;
+  width: 100%;
+  padding: var(--gm-space-4) var(--gm-space-5);
+  border: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gm-space-3);
+  text-align: start;
+
+  background: var(--gm-white);
+  color: var(--gm-gray-800);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-base);
+  font-weight: var(--gm-font-weight-semibold);
+  cursor: pointer;
+
+  transition: background-color var(--gm-transition-fast),
+    color var(--gm-transition-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--gm-gray-50);
+    color: var(--gm-gray-900);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 var(--gm-focus-ring-width)
+      var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    color: var(--gm-gray-400);
+    cursor: not-allowed;
+  }
+}
+
+:host(.gm-accordion__panel--expanded) .gm-accordion__trigger {
+  color: var(--gm-primary);
+}
+
+/* Chevron drawn from two borders so no icon font is needed. */
+.gm-accordion__icon {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: solid var(--gm-gray-400);
+  border-width: 0 2px 2px 0;
+  /* Points down when collapsed. */
+  transform: rotate(45deg);
+  transition: transform var(--gm-transition-fast),
+    border-color var(--gm-transition-fast);
+}
+
+.gm-accordion__trigger:hover:not(:disabled) .gm-accordion__icon {
+  border-color: var(--gm-gray-600);
+}
+
+:host(.gm-accordion__panel--expanded) .gm-accordion__icon {
+  /* Flips to point up. */
+  transform: rotate(-135deg);
+  border-color: var(--gm-primary);
+}
+
+.gm-accordion__content {
+  padding: 0 var(--gm-space-5) var(--gm-space-5);
+  background: var(--gm-white);
+  color: var(--gm-gray-700);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-accordion__trigger,
+  .gm-accordion__icon {
+    transition: none;
+  }
+}

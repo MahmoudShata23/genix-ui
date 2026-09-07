@@ -1,0 +1,38 @@
+/* Workspace-wide TypeScript + Angular compiler options.
+
+   These deliberately mirror Genix Portal's tsconfig.json: the library must
+   compile under exactly the strictness its main consumer uses, or a rule that
+   is off here surfaces as a build break there. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "baseUrl": ".",
+    /* The playground resolves the package to the BUILD OUTPUT, not to source.
+       That is the point: it is the repo's own consumer, so it must exercise the
+       same .d.ts / FESM bundle a `npm install` would hand a real application.
+       Run `npm run build` before serving or building it. */
+    "paths": {
+      "@mahmoudshata23/genix-ui": ["dist/genix-ui"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

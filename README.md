@@ -29,6 +29,17 @@ npm start              # build the library, then serve the playground
 `npm run watch` rebuilds the library on change; run `ng serve playground` in a
 second terminal to see the result live.
 
+## The playground
+
+`npm start` serves a kitchen-sink page at `http://localhost:4200` — a section
+per component, reachable from the sticky nav down the left, covering **every**
+export. Each section shows the variants and the states that are easy to get
+wrong: sizes, severities, loading, disabled, read-only, error, empty, and
+filterable option lists. Form controls are bound to real `FormControl`s, so
+what you see is the ControlValueAccessor path rather than a static mock-up.
+It is the quickest way to eyeball a change, and the fastest way to review the
+API the way a consumer meets it.
+
 The playground deliberately resolves `@mahmoudshata23/genix-ui` to
 `dist/genix-ui` (see `paths` in `tsconfig.json`), **not** to `src`. It therefore
 type-checks against the generated `.d.ts` and renders from the FESM bundle,

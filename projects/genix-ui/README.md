@@ -3,12 +3,11 @@
 Angular 19 component library for GlobeMed apps. Native HTML first, Angular CDK
 only where the platform is insufficient, **no PrimeNG / Material dependency**.
 
-> **About the scope.** The package is published under the personal scope
-> `@mahmoudshata23` because GitHub Packages requires the npm scope to equal the
-> account that owns it, and no `globemed` GitHub organisation exists. The
-> production home is the company Gitea registry, where it is `@globemed/genix-ui`.
-> Consumers can already import it under the `@globemed` name today — see
-> [Installing](#installing).
+> **About the scope.** GitHub Packages requires the npm scope to equal the
+> account that owns the package, so this is published as `@mahmoudshata23/`
+> rather than `@globemed/`. It is only a registry constraint, not a rename you
+> have to adopt: install it under whatever name your project already imports
+> using an npm alias — see [below](#importing-it-as-globemedgenix-ui).
 
 ## Installing
 
@@ -33,13 +32,16 @@ in dozens of files — install it under that name with an npm alias instead of
 rewriting every import:
 
 ```bash
-npm i @globemed/genix-ui@npm:@mahmoudshata23/genix-ui@^0.2.1
+npm i @globemed/genix-ui@npm:@mahmoudshata23/genix-ui@^0.2.2
 ```
 
 npm installs it to `node_modules/@globemed/genix-ui`, so imports, editor
 resolution and the build all behave as if the package were natively scoped that
-way. When the package moves to Gitea, drop the alias — that one line in
-`package.json` is the entire migration.
+way, and `npm ls` still shows what is really installed underneath.
+
+This is the intended steady state, not a stopgap. If a `globemed` GitHub
+organisation is ever created the package can be natively scoped that way, and
+consumers just drop the alias — one line in `package.json`.
 
 ## Styling contract
 

@@ -41,11 +41,11 @@ Versions are published to **GitHub Packages**. CI does the publishing; you only
 push a tag.
 
 ```bash
-# 1. bump the version in projects/genix-ui/package.json (e.g. 0.2.1 -> 0.2.2)
+# 1. bump the version in projects/genix-ui/package.json (e.g. 0.2.2 -> 0.2.3)
 # 2. commit it
-git commit -am "release: 0.2.2"
+git commit -am "release: 0.2.3"
 # 3. tag and push — the tag must match the manifest version or the job fails
-git tag v0.2.2
+git tag v0.2.3
 git push origin main --tags
 ```
 
@@ -63,23 +63,27 @@ npm run publish:lib    # build + publish
 
 A registry never lets a version be republished — always bump first.
 
-## Moving the package to the company Gitea registry
+## Where the package lives
 
-The package is on GitHub Packages under a personal scope for one reason:
-GitHub requires the npm scope to equal the account that owns it, and there is
-no `globemed` GitHub organisation. The company Gitea at
-`http://192.168.237.68:8021` has a built-in npm registry that has no such rule,
-so the production home for this package is:
+GitHub Packages, under the personal account that owns this repository. That is
+the permanent home — there is no company registry in the picture.
 
-```jsonc
-// projects/genix-ui/package.json
-"name": "@globemed/genix-ui",
-"publishConfig": {
-  "registry": "http://192.168.237.68:8021/api/packages/GlobemedGroup/npm/"
-}
-```
+The one consequence is the scope: GitHub requires the npm scope to equal the
+account that owns the package, so it is published as
+**`@mahmoudshata23/genix-ui`** rather than `@globemed/genix-ui`. Consuming
+projects do not have to live with that name — they install it under whatever
+name they already use, via an npm alias. That is what Genix Portal does; see
+"Importing it as `@globemed/genix-ui`" in
+[the package README](projects/genix-ui/README.md).
 
-Then update the `paths` entry in `tsconfig.json`, the import in
-`projects/playground/src/app/app.component.ts`, and the `.npmrc` scope line.
-Consumers that used the npm alias (see the package README) change one line and
-nothing else.
+Because the package is private, every consumer needs two things:
+
+1. `@mahmoudshata23:registry=https://npm.pkg.github.com` in the project's
+   `.npmrc`. Commit it — it is not a secret, and without it a fresh clone
+   cannot install.
+2. A GitHub PAT with `read:packages` in their **user-level** `~/.npmrc`, never
+   in a tracked file.
+
+If a `globemed` GitHub organisation is ever created, the package can move there
+and be natively scoped `@globemed/genix-ui`: change `name` here, change the
+`.npmrc` scope line, and consumers drop their alias. Nothing else moves.

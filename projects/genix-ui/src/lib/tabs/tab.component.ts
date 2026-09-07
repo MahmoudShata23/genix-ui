@@ -16,9 +16,17 @@ import { GM_TABS } from './tabs.token';
 @Component({
   selector: 'gm-tab',
   standalone: true,
-  // Mirrors PrimeNG's TabPanel exactly — the panel is created when the tab
-  // becomes active and destroyed when it leaves, so migrated tabs keep their
-  // existing load/teardown behaviour instead of all initialising at once.
+  // Keeps an inactive panel out of the DOM, but does NOT defer it. Content
+  // projection in Angular is eager: the projected components are constructed
+  // by the *consumer's* template regardless of whether this `@if` renders the
+  // slot. Verified with a probe — a component placed in an inactive gm-tab
+  // still runs its constructor on page load.
+  //
+  // So this is not equivalent to PrimeNG's `p-tabs lazy`. A consumer whose
+  // panel content fetches on init must keep its own `@if` guard around it.
+  // Making it genuinely lazy means projecting through an <ng-template> the
+  // panel instantiates itself (or `@defer`) — a breaking change to the content
+  // API, so it is deliberately not done here.
   template: `@if (active()) {
     <ng-content />
   }`,

@@ -29,9 +29,13 @@ npm start              # build the library, then serve the playground
 `npm run watch` rebuilds the library on change; run `ng serve playground` in a
 second terminal to see the result live.
 
+The playground serves on **4300**, not the Angular default 4200, so it never
+fights a consuming app (Genix Portal included) for the port. The port is set in
+`angular.json` under `playground > architect > serve > options`.
+
 ## The playground
 
-`npm start` serves a kitchen-sink page at `http://localhost:4200` — a section
+`npm start` serves a kitchen-sink page at **http://localhost:4300** — a section
 per component, reachable from the sticky nav down the left, covering **every**
 export. Each section shows the variants and the states that are easy to get
 wrong: sizes, severities, loading, disabled, read-only, error, empty, and

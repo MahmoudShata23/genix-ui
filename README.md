@@ -52,21 +52,31 @@ build before anything reaches the registry.
 
 ## Release
 
-Versions are published to **GitHub Packages**. CI does the publishing; you only
-push a tag.
+Versions are published to **GitHub Packages**, by CI, when a **GitHub Release**
+is published. Semver: PATCH for a fix, MINOR for a new component or a
+backward-compatible input, MAJOR for a breaking API change.
 
 ```bash
-# 1. bump the version in projects/genix-ui/package.json (e.g. 0.2.2 -> 0.2.3)
-# 2. commit it
-git commit -am "release: 0.2.3"
-# 3. tag and push — the tag must match the manifest version or the job fails
-git tag v0.2.3
-git push origin main --tags
+# 1. bump the version in projects/genix-ui/package.json (e.g. 0.3.0 -> 0.3.1)
+# 2. commit and push it to main
+git commit -am "release: 0.3.1"
+git push origin main
 ```
 
-`.github/workflows/release.yml` builds, tests, verifies the tag matches
-`projects/genix-ui/package.json`, and publishes using the workflow's own
-`GITHUB_TOKEN`. No personal access token is stored in the repo.
+Then, on GitHub: **Releases → Draft a new release**, tag `v0.3.1` (the tag is
+created when the release is published), target `main`, write the notes,
+**Publish release**.
+
+`.github/workflows/release.yml` then builds, runs the specs, type-checks the
+built public API through the playground, validates the tarball, verifies the
+release tag matches `projects/genix-ui/package.json` — a mismatch fails the
+job rather than shipping the wrong version — and publishes `dist/genix-ui`
+with the workflow’s own `GITHUB_TOKEN`. No personal access token is stored in
+the repo.
+
+Pushing a tag on its own publishes nothing. That is deliberate: with both a
+tag trigger and a release trigger, cutting a release from a new tag would fire
+the job twice, and the second run would fail on a version that already exists.
 
 To publish by hand instead (needs a PAT with `write:packages` in your
 **user-level** `~/.npmrc`):

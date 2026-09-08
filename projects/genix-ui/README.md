@@ -32,7 +32,7 @@ in dozens of files — install it under that name with an npm alias instead of
 rewriting every import:
 
 ```bash
-npm i @globemed/genix-ui@npm:@mahmoudshata23/genix-ui@^0.2.2
+npm i @globemed/genix-ui@npm:@mahmoudshata23/genix-ui@^0.3.0
 ```
 
 npm installs it to `node_modules/@globemed/genix-ui`, so imports, editor

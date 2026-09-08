@@ -1,0 +1,63 @@
+@if (header()) {
+  <span class="gm-order-list__header" [id]="headerId">{{ header() }}</span>
+}
+
+<ul
+  class="gm-order-list__list"
+  cdkDropList
+  [cdkDropListDisabled]="disabled()"
+  [attr.aria-labelledby]="header() ? headerId : null"
+  [attr.aria-label]="ariaLabel() ?? null"
+  (cdkDropListDropped)="onDrop($event)"
+>
+  @for (item of items(); track item; let index = $index, first = $first, last = $last) {
+    <li
+      class="gm-order-list__item"
+      cdkDrag
+      [cdkDragDisabled]="disabled()"
+      [class.gm-order-list__item--disabled]="disabled()"
+    >
+      <!--
+        Only this part is the handle, so the move buttons below stay clickable
+        instead of starting a drag.
+      -->
+      <div class="gm-order-list__grab" cdkDragHandle>
+        <i class="gm-order-list__grip pi pi-bars" aria-hidden="true"></i>
+
+        @if (itemTemplate()) {
+          <ng-container
+            [ngTemplateOutlet]="itemTemplate()!.template"
+            [ngTemplateOutletContext]="{ $implicit: item, index: index }"
+          />
+        } @else {
+          <span class="gm-order-list__label">{{ label(item) }}</span>
+        }
+      </div>
+
+      @if (showControls()) {
+        <span class="gm-order-list__controls">
+          <gm-button
+            class="gm-order-list__up"
+            icon="pi pi-chevron-up"
+            severity="secondary"
+            variant="text"
+            size="small"
+            [ariaLabel]="'Move ' + label(item) + ' up'"
+            [disabled]="disabled() || first"
+            (onClick)="moveBy(index, -1)"
+          />
+          <gm-button
+            class="gm-order-list__down"
+            icon="pi pi-chevron-down"
+            severity="secondary"
+            variant="text"
+            size="small"
+            [ariaLabel]="'Move ' + label(item) + ' down'"
+            [disabled]="disabled() || last"
+            (onClick)="moveBy(index, 1)"
+          />
+        </span>
+      }
+    </li>
+  }
+</ul>

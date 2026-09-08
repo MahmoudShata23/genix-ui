@@ -1,0 +1,43 @@
+<!-- One persistent polite region, so a screen reader is already watching when a
+     toast is inserted. `aria-atomic="false"` matters: `role="status"` implies
+     atomic, which would re-announce the whole stack every time one arrives.
+     `additions` keeps dismissals silent. -->
+<div
+  class="gm-toast-region"
+  [class]="positionClass"
+  role="status"
+  aria-live="polite"
+  aria-atomic="false"
+  aria-relevant="additions"
+>
+  @for (toast of toasts(); track toast.id) {
+    <!-- A danger toast overrides the polite region with `alert`, so a failure
+         interrupts; everything else waits its turn and stays quiet. -->
+    <div
+      class="gm-toast"
+      [class]="'gm-toast--' + toast.severity"
+      [attr.role]="toast.severity === 'danger' ? 'alert' : null"
+    >
+      <i class="gm-toast__icon" [class]="icons[toast.severity]" aria-hidden="true"></i>
+
+      <div class="gm-toast__body">
+        @if (toast.summary) {
+          <p class="gm-toast__summary">{{ toast.summary }}</p>
+        }
+        <p class="gm-toast__detail">{{ toast.detail }}</p>
+      </div>
+
+      @if (toast.closable) {
+        <gm-button
+          class="gm-toast__close"
+          icon="pi pi-times"
+          variant="text"
+          severity="secondary"
+          size="small"
+          ariaLabel="Dismiss notification"
+          (onClick)="dismiss(toast.id)"
+        />
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,142 @@
+/* ==========================================================================
+   gm-autocomplete
+   --------------------------------------------------------------------------
+   The field reuses the field shell wholesale, so the border, radius, padding,
+   focus ring and error treatment match `gm-input` exactly. The panel reuses the
+   dropdown's surface and option treatment, so a suggestion list and an option
+   list look the same.
+   ========================================================================== */
+
+@use '../core/styles/field' as field;
+
+:host {
+  display: block;
+}
+
+@include field.gm-field-shell('.gm-field__control');
+
+.gm-autocomplete {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.gm-autocomplete .gm-field__control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gm-autocomplete__actions {
+  position: absolute;
+  inset-inline-end: var(--gm-space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-1);
+  /* The affordances sit over the input, so clicks land on them, not through. */
+  pointer-events: auto;
+}
+
+.gm-autocomplete__clear {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gm-radius-full);
+  background: transparent;
+  color: var(--gm-gray-500);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-700);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--gm-focus-ring-color);
+  }
+}
+
+/* Two strokes crossed — no icon font needed for an affordance this simple. */
+.gm-autocomplete__clear-icon {
+  position: relative;
+  width: 0.625rem;
+  height: 0.625rem;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(-45deg);
+  }
+}
+
+.gm-autocomplete__panel {
+  background: var(--gm-white);
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-md);
+  box-shadow: var(--gm-shadow-lg);
+  overflow: hidden;
+  font-family: var(--gm-font-family);
+}
+
+.gm-autocomplete__list {
+  /* It is a <ul>: drop the list chrome. */
+  margin: 0;
+  padding: var(--gm-space-1);
+  list-style: none;
+  /* Roughly eight rows before the list scrolls. */
+  max-height: 16rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gm-autocomplete__option {
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+  padding: var(--gm-space-2) var(--gm-space-3);
+  border-radius: var(--gm-radius-sm);
+  color: var(--gm-gray-700);
+  font-size: var(--gm-font-size-base);
+  cursor: pointer;
+
+  /* Hover and keyboard highlight are the same state, so they share styling. */
+  &--active {
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-900);
+  }
+
+  &--selected {
+    background: var(--gm-primary-light);
+    color: var(--gm-primary-dark);
+    font-weight: var(--gm-font-weight-medium);
+  }
+
+  &--selected#{&}--active {
+    background: var(--gm-primary-light);
+  }
+}
+
+.gm-autocomplete__empty {
+  padding: var(--gm-space-3);
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+  text-align: center;
+}

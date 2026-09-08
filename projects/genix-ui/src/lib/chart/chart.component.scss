@@ -1,0 +1,23 @@
+/* ==========================================================================
+   gm-chart
+   --------------------------------------------------------------------------
+   Geometry only. Colours belong to the data — they come from the caller's
+   `data` and `options`, never from here, so one chart's palette is never
+   hardwired into the library.
+   ========================================================================== */
+
+:host {
+  display: block;
+  font-family: var(--gm-font-family);
+}
+
+.gm-chart__frame {
+  /* Chart.js sizes itself against the nearest positioned ancestor. */
+  position: relative;
+  width: 100%;
+}
+
+.gm-chart__canvas {
+  /* Kills the inline-element gap under a canvas. */
+  display: block;
+}

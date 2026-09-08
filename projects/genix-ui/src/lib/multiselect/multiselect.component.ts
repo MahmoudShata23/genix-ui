@@ -1,4 +1,10 @@
 import {
+  CdkFixedSizeVirtualScroll,
+  CdkVirtualForOf,
+  CdkVirtualScrollViewport,
+} from '@angular/cdk/scrolling';
+import { NgTemplateOutlet } from '@angular/common';
+import {
   ChangeDetectionStrategy,
   Component,
   booleanAttribute,
@@ -16,6 +22,21 @@ import { GmSpinnerComponent } from '../spinner/spinner.component';
 export type GmMultiselectDisplay = 'menu' | 'chip';
 
 /**
+ * `numberAttribute` maps a missing value to `NaN`, which would read as a limit
+ * of zero — so an optional numeric input needs its own parsing to keep "no
+ * limit" expressible.
+ */
+function optionalCount(
+  value: number | string | undefined | null,
+): number | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+/**
  * Multiple-selection dropdown.
  *
  * ```html
@@ -27,13 +48,20 @@ export type GmMultiselectDisplay = 'menu' | 'chip';
  * property per selection; without it, the selected options themselves —
  * matching `gm-select`.
  *
- * Overlay, filtering, option reading and keyboard handling all come from
- * `GmDropdownBase`, shared with `gm-select`.
+ * Overlay, filtering, option reading, keyboard handling and virtual scrolling
+ * all come from `GmDropdownBase`, shared with `gm-select`.
  */
 @Component({
   selector: 'gm-multiselect',
   standalone: true,
-  imports: [GmChipComponent, GmSpinnerComponent],
+  imports: [
+    GmChipComponent,
+    GmSpinnerComponent,
+    NgTemplateOutlet,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    CdkVirtualScrollViewport,
+  ],
   templateUrl: './multiselect.component.html',
   styleUrl: './multiselect.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +87,15 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
   readonly showToggleAll = input(true, { transform: booleanAttribute });
 
   readonly toggleAllLabel = input<string>('Select all');
+
+  /**
+   * Most selections allowed. Omit for no limit.
+   *
+   * The limit blocks *additions* only: a selection that already exists stays
+   * valid and can always be removed, so a control that arrives holding more
+   * than the limit is not silently rewritten — it just cannot grow.
+   */
+  readonly selectionLimit = input(undefined, { transform: optionalCount });
 
   /**
    * The value as a plain array. `writeValue` may hand us null (a reset control)
@@ -103,12 +140,32 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
     return visible.length > 0 && visible.every((option) => this.isSelected(option));
   });
 
+  /** Whether the selection has reached `selectionLimit`. */
+  protected readonly atLimit = computed(() => {
+    const limit = this.selectionLimit();
+    return limit !== undefined && this.selectedValues().length >= limit;
+  });
+
+  /**
+   * Select-all has nothing left to do once the limit is reached and the visible
+   * options are still not all selected — the only move it could make is an
+   * addition the limit forbids.
+   */
+  protected readonly toggleAllBlocked = computed(
+    () => this.atLimit() && !this.allVisibleSelected(),
+  );
+
   protected override generateId(): string {
     return gmUniqueId('gm-multiselect');
   }
 
   protected override isSelected(option: GmDropdownOption): boolean {
     return this.selectedValues().includes(this.valueForOption(option));
+  }
+
+  /** Whether the limit currently rules this option out. */
+  protected isBlocked(option: GmDropdownOption): boolean {
+    return this.atLimit() && !this.isSelected(option);
   }
 
   /** Toggling keeps the panel open so several options can be picked. */
@@ -118,17 +175,24 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
 
     // Always a new array — the bound value is never mutated in place, and a
     // value can never appear twice.
-    this.commit(
-      current.includes(optionValue)
-        ? current.filter((value) => value !== optionValue)
-        : [...current, optionValue],
-    );
+    if (current.includes(optionValue)) {
+      this.commit(current.filter((value) => value !== optionValue));
+      return;
+    }
+
+    // The limit stops additions and nothing else, which is what keeps a full
+    // selection editable.
+    if (this.atLimit()) {
+      return;
+    }
+    this.commit([...current, optionValue]);
   }
 
   /**
    * Selects every visible option, or clears them if all are already selected.
    * Scoped to what is visible so it respects an active filter; selections
-   * hidden by the filter are left alone.
+   * hidden by the filter are left alone. Stops at `selectionLimit`, filling the
+   * remaining slots in option order.
    */
   protected toggleAll(): void {
     const visibleValues = this.visibleOptions().map((option) =>
@@ -141,8 +205,12 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
       return;
     }
 
+    const limit = this.selectionLimit();
     const merged = [...current];
     for (const value of visibleValues) {
+      if (limit !== undefined && merged.length >= limit) {
+        break;
+      }
       if (!merged.includes(value)) {
         merged.push(value);
       }

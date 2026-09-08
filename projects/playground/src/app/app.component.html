@@ -322,6 +322,134 @@
       </gm-card>
     </section>
 
+    <!-- ── Select templates & virtual scroll ───────────────────────────── -->
+    <section id="select-advanced">
+      <h2>Select — templates &amp; virtual scroll</h2>
+      <p class="pg-lead">
+        <code>gmSelectOption</code> re-renders each row and
+        <code>gmSelectValue</code> re-renders the trigger. Both change
+        presentation only: selection still resolves through
+        <code>optionValue</code>, so the control below holds an id.
+      </p>
+
+      <gm-card header="Custom option and value templates">
+        <div class="pg-grid">
+          <gm-select
+            label="Assignee"
+            [formControl]="assignee"
+            [options]="people"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select a person"
+            [filter]="true"
+            [clearable]="true"
+          >
+            <ng-template gmSelectOption let-option let-selected="selected">
+              <span class="pg-person">
+                <strong>{{ option.name }}</strong>
+                <small>{{ option.email }}</small>
+              </span>
+              @if (selected) {
+                <gm-badge value="current" severity="info" />
+              }
+            </ng-template>
+
+            <ng-template gmSelectValue let-option>
+              <strong>{{ option.name }}</strong>
+              <small class="pg-person__hint">— {{ option.role }}</small>
+            </ng-template>
+          </gm-select>
+
+          <p class="pg-lead">
+            Control value: <code>{{ assignee.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+
+      <gm-card
+        header="Virtual scroll"
+        subheader="5,000 options — only the rows in view are in the DOM"
+      >
+        <div class="pg-grid">
+          <gm-select
+            label="City"
+            [formControl]="cityId"
+            [options]="cities"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select a city"
+            [filter]="true"
+            [clearable]="true"
+            [virtualScroll]="true"
+            [virtualItemSize]="40"
+          />
+
+          <p class="pg-lead">
+            Filtering virtualises the filtered result; arrow keys, Home and End
+            scroll the highlighted row into view. Control value:
+            <code>{{ cityId.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Multiselect limit & virtual scroll ──────────────────────────── -->
+    <section id="multiselect-advanced">
+      <h2>Multiselect — limit &amp; virtual scroll</h2>
+      <p class="pg-lead">
+        <code>selectionLimit</code> blocks additions only: a selection already
+        made stays valid and can always be removed, and select-all fills the
+        remaining slots rather than overshooting.
+      </p>
+
+      <gm-card header="selectionLimit" subheader="Two at most — try a third">
+        <div class="pg-grid">
+          <gm-multiselect
+            label="Roles"
+            [formControl]="limitedRoles"
+            [options]="roleOptions"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select up to two roles"
+            display="chip"
+            [clearable]="true"
+            [selectionLimit]="2"
+          />
+
+          <p class="pg-lead">
+            Control value: <code>{{ limitedRoles.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+
+      <gm-card
+        header="Virtual scroll"
+        subheader="5,000 options, the same CDK scroller gm-select uses"
+      >
+        <div class="pg-grid">
+          <gm-multiselect
+            label="Cities"
+            [formControl]="pickedCities"
+            [options]="cities"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select cities"
+            [filter]="true"
+            [clearable]="true"
+            [virtualScroll]="true"
+            [virtualItemSize]="40"
+            [selectionLimit]="5"
+          />
+
+          <p class="pg-lead">
+            Filtering virtualises the filtered list; arrows, Home and End scroll
+            the highlighted row into view. Control value:
+            <code>{{ pickedCities.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+    </section>
+
     <!-- ── Datepicker ──────────────────────────────────────────────────── -->
     <section id="datepicker">
       <h2>Datepicker</h2>
@@ -342,6 +470,159 @@
           <gm-datepicker label="Disabled" disabled placeholder="Unavailable" />
         </div>
         <p class="pg-readout">Bound value: <code>{{ demoDate.value }}</code></p>
+      </gm-card>
+    </section>
+
+    <!-- ── Datepicker time & range ─────────────────────────────────────── -->
+    <section id="datepicker-advanced">
+      <h2>Datepicker — time &amp; range</h2>
+      <p class="pg-lead">
+        Every value is built from explicit local parts, so nothing shifts
+        timezone: a single date is a <code>Date</code>, and a range is a
+        <code>[start, end]</code> tuple.
+      </p>
+
+      <gm-card header="Date + time" subheader="Picking a day keeps the time, and vice versa">
+        <div class="pg-grid">
+          <gm-datepicker
+            label="Appointment (24h)"
+            [formControl]="appointment"
+            [showTime]="true"
+            [clearable]="true"
+          />
+          <gm-datepicker
+            label="Meeting (12h)"
+            [formControl]="meeting"
+            [showTime]="true"
+            [hourFormat]="12"
+            [clearable]="true"
+          />
+        </div>
+
+        <p class="pg-lead">
+          Appointment: <code>{{ appointment.value ?? 'null' }}</code>
+        </p>
+      </gm-card>
+
+      <gm-card header="Time only" subheader="No calendar — the same hour/minute controls">
+        <div class="pg-grid">
+          <gm-datepicker label="Opens at" [formControl]="startTime" [clearable]="true" [timeOnly]="true" />
+
+          <p class="pg-lead">
+            Value: <code>{{ startTime.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+
+      <gm-card header="Range" subheader="First click starts, second click ends">
+        <div class="pg-grid">
+          <gm-datepicker
+            label="Reporting period"
+            [formControl]="period"
+            selectionMode="range"
+            [clearable]="true"
+          />
+
+          <p class="pg-lead">
+            Clicking before the start swaps the two rather than making an
+            invalid range. Value:
+            <code>{{ period.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Small components ────────────────────────────────────────────── -->
+    <section id="small">
+      <h2>Popover, menu, switch, number, select button, autocomplete</h2>
+
+      <gm-card header="Popover & menu" subheader="Both anchored by the shared overlay engine">
+        <div class="pg-row">
+          <gm-button label="Open popover" (onClick)="popover.toggle($event)" />
+          <gm-popover #popover ariaLabel="Provider details">
+            <strong>Nile Diagnostics</strong>
+            <p>Escape, an outside click or the trigger all close this.</p>
+          </gm-popover>
+
+          <gm-button
+            label="Actions"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="menu.toggle($event)"
+          />
+          <gm-menu #menu [items]="menuItems" ariaLabel="Row actions" />
+        </div>
+
+        <p class="pg-lead">Last command: <code>{{ lastCommand() }}</code></p>
+      </gm-card>
+
+      <gm-card header="Toggle switch & number" subheader="Native checkbox and native number input">
+        <div class="pg-grid">
+          <gm-toggle-switch [formControl]="notifications" label="Email notifications" />
+          <gm-toggle-switch [formControl]="locked" label="Disabled switch" />
+
+          <gm-input-number
+            label="Coverage"
+            [formControl]="coverage"
+            [min]="0"
+            [max]="100"
+            [step]="5"
+            suffix="%"
+            hint="Clamped to 0–100 when you leave the field"
+          />
+          <gm-input-number label="Premium" [formControl]="premium" prefix="EGP" [min]="0" />
+        </div>
+
+        <p class="pg-lead">
+          Values: <code>{{ notifications.value }}</code> /
+          <code>{{ coverage.value ?? 'null' }}</code> /
+          <code>{{ premium.value ?? 'null' }}</code>
+        </p>
+      </gm-card>
+
+      <gm-card header="Select button" subheader="A radiogroup — one tab stop, arrows move and select">
+        <div class="pg-grid">
+          <gm-select-button
+            label="Status"
+            [formControl]="claimStatus"
+            [options]="claimStatuses"
+            optionLabel="label"
+            optionValue="value"
+            optionDisabled="inactive"
+          />
+
+          <p class="pg-lead">
+            Value: <code>{{ claimStatus.value ?? 'null' }}</code>
+          </p>
+        </div>
+      </gm-card>
+
+      <gm-card header="Autocomplete" subheader="The component never fetches — it emits a term">
+        <div class="pg-grid">
+          <gm-autocomplete
+            label="Assignee"
+            [formControl]="assignedUser"
+            [suggestions]="userSuggestions()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Search users"
+            [loading]="userSearching()"
+            [clearable]="true"
+            (search)="searchUsers($event)"
+          >
+            <ng-template gmSelectOption let-option>
+              <span class="pg-person">
+                <strong>{{ option.name }}</strong>
+                <small>{{ option.email }}</small>
+              </span>
+            </ng-template>
+          </gm-autocomplete>
+
+          <p class="pg-lead">
+            Typing emits <code>search</code>; this page answers it from a local
+            list. Value: <code>{{ assignedUser.value ?? 'null' }}</code>
+          </p>
+        </div>
       </gm-card>
     </section>
 
@@ -462,6 +743,80 @@
             severity="secondary"
             variant="text"
             gmTooltip=""
+          />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Dialog ──────────────────────────────────────────────────────── -->
+    <section id="dialog">
+      <h2>Dialog</h2>
+      <p class="pg-lead">
+        Opened from a service, not from markup: the content component is
+        instantiated into a CDK overlay with its own
+        <code>GmDialogRef</code> and <code>GmDialogConfig</code>, and hands its
+        result back through <code>onClose</code>.
+      </p>
+
+      <gm-card header="Open" subheader="Escape, the backdrop and the close button all dismiss">
+        <div class="pg-row">
+          <gm-button label="Edit provider" (onClick)="openDialog()" />
+          <gm-button
+            label="Undismissable"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="openLockedDialog()"
+          />
+        </div>
+
+        <p class="pg-lead">
+          Last result: <code>{{ dialogResult() }}</code>
+        </p>
+      </gm-card>
+    </section>
+
+    <!-- ── Toast ───────────────────────────────────────────────────────── -->
+    <section id="toast">
+      <h2>Toast</h2>
+      <p class="pg-lead">
+        Nothing on this page renders the toast host — injecting
+        <code>GmToastService</code> is the whole integration. The first
+        notification creates the stack, and it is torn down again when the last
+        one goes.
+      </p>
+
+      <gm-card header="Severities" subheader="Auto-dismiss after 5s; the close button is keyboard reachable">
+        <div class="pg-row">
+          <gm-button label="Success" severity="success" (onClick)="toastSuccess()" />
+          <gm-button label="Info" severity="info" (onClick)="toastInfo()" />
+          <gm-button label="Warning" severity="warning" (onClick)="toastWarning()" />
+          <gm-button label="Error" severity="danger" (onClick)="toastError()" />
+        </div>
+
+        <div class="pg-row">
+          <gm-button
+            label="With summary"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="toastWithSummary()"
+          />
+          <gm-button
+            label="Sticky error"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="toastSticky()"
+          />
+          <gm-button
+            label="Burst of five"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="toastBurst()"
+          />
+          <gm-button
+            label="Clear all"
+            severity="secondary"
+            variant="text"
+            (onClick)="toastClear()"
           />
         </div>
       </gm-card>
@@ -669,5 +1024,134 @@
         </p>
       </gm-card>
     </section>
+    <!-- ── Long tail ─────────────────────────────────────────────────────── -->
+    <section id="long-tail">
+      <h2>File upload, stepper, order list, chart</h2>
+
+      <gm-card
+        header="File upload"
+        subheader="Selects files and emits them — the page owns the request"
+      >
+        <gm-file-upload
+          label="Claim attachments"
+          [multiple]="true"
+          accept=".pdf,.jpg,.png"
+          [maxFileSize]="2000000"
+          hint="PDF or images, up to 2 MB each"
+          (filesSelected)="attachments.set($event)"
+          (rejected)="attachmentErrors.set($event)"
+        />
+
+        <p class="pg-readout">
+          This page is holding <code>{{ attachments().length }}</code> file(s)
+          @if (attachmentErrors().length) {
+            · turned away: <code>{{ attachmentErrors().length }}</code>
+          }
+        </p>
+      </gm-card>
+
+      <gm-card
+        header="Stepper"
+        subheader="Movement only — the page decides whether Next is allowed"
+      >
+        <gm-stepper [(activeStep)]="wizardStep" [nextDisabled]="nextBlocked()">
+          <gm-step label="Details">
+            <p class="pg-lead">Who the policy is for.</p>
+          </gm-step>
+          <gm-step label="Documents">
+            <p class="pg-lead">Attach the signed forms.</p>
+          </gm-step>
+          <gm-step label="Review" [completed]="reviewDone()">
+            <p class="pg-lead">Last look before submitting.</p>
+          </gm-step>
+        </gm-stepper>
+
+        <div class="pg-row">
+          <gm-button
+            [label]="nextBlocked() ? 'Allow Next' : 'Block Next'"
+            severity="secondary"
+            variant="text"
+            size="small"
+            (onClick)="nextBlocked.set(!nextBlocked())"
+          />
+          <gm-button
+            [label]="reviewDone() ? 'Un-complete Review' : 'Complete Review'"
+            severity="secondary"
+            variant="text"
+            size="small"
+            (onClick)="reviewDone.set(!reviewDone())"
+          />
+        </div>
+      </gm-card>
+
+      <gm-card
+        header="Order list"
+        subheader="Drag by the grip, or move a row with its buttons"
+      >
+        <div class="pg-grid">
+          <gm-order-list
+            header="Benefit priority"
+            [items]="benefits()"
+            itemLabel="name"
+            (orderChange)="reorderBenefits($event)"
+          />
+
+          <gm-order-list
+            header="Custom rows"
+            [items]="benefits()"
+            (orderChange)="reorderBenefits($event)"
+          >
+            <ng-template gmOrderListItem let-benefit let-index="index">
+              <span class="pg-person">
+                <strong>{{ index + 1 }}. {{ benefit.name }}</strong>
+                <small>{{ benefit.cover }}</small>
+              </span>
+            </ng-template>
+          </gm-order-list>
+        </div>
+
+        <p class="pg-readout">
+          Order: <code>{{ benefitOrder() }}</code>
+        </p>
+      </gm-card>
+
+      <gm-card
+        header="Chart"
+        subheader="A thin wrapper — Chart.js comes from the app's providers"
+      >
+        <div class="pg-row">
+          @for (type of chartTypes; track type) {
+            <gm-button
+              [label]="type"
+              severity="secondary"
+              [variant]="chartType() === type ? 'filled' : 'outlined'"
+              size="small"
+              (onClick)="chartType.set(type)"
+            />
+          }
+          <gm-button
+            label="New data"
+            severity="secondary"
+            variant="text"
+            size="small"
+            (onClick)="shuffleChart()"
+          />
+        </div>
+
+        <gm-chart
+          [type]="chartType()"
+          [data]="chartData()"
+          [options]="chartOptions"
+          height="18rem"
+          ariaLabel="Claims per month"
+        />
+
+        <p class="pg-readout">
+          Colours are read from the <code>--gm-*</code> tokens by this page, not
+          by the component.
+        </p>
+      </gm-card>
+    </section>
+
   </main>
 </div>

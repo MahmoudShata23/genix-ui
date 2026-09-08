@@ -1,0 +1,46 @@
+<!-- One list, rendered either straight into the page or into the overlay. -->
+<ng-template #list>
+  <ul
+    class="gm-menu"
+    role="menu"
+    [attr.id]="menuId"
+    [attr.aria-label]="ariaLabel()"
+    (keydown)="onMenuKeydown($event)"
+  >
+    @for (item of items(); track $index) {
+      @if (item.separator) {
+        <li class="gm-menu__separator" role="separator"></li>
+      } @else {
+        <li role="none">
+          <!-- A real button: activation, the disabled state and focus all
+               come from the platform. -->
+          <button
+            type="button"
+            class="gm-menu__item"
+            role="menuitem"
+            tabindex="-1"
+            [disabled]="item.disabled"
+            (click)="run(item)"
+          >
+            @if (item.icon) {
+              <i class="gm-menu__icon" [class]="item.icon" aria-hidden="true"></i>
+            }
+            <span class="gm-menu__label">{{ item.label }}</span>
+          </button>
+        </li>
+      }
+    }
+  </ul>
+</ng-template>
+
+@if (popup()) {
+  <!-- Created in this component's context so its styles still apply once the
+       overlay has taken the template. -->
+  <ng-template #panel>
+    <div class="gm-menu__panel">
+      <ng-container [ngTemplateOutlet]="list" />
+    </div>
+  </ng-template>
+} @else {
+  <ng-container [ngTemplateOutlet]="list" />
+}

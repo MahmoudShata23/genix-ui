@@ -1,0 +1,103 @@
+/* ==========================================================================
+   gm-order-list
+   --------------------------------------------------------------------------
+   Rows in a bordered panel, each with a grip on the leading edge and the move
+   buttons on the trailing one. The `cdk-drag-*` classes below are the CDK's
+   own state hooks, not another framework's stylesheet — the package still
+   ships no third-party CSS.
+   ========================================================================== */
+
+:host {
+  display: block;
+  font-family: var(--gm-font-family);
+}
+
+.gm-order-list__header {
+  display: block;
+  margin-bottom: var(--gm-space-2);
+  color: var(--gm-gray-700);
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-medium);
+}
+
+.gm-order-list__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--gm-space-1);
+
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-md);
+  background: var(--gm-white);
+}
+
+.gm-order-list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+
+  padding: var(--gm-space-2) var(--gm-space-3);
+  border-radius: var(--gm-radius-sm);
+
+  background: var(--gm-white);
+  color: var(--gm-gray-800);
+  font-size: var(--gm-font-size-sm);
+
+  &:hover {
+    background: var(--gm-gray-50);
+  }
+
+  &--disabled {
+    color: var(--gm-gray-400);
+  }
+}
+
+.gm-order-list__grab {
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+
+  /* Takes the slack so the controls sit on the trailing edge. */
+  flex: 1 1 auto;
+  min-width: 0;
+
+  cursor: grab;
+
+  .gm-order-list__item--disabled & {
+    cursor: not-allowed;
+  }
+}
+
+.gm-order-list__grip {
+  flex: none;
+  color: var(--gm-gray-400);
+}
+
+.gm-order-list__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gm-order-list__controls {
+  display: flex;
+  flex: none;
+  gap: var(--gm-space-1);
+}
+
+/* Where the row will land: kept in flow so the list does not jump. */
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+/* The row being carried. The CDK moves it to the body, so only rules that do
+   not depend on an ancestor can reach it. */
+.cdk-drag-preview {
+  box-shadow: var(--gm-shadow-lg);
+  border-radius: var(--gm-radius-sm);
+  background: var(--gm-white);
+}
+
+.cdk-drag-animating,
+.cdk-drop-list-dragging .gm-order-list__item:not(.cdk-drag-placeholder) {
+  transition: transform var(--gm-duration-base) cubic-bezier(0, 0, 0.2, 1);
+}

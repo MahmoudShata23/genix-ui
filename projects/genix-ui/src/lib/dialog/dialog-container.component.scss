@@ -1,0 +1,92 @@
+/* ==========================================================================
+   gm-dialog
+   --------------------------------------------------------------------------
+   Surface, header and backdrop expressed entirely in `--gm-*` tokens — same
+   surface recipe as `gm-card`, one shadow step up because a dialog sits above
+   the page rather than in it.
+
+   The backdrop carries the fixed positioning and the centring, so the dialog
+   does not depend on the CDK's `overlay-prebuilt.css` geometry (see the
+   container component for why). `pointer-events: auto` is what makes it work
+   when that sheet *is* loaded: the CDK's overlay container sets
+   `pointer-events: none` on itself, and this re-enables them for the dialog.
+   ========================================================================== */
+
+:host {
+  /* The host is a passthrough; the backdrop below is the real element. */
+  display: contents;
+}
+
+.gm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--gm-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gm-space-4);
+  pointer-events: auto;
+  background: transparent;
+  transition: background var(--gm-transition-fast);
+}
+
+/* A non-modal dialog still captures clicks, it just does not tint the page. */
+.gm-dialog-backdrop--dimmed {
+  background: var(--gm-overlay-bg);
+}
+
+.gm-dialog {
+  display: flex;
+  flex-direction: column;
+  /* Viewport-relative caps, minus the backdrop's padding on both sides, so a
+     dialog can never grow past the screen no matter what `width` asks for. */
+  max-width: calc(100vw - var(--gm-space-8));
+  max-height: calc(100vh - var(--gm-space-8));
+  min-width: 0;
+  background: var(--gm-white);
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-lg);
+  box-shadow: var(--gm-shadow-xl);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-base);
+  color: var(--gm-gray-900);
+  overflow: hidden;
+
+  /* The panel takes focus on open so the title is announced; that is a
+     programmatic move, not a keyboard one, so it needs no ring of its own. */
+  &:focus {
+    outline: none;
+  }
+}
+
+.gm-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gm-space-4);
+  flex: 0 0 auto;
+  padding: var(--gm-space-5) var(--gm-space-6);
+  border-bottom: 1px solid var(--gm-gray-100);
+}
+
+.gm-dialog__title {
+  margin: 0;
+  font-size: var(--gm-font-size-lg);
+  font-weight: var(--gm-font-weight-semibold);
+  color: var(--gm-gray-900);
+}
+
+/* Pushes the close button to the trailing edge when there is no title to
+   space it away from. */
+.gm-dialog__close {
+  margin-inline-start: auto;
+}
+
+.gm-dialog__content {
+  flex: 1 1 auto;
+  padding: var(--gm-space-6);
+  overflow: auto;
+  /* Keeps a scroll gesture that reaches the end of the content from carrying
+     on into the page behind the dialog. */
+  overscroll-behavior: contain;
+}

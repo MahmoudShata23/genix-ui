@@ -1,0 +1,110 @@
+/* ==========================================================================
+   gm-select-button
+   --------------------------------------------------------------------------
+   A segmented row: the buttons share one border, so only the outer corners are
+   rounded and the joins collapse into a single rule.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.gm-field__label {
+  display: block;
+  margin-block-end: var(--gm-space-1);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-medium);
+  color: var(--gm-gray-700);
+}
+
+.gm-field__required {
+  margin-inline-start: var(--gm-space-1);
+  color: var(--gm-danger);
+}
+
+.gm-select-button {
+  display: inline-flex;
+  border-radius: var(--gm-radius-md);
+  overflow: hidden;
+}
+
+.gm-select-button__option {
+  appearance: none;
+  padding: var(--gm-space-2) var(--gm-space-4);
+  border: 1px solid var(--gm-gray-300);
+  background: var(--gm-white);
+  color: var(--gm-gray-700);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-base);
+  cursor: pointer;
+  transition: background-color var(--gm-transition-fast),
+    color var(--gm-transition-fast);
+
+  /* Neighbours share one border rather than stacking two. */
+  & + & {
+    border-inline-start-width: 0;
+  }
+
+  &:hover:not(:disabled):not(.gm-select-button__option--selected) {
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-900);
+  }
+
+  &:focus-visible {
+    outline: none;
+    /* Raised so the ring is not clipped by the neighbouring segment. */
+    position: relative;
+    z-index: 1;
+    border-color: var(--gm-primary);
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+
+  &--selected {
+    background: var(--gm-primary);
+    border-color: var(--gm-primary);
+    color: var(--gm-white);
+    font-weight: var(--gm-font-weight-medium);
+  }
+
+  &--selected:hover:not(:disabled) {
+    background: var(--gm-primary-dark);
+  }
+
+  &:disabled {
+    background: var(--gm-gray-50);
+    color: var(--gm-gray-300);
+    cursor: not-allowed;
+  }
+}
+
+:host(.gm-select-button-host--invalid) .gm-select-button__option {
+  border-color: var(--gm-danger);
+}
+
+:host(.gm-select-button-host--small) .gm-select-button__option {
+  padding: var(--gm-space-1) var(--gm-space-3);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-field__hint,
+.gm-field__error {
+  display: block;
+  margin-block-start: var(--gm-space-1);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-field__hint {
+  color: var(--gm-gray-500);
+}
+
+.gm-field__error {
+  color: var(--gm-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-select-button__option {
+    transition: none;
+  }
+}

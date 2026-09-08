@@ -191,6 +191,23 @@
     text-align: center;
   }
 
+  /* ---- Virtualised list ------------------------------------------------
+     The CDK scroller replaces the <ul> when `virtualScroll` is on. Rows keep
+     `.gm-dropdown__option`, so both branches look identical. */
+
+  .gm-dropdown__viewport {
+    /* Inline padding only. The CDK positions its content wrapper against
+       this element's padding box, so block padding would offset every row
+       and put the scroll maths out by that amount. */
+    padding-inline: var(--gm-space-1);
+
+    .gm-dropdown__option {
+      /* The row height is pinned to `virtualItemSize`, which has to include
+         the shell's own padding for the offsets to line up. */
+      box-sizing: border-box;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .gm-dropdown__chevron {
       transition: none;

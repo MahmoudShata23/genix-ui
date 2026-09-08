@@ -84,3 +84,17 @@
     transition: none;
   }
 }
+
+/* An option the selection limit currently rules out. Not a disabled option:
+   the limit is a state of the selection, so the row becomes selectable again
+   the moment something is removed. */
+.gm-multiselect__option--blocked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Select-all has no move left once the limit is reached. */
+.gm-multiselect__toggle-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

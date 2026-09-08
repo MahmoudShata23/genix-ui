@@ -1,0 +1,15 @@
+<!-- Rendered into the shared CDK overlay, but created in this component's
+     context so its styles and projected content still apply. -->
+<ng-template #panel>
+  <div
+    class="gm-popover"
+    role="dialog"
+    aria-modal="false"
+    tabindex="-1"
+    [attr.id]="panelId"
+    [attr.aria-label]="ariaLabel()"
+    (keydown)="onPanelKeydown($event)"
+  >
+    <ng-content />
+  </div>
+</ng-template>

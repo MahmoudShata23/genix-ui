@@ -1,0 +1,121 @@
+/* ==========================================================================
+   gm-toggle-switch
+   --------------------------------------------------------------------------
+   The native checkbox stays in the DOM and keeps focus and activation; it is
+   visually replaced by the track, which mirrors its state through `:checked`
+   sibling selectors rather than through a class binding.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.gm-switch__row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+  cursor: pointer;
+}
+
+/* Hidden from sight, not from the accessibility tree or the tab order. */
+.gm-switch__control {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.gm-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--gm-gray-300);
+  border-radius: var(--gm-radius-full);
+  background: var(--gm-gray-200);
+  transition: background-color var(--gm-transition-fast),
+    border-color var(--gm-transition-fast);
+}
+
+.gm-switch__thumb {
+  position: absolute;
+  inset-block-start: 1px;
+  inset-inline-start: 1px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--gm-radius-full);
+  background: var(--gm-white);
+  box-shadow: var(--gm-shadow-sm);
+  transition: transform var(--gm-transition-fast);
+}
+
+.gm-switch__control:checked + .gm-switch__track {
+  background: var(--gm-primary);
+  border-color: var(--gm-primary);
+
+  .gm-switch__thumb {
+    transform: translateX(1rem);
+  }
+}
+
+/* The thumb has to travel the other way when the document is right-to-left. */
+:host-context([dir='rtl']) .gm-switch__control:checked + .gm-switch__track .gm-switch__thumb {
+  transform: translateX(-1rem);
+}
+
+.gm-switch__control:focus-visible + .gm-switch__track {
+  border-color: var(--gm-primary);
+  box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+}
+
+.gm-switch__label {
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-base);
+  color: var(--gm-gray-800);
+}
+
+.gm-switch__required {
+  margin-inline-start: var(--gm-space-1);
+  color: var(--gm-danger);
+}
+
+:host(.gm-switch-host--invalid) .gm-switch__track {
+  border-color: var(--gm-danger);
+}
+
+:host(.gm-switch-host--disabled) .gm-switch__row {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:host(.gm-switch-host--readonly) .gm-switch__row {
+  cursor: default;
+}
+
+.gm-switch__hint,
+.gm-switch__error {
+  display: block;
+  margin-block-start: var(--gm-space-1);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-switch__hint {
+  color: var(--gm-gray-500);
+}
+
+.gm-switch__error {
+  color: var(--gm-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-switch__track,
+  .gm-switch__thumb {
+    transition: none;
+  }
+}

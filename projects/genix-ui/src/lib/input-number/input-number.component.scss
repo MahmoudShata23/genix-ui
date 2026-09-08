@@ -1,0 +1,33 @@
+/* ==========================================================================
+   gm-input-number
+   --------------------------------------------------------------------------
+   Reuses the field shell wholesale, so the border, radius, padding, focus ring
+   and error treatment are identical to `gm-input`. Only the affix row is new.
+   ========================================================================== */
+
+@use '../core/styles/field' as field;
+
+:host {
+  display: block;
+}
+
+@include field.gm-field-shell('.gm-field__control');
+
+.gm-input-number {
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+}
+
+.gm-input-number .gm-field__control {
+  /* The affixes sit outside the input, so it takes the remaining width. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gm-input-number__affix {
+  flex: 0 0 auto;
+  color: var(--gm-gray-500);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+}

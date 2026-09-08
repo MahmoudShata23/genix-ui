@@ -7,11 +7,13 @@ import {
   effect,
   inject,
   input,
+  numberAttribute,
   signal,
   viewChild,
 } from '@angular/core';
 
 import { GmFormFieldBase } from './form-field-base';
+import { gmOptionLabel, gmOptionValue, gmReadOption } from './option-reader';
 import { gmOverlayPanel } from './overlay-panel';
 import { gmUniqueId } from './unique-id';
 
@@ -57,10 +59,25 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
 
   readonly emptyFilterMessage = input<string>('No results found');
 
+  /**
+   * Renders only the rows in view, for lists long enough that a row per
+   * option is the bottleneck. Fixed row height — see `virtualItemSize`.
+   */
+  readonly virtualScroll = input(false, { transform: booleanAttribute });
+
+  /**
+   * Row height in pixels while virtualising. Every row is pinned to it,
+   * since fixed-size virtualisation is what computes the scroll offsets.
+   */
+  readonly virtualItemSize = input(40, { transform: numberAttribute });
+
+  /** Any CSS length. Matches the non-virtual list's cap by default. */
+  readonly virtualScrollHeight = input<string>('16rem');
+
   protected readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** The shared overlay engine — same one `gm-datepicker` uses. */
-  private readonly overlayPanel = gmOverlayPanel();
+  protected readonly overlayPanel = gmOverlayPanel();
 
   protected readonly panel = viewChild.required<TemplateRef<unknown>>('panel');
 
@@ -120,24 +137,17 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
 
   /** Display text for an option, honouring `optionLabel`. */
   protected labelOf(option: GmDropdownOption): string {
-    return String(this.read(option, this.optionLabel()) ?? '');
+    return gmOptionLabel(option, this.optionLabel());
   }
 
   /** Form value for an option, honouring `optionValue`. */
   protected valueForOption(option: GmDropdownOption): unknown {
-    const key = this.optionValue();
-    return key ? this.read(option, key) : option;
+    return gmOptionValue(option, this.optionValue());
   }
 
   /** Reads `key` off an object option; a primitive option is its own value. */
-  protected read(
-    option: GmDropdownOption,
-    key: string | undefined,
-  ): unknown {
-    if (!key || option === null || typeof option !== 'object') {
-      return option;
-    }
-    return (option as Record<string, unknown>)[key];
+  protected read(option: GmDropdownOption, key: string | undefined): unknown {
+    return gmReadOption(option, key);
   }
 
   // ── Open / close ────────────────────────────────────────────────────────
@@ -190,11 +200,29 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
     this.filterText.set((event.target as HTMLInputElement).value);
     // The previous highlight may no longer be in the filtered list.
     this.activeIndex.set(this.visibleOptions().length ? 0 : -1);
+    // A new term shortens the list, so the old scroll offset is meaningless.
+    const viewport = this.viewportElement();
+    if (viewport) {
+      viewport.scrollTop = 0;
+    }
   }
 
   // ── Keyboard ────────────────────────────────────────────────────────────
 
+  /**
+   * Handles the key, then brings the highlight back into view. The reveal
+   * has to happen here rather than per-case: an option scrolled out of a
+   * virtualised list is not rendered at all, and `aria-activedescendant`
+   * must point at a row that exists.
+   */
   protected onKeydown(event: KeyboardEvent): void {
+    this.handleKeydown(event);
+    if (this.virtualScroll() && this.open()) {
+      this.revealActiveOption();
+    }
+  }
+
+  private handleKeydown(event: KeyboardEvent): void {
     if (this.locked()) {
       return;
     }
@@ -257,6 +285,44 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
       default:
         return;
     }
+  }
+
+  /**
+   * Scrolls the smallest amount that puts the active row fully in view, so
+   * arrowing down one row moves the list by one row rather than jumping the
+   * active option to the top.
+   */
+  private revealActiveOption(): void {
+    const viewport = this.viewportElement();
+    const index = this.activeIndex();
+    if (!viewport || index < 0) {
+      return;
+    }
+
+    const itemSize = this.virtualItemSize();
+    const offset = viewport.scrollTop;
+    const height = viewport.clientHeight;
+    const top = index * itemSize;
+
+    if (top < offset) {
+      viewport.scrollTop = top;
+    } else if (top + itemSize > offset + height) {
+      viewport.scrollTop = top + itemSize - height;
+    }
+  }
+
+  /**
+   * The scroll container, found through the overlay rather than a view
+   * query: the panel is an embedded view the portal created, which a view
+   * query does not reach into. Setting `scrollTop` is what the CDK viewport
+   * does internally, and its own scroll listener picks the change up.
+   */
+  private viewportElement(): HTMLElement | null {
+    return (
+      this.overlayPanel.panelElement?.querySelector<HTMLElement>(
+        '.gm-dropdown__viewport',
+      ) ?? null
+    );
   }
 
   private move(delta: number, count: number): void {

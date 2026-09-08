@@ -1,0 +1,143 @@
+/* ==========================================================================
+   gm-stepper
+   --------------------------------------------------------------------------
+   Numbered markers joined by a rule, the active one tinted primary and a
+   finished one filled and ticked. The separator is a flexing element between
+   list items rather than a pseudo-element, so it stretches with the row and
+   flips with the writing direction on its own.
+   ========================================================================== */
+
+:host {
+  display: block;
+  font-family: var(--gm-font-family);
+}
+
+.gm-stepper__header {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gm-stepper__step {
+  display: flex;
+  align-items: center;
+  /* Only the separator grows; the labels keep their natural width. */
+  flex: 0 1 auto;
+  min-width: 0;
+
+  &:not(:last-child) {
+    flex: 1 1 auto;
+  }
+}
+
+.gm-stepper__button {
+  /* A real <button>, so its default chrome has to be cleared. */
+  appearance: none;
+  background: transparent;
+  border: 0;
+
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+
+  padding: var(--gm-space-2);
+  border-radius: var(--gm-radius-md);
+
+  color: var(--gm-gray-500);
+  font-family: inherit;
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-medium);
+  cursor: pointer;
+
+  transition: color var(--gm-transition-fast);
+
+  &:hover:not(:disabled) {
+    color: var(--gm-primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    color: var(--gm-gray-400);
+    cursor: not-allowed;
+  }
+}
+
+.gm-stepper__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+
+  width: 1.75rem;
+  height: 1.75rem;
+
+  border: 1px solid var(--gm-gray-300);
+  border-radius: var(--gm-radius-full);
+  background: var(--gm-white);
+
+  font-size: var(--gm-font-size-xs);
+  font-weight: var(--gm-font-weight-semibold);
+  line-height: 1;
+
+  transition: background-color var(--gm-transition-fast),
+    border-color var(--gm-transition-fast), color var(--gm-transition-fast);
+}
+
+.gm-stepper__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gm-stepper__step--active {
+  .gm-stepper__button {
+    color: var(--gm-primary);
+  }
+
+  .gm-stepper__marker {
+    border-color: var(--gm-primary);
+    background: var(--gm-primary);
+    color: var(--gm-white);
+  }
+}
+
+.gm-stepper__step--completed {
+  .gm-stepper__marker {
+    border-color: var(--gm-success);
+    background: var(--gm-success);
+    color: var(--gm-white);
+  }
+}
+
+.gm-stepper__separator {
+  flex: 1 1 auto;
+  min-width: var(--gm-space-4);
+  height: 1px;
+  margin: 0 var(--gm-space-2);
+  background: var(--gm-gray-200);
+}
+
+.gm-stepper__panels {
+  padding-top: var(--gm-space-5);
+  color: var(--gm-gray-800);
+}
+
+.gm-stepper__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gm-space-3);
+  padding-top: var(--gm-space-4);
+}
+
+/* Narrow viewports: the labels are what has to go, not the markers. */
+@media (max-width: 40rem) {
+  .gm-stepper__label {
+    display: none;
+  }
+}

@@ -1,0 +1,12 @@
+<!--
+  The frame is what makes the chart responsive: a positioned box with a real
+  height, which is what a charting engine measures itself against.
+-->
+<div class="gm-chart__frame" [style.height]="height()">
+  <canvas
+    #canvas
+    class="gm-chart__canvas"
+    [attr.role]="ariaLabel() ? 'img' : null"
+    [attr.aria-label]="ariaLabel() ?? null"
+  ></canvas>
+</div>

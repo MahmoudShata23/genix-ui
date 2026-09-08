@@ -1,0 +1,30 @@
+/* ==========================================================================
+   gm-popover
+   --------------------------------------------------------------------------
+   Same surface recipe as the dropdown panel, so an anchored popover and an
+   anchored option list read as the same kind of thing.
+   ========================================================================== */
+
+:host {
+  /* The panel lives in the overlay; the host itself renders nothing. */
+  display: none;
+}
+
+.gm-popover {
+  min-width: 12rem;
+  max-width: min(24rem, calc(100vw - var(--gm-space-8)));
+  padding: var(--gm-space-4);
+  background: var(--gm-white);
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-md);
+  box-shadow: var(--gm-shadow-lg);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+  color: var(--gm-gray-800);
+
+  /* The panel takes focus on open so its content is reachable; that is a
+     programmatic move, not a keyboard one, so it needs no ring of its own. */
+  &:focus {
+    outline: none;
+  }
+}

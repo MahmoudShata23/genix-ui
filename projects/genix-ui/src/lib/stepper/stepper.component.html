@@ -1,0 +1,62 @@
+<!--
+  An ordered list rather than a tablist: the steps are a sequence, and the
+  active one is marked with `aria-current="step"` — the pattern assistive
+  technology expects from a progress indicator.
+-->
+<ol class="gm-stepper__header" [attr.aria-label]="ariaLabel() ?? null">
+  @for (step of steps(); track step.panelId; let index = $index, last = $last) {
+    <li
+      class="gm-stepper__step"
+      [class.gm-stepper__step--active]="step.active()"
+      [class.gm-stepper__step--completed]="step.isCompleted()"
+    >
+      <button
+        type="button"
+        class="gm-stepper__button"
+        [id]="step.headerId"
+        [attr.aria-current]="step.active() ? 'step' : null"
+        [attr.aria-controls]="step.panelId"
+        [disabled]="step.disabled()"
+        (click)="select(step)"
+      >
+        <span class="gm-stepper__marker" aria-hidden="true">
+          @if (step.isCompleted()) {
+            <i class="pi pi-check"></i>
+          } @else if (step.icon()) {
+            <i [class]="step.icon()"></i>
+          } @else {
+            {{ index + 1 }}
+          }
+        </span>
+        <span class="gm-stepper__label">{{ step.label() }}</span>
+      </button>
+
+      @if (!last) {
+        <span class="gm-stepper__separator" aria-hidden="true"></span>
+      }
+    </li>
+  }
+</ol>
+
+<div class="gm-stepper__panels">
+  <ng-content />
+</div>
+
+@if (showNavigation()) {
+  <div class="gm-stepper__actions">
+    <gm-button
+      class="gm-stepper__back"
+      [label]="backLabel()"
+      severity="secondary"
+      variant="outlined"
+      [disabled]="!canGoBack()"
+      (onClick)="previous()"
+    />
+    <gm-button
+      class="gm-stepper__next"
+      [label]="nextLabel()"
+      [disabled]="!canGoNext() || nextDisabled()"
+      (onClick)="next()"
+    />
+  </div>
+}

@@ -32,7 +32,7 @@
     }
 
     <span class="gm-datepicker__actions">
-      @if (clearable() && selected() && !readOnly()) {
+      @if (clearable() && hasSelection() && !readOnly()) {
         <!-- A real button so it is reachable and announced on its own. -->
         <button
           type="button"
@@ -67,72 +67,130 @@
     role="dialog"
     aria-modal="false"
     [attr.id]="calendarId"
-    [attr.aria-label]="monthLabel()"
+    [attr.aria-label]="panelLabel()"
+    (keydown)="onPanelKeydown($event)"
   >
-    <div class="gm-datepicker__header">
-      <button
-        type="button"
-        class="gm-datepicker__nav"
-        aria-label="Previous month"
-        [disabled]="!canGoBack()"
-        (click)="shiftMonth(-1)"
+    @if (showCalendar()) {
+      <div class="gm-datepicker__header">
+        <button
+          type="button"
+          class="gm-datepicker__nav"
+          aria-label="Previous month"
+          [disabled]="!canGoBack()"
+          (click)="shiftMonth(-1)"
+        >
+          <span class="gm-datepicker__chevron gm-datepicker__chevron--prev" aria-hidden="true"></span>
+        </button>
+
+        <!-- aria-live so the month change is announced during keyboard paging. -->
+        <span class="gm-datepicker__month" aria-live="polite">{{ monthLabel() }}</span>
+
+        <button
+          type="button"
+          class="gm-datepicker__nav"
+          aria-label="Next month"
+          [disabled]="!canGoForward()"
+          (click)="shiftMonth(1)"
+        >
+          <span class="gm-datepicker__chevron gm-datepicker__chevron--next" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <table
+        class="gm-datepicker__grid"
+        role="grid"
+        (keydown)="onCalendarKeydown($event)"
+        (mouseleave)="hoverDate.set(null)"
       >
-        <span class="gm-datepicker__chevron gm-datepicker__chevron--prev" aria-hidden="true"></span>
-      </button>
-
-      <!-- aria-live so the month change is announced during keyboard paging. -->
-      <span class="gm-datepicker__month" aria-live="polite">{{ monthLabel() }}</span>
-
-      <button
-        type="button"
-        class="gm-datepicker__nav"
-        aria-label="Next month"
-        [disabled]="!canGoForward()"
-        (click)="shiftMonth(1)"
-      >
-        <span class="gm-datepicker__chevron gm-datepicker__chevron--next" aria-hidden="true"></span>
-      </button>
-    </div>
-
-    <table class="gm-datepicker__grid" role="grid" (keydown)="onCalendarKeydown($event)">
-      <thead>
-        <tr role="row">
-          @for (day of weekdays(); track $index) {
-            <th scope="col" class="gm-datepicker__weekday" [attr.abbr]="day">
-              {{ day }}
-            </th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @for (week of weeks(); track $index) {
+        <thead>
           <tr role="row">
-            @for (day of week; track dayId(day)) {
-              <td role="gridcell" class="gm-datepicker__cell">
-                <!-- A real button, never a clickable div: keyboard activation
-                     and disabled semantics come from the platform. -->
-                <button
-                  type="button"
-                  class="gm-datepicker__day"
-                  [attr.id]="dayId(day)"
-                  [class.gm-datepicker__day--selected]="isSelected(day)"
-                  [class.gm-datepicker__day--today]="isToday(day)"
-                  [class.gm-datepicker__day--outside]="isOutsideMonth(day)"
-                  [disabled]="isDisabledDay(day)"
-                  [attr.aria-label]="dayLabel(day)"
-                  [attr.aria-selected]="isSelected(day)"
-                  [attr.aria-current]="isToday(day) ? 'date' : null"
-                  [attr.tabindex]="isFocused(day) ? 0 : -1"
-                  (click)="select(day)"
-                >
-                  {{ day.getDate() }}
-                </button>
-              </td>
+            @for (day of weekdays(); track $index) {
+              <th scope="col" class="gm-datepicker__weekday" [attr.abbr]="day">
+                {{ day }}
+              </th>
             }
           </tr>
+        </thead>
+        <tbody>
+          @for (week of weeks(); track $index) {
+            <tr role="row">
+              @for (day of week; track dayId(day)) {
+                <td role="gridcell" class="gm-datepicker__cell">
+                  <!-- A real button, never a clickable div: keyboard activation
+                       and disabled semantics come from the platform. -->
+                  <button
+                    type="button"
+                    class="gm-datepicker__day"
+                    [attr.id]="dayId(day)"
+                    [class.gm-datepicker__day--selected]="isSelected(day)"
+                    [class.gm-datepicker__day--today]="isToday(day)"
+                    [class.gm-datepicker__day--outside]="isOutsideMonth(day)"
+                    [class.gm-datepicker__day--range-start]="isRangeStart(day)"
+                    [class.gm-datepicker__day--range-end]="isRangeEnd(day)"
+                    [class.gm-datepicker__day--in-range]="isInRange(day)"
+                    [disabled]="isDisabledDay(day)"
+                    [attr.aria-label]="dayLabel(day)"
+                    [attr.aria-selected]="isSelected(day)"
+                    [attr.aria-current]="isToday(day) ? 'date' : null"
+                    [attr.tabindex]="isFocused(day) ? 0 : -1"
+                    (click)="select(day)"
+                    (mouseenter)="hoverDate.set(day)"
+                  >
+                    {{ day.getDate() }}
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (hasTime()) {
+      <!-- Native selects: keyboard operation, screen-reader support and the
+           mobile wheel picker all come from the platform. -->
+      <div class="gm-datepicker__time" role="group" aria-label="Time">
+        <select
+          class="gm-datepicker__time-select"
+          aria-label="Hour"
+          [disabled]="isDisabled() || readOnly()"
+          (change)="setHour($any($event.target).value)"
+        >
+          @for (option of hourOptions(); track option) {
+            <option [value]="option" [selected]="option === displayHour()">
+              {{ pad(option) }}
+            </option>
+          }
+        </select>
+
+        <span class="gm-datepicker__time-separator" aria-hidden="true">:</span>
+
+        <select
+          class="gm-datepicker__time-select"
+          aria-label="Minute"
+          [disabled]="isDisabled() || readOnly()"
+          (change)="setMinute($any($event.target).value)"
+        >
+          @for (option of minuteOptions; track option) {
+            <option [value]="option" [selected]="option === minute()">
+              {{ pad(option) }}
+            </option>
+          }
+        </select>
+
+        @if (hourFormat() === 12) {
+          <select
+            class="gm-datepicker__time-select"
+            aria-label="AM or PM"
+            [disabled]="isDisabled() || readOnly()"
+            (change)="setMeridiem($any($event.target).value)"
+          >
+            <option value="AM" [selected]="meridiem() === 'AM'">AM</option>
+            <option value="PM" [selected]="meridiem() === 'PM'">PM</option>
+          </select>
         }
-      </tbody>
-    </table>
+      </div>
+    }
 
     @if (showButtonBar()) {
       <div class="gm-datepicker__footer">

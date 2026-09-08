@@ -1,0 +1,135 @@
+/* ==========================================================================
+   gm-file-upload
+   --------------------------------------------------------------------------
+   A dashed drop zone over a hidden native input, then the picked files as a
+   plain list. Borders and surfaces come from the same tokens the form fields
+   use, so the zone reads as part of a form rather than a separate widget.
+   ========================================================================== */
+
+:host {
+  display: block;
+  font-family: var(--gm-font-family);
+}
+
+.gm-file-upload__label {
+  display: block;
+  margin-bottom: var(--gm-space-2);
+  color: var(--gm-gray-700);
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-medium);
+}
+
+.gm-file-upload__zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gm-space-2);
+
+  padding: var(--gm-space-6) var(--gm-space-4);
+
+  border: 1px dashed var(--gm-gray-300);
+  border-radius: var(--gm-radius-md);
+  background: var(--gm-gray-50);
+
+  text-align: center;
+  transition: border-color var(--gm-transition-fast),
+    background-color var(--gm-transition-fast);
+
+  &--dragging {
+    border-color: var(--gm-primary);
+    background: var(--gm-primary-light);
+  }
+
+  &--disabled {
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-400);
+    cursor: not-allowed;
+  }
+}
+
+/* Present for the file dialog and for form semantics, never seen. */
+.gm-file-upload__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.gm-file-upload__icon {
+  font-size: var(--gm-font-size-2xl);
+  color: var(--gm-gray-400);
+}
+
+.gm-file-upload__drop-hint {
+  margin: 0;
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-file-upload__files {
+  list-style: none;
+  margin: var(--gm-space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-1);
+}
+
+.gm-file-upload__file {
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+
+  padding: var(--gm-space-2) var(--gm-space-3);
+
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-sm);
+  background: var(--gm-white);
+
+  color: var(--gm-gray-800);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-file-upload__file-icon {
+  color: var(--gm-gray-400);
+}
+
+.gm-file-upload__name {
+  /* Takes the slack so the size and the remove button sit at the end. */
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gm-file-upload__size {
+  flex: none;
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-file-upload__clear {
+  display: block;
+  margin-top: var(--gm-space-1);
+}
+
+.gm-file-upload__errors {
+  list-style: none;
+  margin: var(--gm-space-2) 0 0;
+  padding: 0;
+  color: var(--gm-danger-text);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-file-upload__hint {
+  margin: var(--gm-space-2) 0 0;
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-xs);
+}

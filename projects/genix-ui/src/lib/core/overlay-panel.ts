@@ -35,6 +35,9 @@ export const GM_PANEL_BELOW: ConnectedPosition[] = [
 export class GmOverlayPanel {
   private overlayRef: OverlayRef | null = null;
 
+  /** What the open panel is anchored to and measured "outside" against. */
+  private origin: HTMLElement | null = null;
+
   constructor(
     private readonly overlay: Overlay,
     private readonly viewContainer: ViewContainerRef,
@@ -50,22 +53,37 @@ export class GmOverlayPanel {
   }
 
   /**
+   * The overlay element while the panel is attached.
+   *
+   * For the rare caller that has to reach into the rendered panel: a view
+   * query cannot see inside it, because the panel is an embedded view the
+   * portal created, not one this component's own template did.
+   */
+  get panelElement(): HTMLElement | null {
+    return this.overlayRef?.overlayElement ?? null;
+  }
+
+  /**
    * Attaches `template` under the host. `onOutsideClick` fires only for clicks
    * genuinely outside both the panel and the trigger.
    */
   open(
     template: TemplateRef<unknown>,
     onOutsideClick: () => void,
-    options: { minWidth?: number | string } = {},
+    options: { minWidth?: number | string; origin?: HTMLElement } = {},
   ): void {
     if (this.overlayRef) {
       return;
     }
 
+    // A popover or menu is opened *by* something other than its own host, so
+    // the anchor is a parameter; everything else defaults to the host.
+    this.origin = options.origin ?? this.host.nativeElement;
+
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay
         .position()
-        .flexibleConnectedTo(this.host)
+        .flexibleConnectedTo(this.origin)
         .withPositions(GM_PANEL_BELOW)
         .withFlexibleDimensions(false)
         .withPush(false),
@@ -86,7 +104,7 @@ export class GmOverlayPanel {
       .outsidePointerEvents()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
-        if (!this.host.nativeElement.contains(event.target as Node)) {
+        if (!this.origin?.contains(event.target as Node)) {
           onOutsideClick();
         }
       });
@@ -95,6 +113,7 @@ export class GmOverlayPanel {
   close(): void {
     this.overlayRef?.dispose();
     this.overlayRef = null;
+    this.origin = null;
   }
 }
 

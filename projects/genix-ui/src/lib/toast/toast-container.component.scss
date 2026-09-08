@@ -1,0 +1,133 @@
+/* ==========================================================================
+   gm-toast
+   --------------------------------------------------------------------------
+   Tinted surfaces on the same `--gm-*-light` / `--gm-*-text` pairing that
+   `gm-badge` and `gm-chip` use, so a success toast and a success badge are
+   recognisably the same colour language.
+
+   Positioning uses logical properties (`inset-inline-end`), which is what
+   makes the stack direction-aware: the default sits in the top-right corner in
+   LTR and the top-left in RTL, with no separate RTL rule.
+   ========================================================================== */
+
+:host {
+  /* The region below owns the fixed positioning. */
+  display: contents;
+}
+
+.gm-toast-region {
+  position: fixed;
+  z-index: var(--gm-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-3);
+  padding: var(--gm-space-4);
+  max-width: min(24rem, calc(100vw - var(--gm-space-8)));
+  /* The region spans a corner but must never swallow clicks meant for the page
+     underneath; the toasts themselves opt back in. */
+  pointer-events: none;
+}
+
+.gm-toast-region--top-end {
+  inset-block-start: 0;
+  inset-inline-end: 0;
+}
+
+.gm-toast-region--bottom-end {
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  /* Newest nearest the edge it grows from. */
+  flex-direction: column-reverse;
+}
+
+.gm-toast-region--top-center {
+  inset-block-start: 0;
+  inset-inline: 0;
+  margin-inline: auto;
+}
+
+.gm-toast-region--bottom-center {
+  inset-block-end: 0;
+  inset-inline: 0;
+  margin-inline: auto;
+  flex-direction: column-reverse;
+}
+
+.gm-toast {
+  --gm-toast-bg: var(--gm-info-light);
+  --gm-toast-fg: var(--gm-info-text);
+  --gm-toast-accent: var(--gm-info);
+
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gm-space-3);
+  padding: var(--gm-space-4);
+  pointer-events: auto;
+  background: var(--gm-toast-bg);
+  color: var(--gm-toast-fg);
+  /* The accent bar is the severity cue that survives a colour-vision
+     difference, alongside the icon. */
+  border: 1px solid var(--gm-toast-accent);
+  border-inline-start: var(--gm-space-1) solid var(--gm-toast-accent);
+  border-radius: var(--gm-radius-md);
+  box-shadow: var(--gm-shadow-lg);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+
+  /* ---- Severities ---------------------------------------------------- */
+
+  &--success {
+    --gm-toast-bg: var(--gm-success-light);
+    --gm-toast-fg: var(--gm-success-text);
+    --gm-toast-accent: var(--gm-success);
+  }
+
+  &--info {
+    --gm-toast-bg: var(--gm-info-light);
+    --gm-toast-fg: var(--gm-info-text);
+    --gm-toast-accent: var(--gm-info);
+  }
+
+  &--warning {
+    --gm-toast-bg: var(--gm-warning-light);
+    --gm-toast-fg: var(--gm-warning-text);
+    --gm-toast-accent: var(--gm-warning);
+  }
+
+  &--danger {
+    --gm-toast-bg: var(--gm-danger-light);
+    --gm-toast-fg: var(--gm-danger-text);
+    --gm-toast-accent: var(--gm-danger);
+  }
+}
+
+.gm-toast__icon {
+  flex: 0 0 auto;
+  margin-block-start: 0.1em;
+  font-size: var(--gm-font-size-md);
+  color: var(--gm-toast-accent);
+}
+
+.gm-toast__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gm-toast__summary {
+  margin: 0;
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-semibold);
+}
+
+.gm-toast__detail {
+  margin: 0;
+  /* Only spaced off a summary that is actually there. */
+  .gm-toast__summary + & {
+    margin-block-start: var(--gm-space-1);
+  }
+  overflow-wrap: anywhere;
+}
+
+.gm-toast__close {
+  flex: 0 0 auto;
+}

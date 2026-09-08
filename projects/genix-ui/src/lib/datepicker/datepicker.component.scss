@@ -250,6 +250,25 @@
     background: var(--gm-primary-dark);
   }
 
+  /* ---- Range ---------------------------------------------------------
+     The endpoints reuse the filled `--selected` treatment; these rules only
+     shape the span, squaring the inner corners so the run reads as one bar. */
+  &--in-range {
+    background: var(--gm-primary-light);
+    color: var(--gm-primary-dark);
+    border-radius: 0;
+  }
+
+  &--range-start {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  &--range-end {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
   /* Leading/trailing days of the adjacent months stay visible but recede. */
   &--outside {
     color: var(--gm-gray-400);
@@ -259,6 +278,50 @@
     color: var(--gm-gray-300);
     cursor: not-allowed;
   }
+}
+
+/* ---- Time controls ---------------------------------------------------- */
+
+.gm-datepicker__time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gm-space-2);
+  margin-top: var(--gm-space-2);
+  padding-top: var(--gm-space-3);
+  border-top: 1px solid var(--gm-gray-100);
+}
+
+/* A native <select>, given the field shell's border, radius and focus ring so
+   it sits with the rest of the design system rather than looking pasted in. */
+.gm-datepicker__time-select {
+  appearance: none;
+  padding: var(--gm-space-1) var(--gm-space-3);
+  border: 1px solid var(--gm-gray-300);
+  border-radius: var(--gm-radius-sm);
+  background: var(--gm-white);
+  color: var(--gm-gray-800);
+  font-family: inherit;
+  font-size: var(--gm-font-size-sm);
+  text-align: center;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--gm-primary);
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    background: var(--gm-gray-50);
+    color: var(--gm-gray-400);
+    cursor: not-allowed;
+  }
+}
+
+.gm-datepicker__time-separator {
+  color: var(--gm-gray-500);
+  font-weight: var(--gm-font-weight-semibold);
 }
 
 .gm-datepicker__footer {

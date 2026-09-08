@@ -1,0 +1,76 @@
+/* ==========================================================================
+   gm-menu
+   --------------------------------------------------------------------------
+   Entries reuse the dropdown option's spacing and hover treatment, so a menu
+   and an option list feel like the same control family.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+/* A popup menu renders nothing in place — the list is in the overlay. */
+:host(.gm-menu-host--popup) {
+  display: none;
+}
+
+.gm-menu__panel {
+  background: var(--gm-white);
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-md);
+  box-shadow: var(--gm-shadow-lg);
+  overflow: hidden;
+}
+
+.gm-menu {
+  /* It is a <ul>: drop the list chrome. */
+  margin: 0;
+  padding: var(--gm-space-1);
+  list-style: none;
+  font-family: var(--gm-font-family);
+}
+
+.gm-menu__item {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--gm-space-2);
+  width: 100%;
+  padding: var(--gm-space-2) var(--gm-space-3);
+  border: 0;
+  border-radius: var(--gm-radius-sm);
+  background: transparent;
+  color: var(--gm-gray-700);
+  font-family: inherit;
+  font-size: var(--gm-font-size-base);
+  text-align: start;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-900);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-900);
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    color: var(--gm-gray-300);
+    cursor: not-allowed;
+  }
+}
+
+.gm-menu__icon {
+  flex: 0 0 auto;
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-menu__separator {
+  height: 1px;
+  margin: var(--gm-space-1) 0;
+  background: var(--gm-gray-100);
+}

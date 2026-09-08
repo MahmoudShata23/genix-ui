@@ -136,3 +136,65 @@ export function gmCoerceDate(value: unknown): Date | null {
 
   return null;
 }
+
+/**
+ * The same calendar day carrying a wall-clock time. Built from explicit
+ * parts like everything else here, so it is the viewer's local time and never
+ * shifts. Seconds are dropped: the picker offers hours and minutes only.
+ */
+export function gmWithTime(date: Date, hours: number, minutes: number): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    hours,
+    minutes,
+  );
+}
+
+/** Formats the time part as `HH:mm`, or `hh:mm AM/PM` in 12-hour mode. */
+export function gmFormatTime(date: Date, hourFormat: 12 | 24 = 24): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const minutes = pad(date.getMinutes());
+  if (hourFormat === 24) {
+    return `${pad(date.getHours())}:${minutes}`;
+  }
+  const hours = date.getHours() % 12 || 12;
+  return `${pad(hours)}:${minutes} ${date.getHours() < 12 ? 'AM' : 'PM'}`;
+}
+
+/**
+ * Like `gmCoerceDate`, but keeps the time — for `showTime` / `timeOnly`,
+ * where the hours and minutes are part of the value.
+ *
+ * Strings are read from their parts rather than parsed, for the same reason:
+ * `yyyy-MM-dd`, `yyyy-MM-ddTHH:mm`, and a bare `HH:mm` (which lands on
+ * today's date, since a time on its own has no day of its own).
+ */
+export function gmCoerceDateTime(value: unknown): Date | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime())
+      ? null
+      : gmWithTime(value, value.getHours(), value.getMinutes());
+  }
+
+  if (typeof value === 'string') {
+    const dateTime = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(value);
+    if (dateTime) {
+      return new Date(
+        Number(dateTime[1]),
+        Number(dateTime[2]) - 1,
+        Number(dateTime[3]),
+        Number(dateTime[4] ?? 0),
+        Number(dateTime[5] ?? 0),
+      );
+    }
+
+    const timeOnly = /^(\d{1,2}):(\d{2})/.exec(value);
+    if (timeOnly) {
+      return gmWithTime(gmToday(), Number(timeOnly[1]), Number(timeOnly[2]));
+    }
+  }
+
+  return null;
+}

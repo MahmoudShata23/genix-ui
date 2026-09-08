@@ -1,15 +1,20 @@
-# Publishes to GitHub Packages when a tag like v0.2.0 is pushed.
+# Publishes to GitHub Packages when a GitHub Release is published.
 #
-# The tag is the trigger, but projects/genix-ui/package.json is the source of
-# truth for the version — the job refuses to publish if the two disagree, so a
-# mistyped tag fails loudly instead of shipping the wrong version.
+# The release's tag is the trigger, but projects/genix-ui/package.json is the
+# source of truth for the version — the job refuses to publish if the two
+# disagree, so a mistyped tag fails loudly instead of shipping the wrong
+# version.
+#
+# Only the Release event publishes. A tag push deliberately does NOT: with both
+# triggers, creating a release from a new tag would fire twice and the second
+# run would fail on a version that already exists, turning a good release red.
 #
 # No PAT is needed: GITHUB_TOKEN carries packages:write for this repository.
 name: Release
 
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -19,32 +24,58 @@ jobs:
       contents: read
       packages: write
     steps:
+      # For a release event this checks out the commit the release points at.
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+          # Writes the registry + NODE_AUTH_TOKEN mapping into the runner's
+          # .npmrc. The repo's own .npmrc maps the scope; neither holds a token.
           registry-url: https://npm.pkg.github.com
 
       - run: npm ci
 
-      - name: Tag must match the package version
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Release tag must match the package version
+        # Skipped for a manual dispatch, which has no tag to compare against.
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
         run: |
-          tag="${GITHUB_REF_NAME#v}"
+          tag="${TAG#v}"
           pkg="$(node -p "require('./projects/genix-ui/package.json').version")"
           if [ "$tag" != "$pkg" ]; then
-            echo "::error::tag v$tag does not match package version $pkg"
+            echo "::error::release tag $TAG does not match package version $pkg"
             exit 1
           fi
           echo "Publishing version $pkg"
 
-      - run: npm run build
+      - name: Build the library
+        run: npm run build
 
-      - run: npm test
+      - name: Unit tests
+        run: npm test
+
+      # The public API as consumers see it: the playground compiles against
+      # dist/genix-ui's generated .d.ts, not against src.
+      - name: Type-check the built public API
+        run: npx ng build playground
+
+      - name: Validate the tarball
+        run: |
+          npm pack ./dist/genix-ui --pack-destination dist
+          tarball="$(ls dist/*.tgz)"
+          echo "Packed $tarball"
+          tar -tzf "$tarball" | sort
+          for required in package/index.d.ts package/styles/tokens.css; do
+            tar -tzf "$tarball" | grep -qx "$required" \
+              || { echo "::error::$required missing from the tarball"; exit 1; }
+          done
 
       - name: Publish to GitHub Packages
+        # Publishes the BUILT package, never the workspace root — the root
+        # manifest is private and has no publishable output.
         run: npm publish ./dist/genix-ui
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

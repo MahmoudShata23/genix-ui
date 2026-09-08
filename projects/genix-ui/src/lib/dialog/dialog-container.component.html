@@ -1,0 +1,48 @@
+<!-- Trap root is the backdrop, so the panel below can carry `cdkFocusInitial`
+     and be found by the trap's descendant lookup. -->
+<div
+  class="gm-dialog-backdrop"
+  [class.gm-dialog-backdrop--dimmed]="config.modal"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
+  (click)="handleBackdropClick($event)"
+>
+  <div
+    class="gm-dialog"
+    [class]="panelClasses"
+    role="dialog"
+    [attr.aria-modal]="config.modal ? 'true' : null"
+    [attr.aria-labelledby]="config.header ? headerId : null"
+    [attr.aria-label]="config.header ? null : config.ariaLabel"
+    tabindex="-1"
+    cdkFocusInitial
+    [style.width]="config.width"
+    [style.height]="config.height"
+    [style.max-width]="config.maxWidth"
+    [style.max-height]="config.maxHeight"
+  >
+    @if (config.header || config.closable) {
+      <div class="gm-dialog__header">
+        @if (config.header) {
+          <h2 class="gm-dialog__title" [id]="headerId">{{ config.header }}</h2>
+        }
+
+        @if (config.closable) {
+          <gm-button
+            class="gm-dialog__close"
+            icon="pi pi-times"
+            variant="text"
+            severity="secondary"
+            size="small"
+            ariaLabel="Close"
+            (onClick)="ref.close()"
+          />
+        }
+      </div>
+    }
+
+    <div class="gm-dialog__content">
+      <ng-template [cdkPortalOutlet]="contentPortal" />
+    </div>
+  </div>
+</div>

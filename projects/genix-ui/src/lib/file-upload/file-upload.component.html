@@ -1,0 +1,98 @@
+@if (label()) {
+  <span class="gm-file-upload__label" [id]="labelId">{{ label() }}</span>
+}
+
+<div
+  class="gm-file-upload__zone"
+  role="group"
+  [class.gm-file-upload__zone--dragging]="dragging()"
+  [class.gm-file-upload__zone--disabled]="disabled()"
+  [attr.aria-labelledby]="label() ? labelId : null"
+  [attr.aria-label]="ariaLabel() ?? null"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave()"
+  (drop)="onDrop($event)"
+>
+  <!--
+    The real control. Hidden and out of the tab order on purpose: the button
+    below is the accessible affordance, and leaving the input focusable would
+    give the same action two tab stops.
+  -->
+  <input
+    #fileInput
+    type="file"
+    class="gm-file-upload__input"
+    [id]="inputId"
+    [attr.accept]="accept() ?? null"
+    [multiple]="multiple()"
+    [disabled]="disabled()"
+    tabindex="-1"
+    aria-hidden="true"
+    (change)="onInputChange($event)"
+  />
+
+  <i class="gm-file-upload__icon pi pi-cloud-upload" aria-hidden="true"></i>
+
+  <gm-button
+    class="gm-file-upload__choose"
+    [label]="chooseLabel()"
+    icon="pi pi-plus"
+    severity="secondary"
+    variant="outlined"
+    size="small"
+    [disabled]="disabled()"
+    (onClick)="browse()"
+  />
+
+  @if (dragAndDrop()) {
+    <p class="gm-file-upload__drop-hint">
+      or drop {{ multiple() ? 'files' : 'a file' }} here
+    </p>
+  }
+</div>
+
+@if (showFiles() && files().length) {
+  <ul class="gm-file-upload__files">
+    @for (file of files(); track file) {
+      <li class="gm-file-upload__file">
+        <i class="gm-file-upload__file-icon pi pi-file" aria-hidden="true"></i>
+        <span class="gm-file-upload__name">{{ file.name }}</span>
+        <span class="gm-file-upload__size">{{ sizeOf(file) }}</span>
+        <gm-button
+          class="gm-file-upload__remove"
+          icon="pi pi-times"
+          severity="danger"
+          variant="text"
+          size="small"
+          [ariaLabel]="'Remove ' + file.name"
+          [disabled]="disabled()"
+          (onClick)="remove(file)"
+        />
+      </li>
+    }
+  </ul>
+
+  @if (files().length > 1) {
+    <gm-button
+      class="gm-file-upload__clear"
+      label="Clear all"
+      severity="secondary"
+      variant="text"
+      size="small"
+      [disabled]="disabled()"
+      (onClick)="clear()"
+    />
+  }
+}
+
+@if (errors().length) {
+  <ul class="gm-file-upload__errors" role="alert">
+    @for (error of errors(); track error.file) {
+      <li>{{ error.message }}</li>
+    }
+  </ul>
+}
+
+@if (hint()) {
+  <p class="gm-file-upload__hint">{{ hint() }}</p>
+}

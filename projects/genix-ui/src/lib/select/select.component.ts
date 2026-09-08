@@ -1,8 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
+import {
+  CdkFixedSizeVirtualScroll,
+  CdkVirtualForOf,
+  CdkVirtualScrollViewport,
+} from '@angular/cdk/scrolling';
+import { NgTemplateOutlet } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChild,
+  input,
+} from '@angular/core';
 
 import { GmDropdownBase, type GmDropdownOption } from '../core/dropdown-base';
 import { gmUniqueId } from '../core/unique-id';
 import { GmSpinnerComponent } from '../spinner/spinner.component';
+import { GmSelectOptionDirective } from './select-option.directive';
+import { GmSelectValueDirective } from './select-value.directive';
 
 /**
  * Single-select dropdown.
@@ -15,13 +29,23 @@ import { GmSpinnerComponent } from '../spinner/spinner.component';
  * Options may be primitives or objects. With `optionValue` the control holds
  * that property; without it, the control holds the option itself.
  *
+ * Rows and the selected value can be re-rendered with `gmSelectOption` /
+ * `gmSelectValue` templates, and a long list can be virtualised with
+ * `[virtualScroll]="true"`.
+ *
  * The overlay, filtering, option reading and keyboard handling come from
  * `GmDropdownBase`, shared with `gm-multiselect`.
  */
 @Component({
   selector: 'gm-select',
   standalone: true,
-  imports: [GmSpinnerComponent],
+  imports: [
+    GmSpinnerComponent,
+    NgTemplateOutlet,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    CdkVirtualScrollViewport,
+  ],
   templateUrl: './select.component.html',
   styleUrl: './select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +57,10 @@ import { GmSpinnerComponent } from '../spinner/spinner.component';
   },
 })
 export class GmSelectComponent extends GmDropdownBase<unknown> {
+  protected readonly optionTemplate = contentChild(GmSelectOptionDirective);
+
+  protected readonly valueTemplate = contentChild(GmSelectValueDirective);
+
   protected readonly selectedOption = computed(() => {
     const current = this.value();
     if (current === null || current === undefined) {
@@ -74,4 +102,5 @@ export class GmSelectComponent extends GmDropdownBase<unknown> {
     this.commit(null);
     this.handleBlur();
   }
+
 }

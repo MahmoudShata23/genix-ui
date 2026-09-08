@@ -99,6 +99,7 @@
       <button
         type="button"
         class="gm-multiselect__toggle-all"
+        [disabled]="toggleAllBlocked()"
         [attr.aria-pressed]="allVisibleSelected()"
         (click)="toggleAll()"
       >
@@ -111,38 +112,92 @@
       </button>
     }
 
-    <ul
-      class="gm-dropdown__list"
-      role="listbox"
-      aria-multiselectable="true"
-      [attr.id]="listboxId"
-    >
-      @for (option of visibleOptions(); track $index; let i = $index) {
-        <li
-          class="gm-dropdown__option"
-          role="option"
-          [attr.id]="optionId(i)"
-          [class.gm-dropdown__option--selected]="isSelected(option)"
-          [class.gm-dropdown__option--active]="i === activeIndex()"
-          [attr.aria-selected]="isSelected(option)"
-          (click)="commitActive(option)"
-          (mouseenter)="activeIndex.set(i)"
-        >
-          <!-- Presentational only: a real checkbox here would add a focusable
-               element inside a role="option", which breaks the listbox pattern.
-               `aria-selected` already conveys the state. -->
-          <span
-            class="gm-multiselect__tick"
-            [class.gm-multiselect__tick--checked]="isSelected(option)"
-            aria-hidden="true"
-          ></span>
-          {{ labelOf(option) }}
-        </li>
-      } @empty {
+    @if (!visibleOptions().length) {
+      <!-- Still a listbox, so `aria-controls` on the trigger always resolves. -->
+      <ul
+        class="gm-dropdown__list"
+        role="listbox"
+        aria-multiselectable="true"
+        [attr.id]="listboxId"
+      >
         <li class="gm-dropdown__empty" role="presentation">
           {{ filterText() ? emptyFilterMessage() : emptyMessage() }}
         </li>
-      }
-    </ul>
+      </ul>
+    } @else if (virtualScroll()) {
+      <!-- ARIA carries the list semantics on this branch: the CDK wraps the
+           rendered rows in its own element, so a <ul>/<li> tree could not
+           survive virtualisation. `role="listbox"` sits on the scroller itself
+           to keep the option rows as close to it as possible. -->
+      <cdk-virtual-scroll-viewport
+        class="gm-dropdown__viewport"
+        role="listbox"
+        aria-multiselectable="true"
+        [attr.id]="listboxId"
+        [itemSize]="virtualItemSize()"
+        [style.height]="virtualScrollHeight()"
+      >
+        <div
+          *cdkVirtualFor="let option of visibleOptions(); let i = index"
+          class="gm-dropdown__option"
+          role="option"
+          [attr.id]="optionId(i)"
+          [style.height.px]="virtualItemSize()"
+          [class.gm-dropdown__option--selected]="isSelected(option)"
+          [class.gm-dropdown__option--active]="i === activeIndex()"
+          [class.gm-multiselect__option--blocked]="isBlocked(option)"
+          [attr.aria-selected]="isSelected(option)"
+          [attr.aria-disabled]="isBlocked(option) ? 'true' : null"
+          (click)="commitActive(option)"
+          (mouseenter)="activeIndex.set(i)"
+        >
+          <ng-container
+            [ngTemplateOutlet]="optionBody"
+            [ngTemplateOutletContext]="{ $implicit: option }"
+          />
+        </div>
+      </cdk-virtual-scroll-viewport>
+    } @else {
+      <ul
+        class="gm-dropdown__list"
+        role="listbox"
+        aria-multiselectable="true"
+        [attr.id]="listboxId"
+      >
+        @for (option of visibleOptions(); track $index; let i = $index) {
+          <li
+            class="gm-dropdown__option"
+            role="option"
+            [attr.id]="optionId(i)"
+            [class.gm-dropdown__option--selected]="isSelected(option)"
+            [class.gm-dropdown__option--active]="i === activeIndex()"
+            [class.gm-multiselect__option--blocked]="isBlocked(option)"
+            [attr.aria-selected]="isSelected(option)"
+            [attr.aria-disabled]="isBlocked(option) ? 'true' : null"
+            (click)="commitActive(option)"
+            (mouseenter)="activeIndex.set(i)"
+          >
+            <ng-container
+              [ngTemplateOutlet]="optionBody"
+              [ngTemplateOutletContext]="{ $implicit: option }"
+            />
+          </li>
+        }
+      </ul>
+    }
   </div>
+</ng-template>
+
+<!-- The inside of one option row, shared by both list branches.
+
+     The tick is presentational only: a real checkbox here would add a focusable
+     element inside a role="option", which breaks the listbox pattern.
+     `aria-selected` already conveys the state. -->
+<ng-template #optionBody let-option>
+  <span
+    class="gm-multiselect__tick"
+    [class.gm-multiselect__tick--checked]="isSelected(option)"
+    aria-hidden="true"
+  ></span>
+  {{ labelOf(option) }}
 </ng-template>

@@ -1,0 +1,52 @@
+<div class="gm-field">
+  @if (label()) {
+    <label class="gm-field__label" [attr.for]="controlId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="gm-field__required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <div class="gm-input-number">
+    @if (prefix()) {
+      <!-- Decoration only, and hidden from screen readers: the unit belongs in
+           the label, not read out as part of the number. -->
+      <span class="gm-input-number__affix" aria-hidden="true">{{ prefix() }}</span>
+    }
+
+    <input
+      type="number"
+      class="gm-field__control"
+      [attr.id]="controlId()"
+      [attr.name]="name()"
+      [value]="value() ?? ''"
+      [disabled]="isDisabled()"
+      [attr.readonly]="readOnly() ? '' : null"
+      [attr.placeholder]="placeholder()"
+      [attr.min]="min() ?? null"
+      [attr.max]="max() ?? null"
+      [attr.step]="step()"
+      [attr.required]="required() ? '' : null"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      (input)="handleInput($event)"
+      (blur)="handleFieldBlur()"
+    />
+
+    @if (suffix()) {
+      <span class="gm-input-number__affix" aria-hidden="true">{{ suffix() }}</span>
+    }
+  </div>
+
+  @if (errorText()) {
+    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-field__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>

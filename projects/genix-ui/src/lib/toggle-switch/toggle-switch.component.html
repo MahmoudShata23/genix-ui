@@ -1,0 +1,44 @@
+<div class="gm-switch">
+  <label class="gm-switch__row">
+    <!-- A real checkbox, visually replaced by the track below: keyboard
+         activation and the disabled state stay native. -->
+    <input
+      type="checkbox"
+      class="gm-switch__control"
+      role="switch"
+      [attr.id]="controlId()"
+      [attr.name]="name()"
+      [checked]="checked()"
+      [disabled]="isDisabled()"
+      [attr.required]="required() ? '' : null"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.aria-readonly]="readOnly() ? 'true' : null"
+      (change)="handleChange($event)"
+    />
+
+    <span class="gm-switch__track" aria-hidden="true">
+      <span class="gm-switch__thumb"></span>
+    </span>
+
+    @if (label()) {
+      <span class="gm-switch__label">
+        {{ label() }}
+        @if (required()) {
+          <span class="gm-switch__required" aria-hidden="true">*</span>
+        }
+      </span>
+    }
+  </label>
+
+  @if (errorText()) {
+    <small class="gm-switch__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-switch__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>

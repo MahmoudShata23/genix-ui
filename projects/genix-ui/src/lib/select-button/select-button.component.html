@@ -1,0 +1,51 @@
+<div class="gm-field">
+  @if (label()) {
+    <!-- Not a <label for>: a radiogroup is named by `aria-labelledby`, since
+         there is no single control for a label to point at. -->
+    <span class="gm-field__label" [attr.id]="groupId + '-label'">
+      {{ label() }}
+      @if (required()) {
+        <span class="gm-field__required" aria-hidden="true">*</span>
+      }
+    </span>
+  }
+
+  <div
+    class="gm-select-button"
+    role="radiogroup"
+    [attr.id]="groupId"
+    [attr.aria-label]="label() ? null : ariaLabel()"
+    [attr.aria-labelledby]="label() ? groupId + '-label' : null"
+    [attr.aria-required]="required() ? 'true' : null"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    [attr.aria-readonly]="readOnly() ? 'true' : null"
+  >
+    @for (option of options(); track $index; let i = $index) {
+      <!-- A real button, so activation and the disabled state are native. -->
+      <button
+        type="button"
+        class="gm-select-button__option"
+        role="radio"
+        [class.gm-select-button__option--selected]="isSelected(option)"
+        [disabled]="isOptionDisabled(option)"
+        [attr.aria-checked]="isSelected(option)"
+        [attr.tabindex]="i === tabbableIndex() ? 0 : -1"
+        (click)="select(option)"
+        (keydown)="onKeydown($event, i)"
+      >
+        {{ labelOf(option) }}
+      </button>
+    }
+  </div>
+
+  @if (errorText()) {
+    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
+      {{ errorText() }}
+    </small>
+  } @else if (showHint()) {
+    <small class="gm-field__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </small>
+  }
+</div>

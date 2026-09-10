@@ -125,3 +125,67 @@ describe('gm-input / gm-textarea reactive forms integration', () => {
     expect(textarea().value).toBe('written back');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [GmInputComponent],
+  template: `
+    <gm-input label="Search" [iconStart]="iconStart" [iconEnd]="iconEnd" />
+  `,
+})
+class IconHostComponent {
+  iconStart?: string;
+  iconEnd?: string;
+}
+
+describe('gm-input icon slots', () => {
+  let fixture: ComponentFixture<IconHostComponent>;
+  let host: IconHostComponent;
+
+  const wrapper = () =>
+    fixture.nativeElement.querySelector('.gm-input') as HTMLElement;
+  const icon = (side: 'start' | 'end') =>
+    fixture.nativeElement.querySelector(
+      `.gm-input__icon--${side}`,
+    ) as HTMLElement | null;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [IconHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(IconHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('renders no icon and no padding class by default', () => {
+    expect(icon('start')).toBeNull();
+    expect(icon('end')).toBeNull();
+    expect(wrapper().classList).not.toContain('gm-input--icon-start');
+    expect(wrapper().classList).not.toContain('gm-input--icon-end');
+  });
+
+  it('renders a leading icon and flags the control for padding', () => {
+    host.iconStart = 'pi pi-search';
+    fixture.detectChanges();
+
+    expect(icon('start')!.classList).toContain('pi-search');
+    expect(wrapper().classList).toContain('gm-input--icon-start');
+  });
+
+  it('renders a trailing icon independently', () => {
+    host.iconEnd = 'pi pi-times';
+    fixture.detectChanges();
+
+    expect(icon('end')!.classList).toContain('pi-times');
+    expect(icon('start')).toBeNull();
+    expect(wrapper().classList).toContain('gm-input--icon-end');
+  });
+
+  it('hides icons from screen readers, since they are decoration', () => {
+    host.iconStart = 'pi pi-search';
+    fixture.detectChanges();
+
+    expect(icon('start')!.getAttribute('aria-hidden')).toBe('true');
+  });
+});

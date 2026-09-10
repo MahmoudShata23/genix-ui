@@ -8,25 +8,47 @@
     </label>
   }
 
-  <input
-    class="gm-field__control"
-    [attr.id]="controlId()"
-    [attr.name]="name()"
-    [attr.type]="type()"
-    [value]="value() ?? ''"
-    [disabled]="isDisabled()"
-    [attr.readonly]="readOnly() ? '' : null"
-    [attr.placeholder]="placeholder()"
-    [attr.autocomplete]="autocomplete()"
-    [attr.maxlength]="maxLength() ?? null"
-    [attr.minlength]="minLength() ?? null"
-    [attr.required]="required() ? '' : null"
-    [attr.aria-label]="ariaLabel()"
-    [attr.aria-invalid]="hasError() ? 'true' : null"
-    [attr.aria-describedby]="describedBy()"
-    (input)="handleInput($event)"
-    (blur)="handleBlur()"
-  />
+  <div
+    class="gm-input"
+    [class.gm-input--icon-start]="iconStart()"
+    [class.gm-input--icon-end]="iconEnd()"
+  >
+    @if (iconStart()) {
+      <i
+        class="gm-input__icon gm-input__icon--start"
+        [class]="iconStart()"
+        aria-hidden="true"
+      ></i>
+    }
+
+    <input
+      class="gm-field__control"
+      [attr.id]="controlId()"
+      [attr.name]="name()"
+      [attr.type]="type()"
+      [value]="value() ?? ''"
+      [disabled]="isDisabled()"
+      [attr.readonly]="readOnly() ? '' : null"
+      [attr.placeholder]="placeholder()"
+      [attr.autocomplete]="autocomplete()"
+      [attr.maxlength]="maxLength() ?? null"
+      [attr.minlength]="minLength() ?? null"
+      [attr.required]="required() ? '' : null"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()"
+    />
+
+    @if (iconEnd()) {
+      <i
+        class="gm-input__icon gm-input__icon--end"
+        [class]="iconEnd()"
+        aria-hidden="true"
+      ></i>
+    }
+  </div>
 
   @if (errorText()) {
     <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">

@@ -43,6 +43,19 @@ export class GmInputComponent extends GmFormFieldBase<string | number> {
 
   readonly minLength = input(undefined, { transform: numberAttribute });
 
+  /**
+   * Icon class rendered inside the field, before the text — e.g.
+   * `iconStart="pi pi-search"` for a search box. Decoration only, and hidden
+   * from screen readers, so whatever it signifies belongs in the label too.
+   *
+   * `start`/`end` rather than `left`/`right`: the side follows the writing
+   * direction, which the Arabic locale depends on.
+   */
+  readonly iconStart = input<string>();
+
+  /** Icon class rendered inside the field, after the text. */
+  readonly iconEnd = input<string>();
+
   protected override generateId(): string {
     return gmUniqueId('gm-input');
   }

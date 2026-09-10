@@ -5,3 +5,66 @@
 }
 
 @include field.gm-field-shell('.gm-field__control');
+
+/* ==========================================================================
+   Icon slots
+   --------------------------------------------------------------------------
+   The icon sits inside the field's border box and the control gains matching
+   inside padding, so the caret never runs under the glyph. Logical properties
+   throughout: `start` follows the writing direction, so RTL needs no override.
+
+   The inset is its own slot rather than reusing `--gm-field-padding-x`: that
+   one is declared on the control, and the icon is its sibling, not a child.
+   ========================================================================== */
+
+.gm-input {
+  --gm-input-icon-inset: var(--gm-space-3);
+
+  /* Not a flex row: the icons are absolutely positioned, and an
+     absolutely-positioned child is out of flow, so `align-items` would not
+     centre it. The control keeps the mixin's `width: 100%`. */
+  position: relative;
+  display: block;
+}
+
+:host(.gm-field-host--small) .gm-input {
+  --gm-input-icon-inset: var(--gm-space-2);
+}
+
+:host(.gm-field-host--large) .gm-input {
+  --gm-input-icon-inset: var(--gm-space-4);
+}
+
+.gm-input__icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: inline-flex;
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+
+  /* Clicks fall through to the input, so the icon never steals focus. */
+  pointer-events: none;
+}
+
+.gm-input__icon--start {
+  inset-inline-start: var(--gm-input-icon-inset);
+}
+
+.gm-input__icon--end {
+  inset-inline-end: var(--gm-input-icon-inset);
+}
+
+/* 1em for the glyph plus a gap, on top of the field's own padding. */
+.gm-input--icon-start .gm-field__control {
+  padding-inline-start: calc(var(--gm-field-padding-x) * 2 + 1em);
+}
+
+.gm-input--icon-end .gm-field__control {
+  padding-inline-end: calc(var(--gm-field-padding-x) * 2 + 1em);
+}
+
+:host(.gm-field-host--invalid) .gm-input__icon {
+  color: var(--gm-danger);
+}

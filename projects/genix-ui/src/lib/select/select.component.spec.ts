@@ -346,3 +346,82 @@ describe('gm-select', () => {
     expect(trigger().getAttribute('aria-invalid')).toBe('true');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [GmSelectComponent],
+  template: `
+    <gm-select
+      [options]="['Active', 'Inactive']"
+      [filter]="true"
+      (filterChange)="terms.push($event)"
+      (openChange)="openStates.push($event)"
+    />
+  `,
+})
+class EventHostComponent {
+  readonly terms: string[] = [];
+  readonly openStates: boolean[] = [];
+}
+
+describe('gm-select filter and open events', () => {
+  let fixture: ComponentFixture<EventHostComponent>;
+  let host: EventHostComponent;
+
+  const trigger = () =>
+    fixture.nativeElement.querySelector(
+      '.gm-dropdown__trigger',
+    ) as HTMLButtonElement;
+  const filterInput = () =>
+    document.querySelector(
+      '.cdk-overlay-container .gm-dropdown__filter-input',
+    ) as HTMLInputElement;
+
+  const type = (value: string) => {
+    filterInput().value = value;
+    filterInput().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [EventHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(EventHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('emits openChange on open and on close', () => {
+    trigger().click();
+    fixture.detectChanges();
+    expect(host.openStates).toEqual([true]);
+
+    trigger().click();
+    fixture.detectChanges();
+    expect(host.openStates).toEqual([true, false]);
+  });
+
+  it('emits the filter term on every keystroke', () => {
+    trigger().click();
+    fixture.detectChanges();
+
+    type('ac');
+    type('act');
+
+    expect(host.terms).toEqual(['ac', 'act']);
+  });
+
+  // A consumer fetching on filterChange must not be told the term went empty
+  // just because the panel closed.
+  it('does not emit a filter term when closing clears it', () => {
+    trigger().click();
+    fixture.detectChanges();
+    type('ac');
+
+    trigger().click();
+    fixture.detectChanges();
+
+    expect(host.terms).toEqual(['ac']);
+  });
+});

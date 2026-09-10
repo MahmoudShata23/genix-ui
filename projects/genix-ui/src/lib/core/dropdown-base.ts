@@ -8,6 +8,7 @@ import {
   inject,
   input,
   numberAttribute,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -83,6 +84,19 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
 
   protected readonly open = signal(false);
   protected readonly filterText = signal('');
+
+  /**
+   * The filter term, on every keystroke. Exists so a consumer can run a
+   * server-side search rather than filter the `options` it already holds.
+   *
+   * Deliberately not emitted when closing clears the term: a consumer fetching
+   * on this event would otherwise re-fetch the unfiltered list every time the
+   * panel closed.
+   */
+  readonly filterChange = output<string>();
+
+  /** Panel opened (`true`) or closed (`false`). */
+  readonly openChange = output<boolean>();
 
   /** Index into `visibleOptions`, for keyboard highlight + activedescendant. */
   protected readonly activeIndex = signal(-1);
@@ -167,6 +181,7 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
     });
 
     this.open.set(true);
+    this.openChange.emit(true);
 
     // Start on the current selection so arrows continue from it; with nothing
     // selected, opening highlights the first option (what ArrowDown-to-open is
@@ -180,8 +195,14 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
   }
 
   protected close(): void {
+    // A redundant close stays quiet — `close()` also runs on outside clicks
+    // and when the control locks, which can land while already closed.
+    const wasOpen = this.open();
     this.overlayPanel.close();
     this.open.set(false);
+    if (wasOpen) {
+      this.openChange.emit(false);
+    }
     this.filterText.set('');
     this.activeIndex.set(-1);
     // Closing ends the interaction, which is when the control becomes touched.
@@ -198,6 +219,7 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
 
   protected onFilterInput(event: Event): void {
     this.filterText.set((event.target as HTMLInputElement).value);
+    this.filterChange.emit(this.filterText());
     // The previous highlight may no longer be in the filtered list.
     this.activeIndex.set(this.visibleOptions().length ? 0 : -1);
     // A new term shortens the list, so the old scroll offset is meaningless.

@@ -8,6 +8,7 @@ import {
   effect,
   inject,
   input,
+  numberAttribute,
   signal,
   viewChild,
 } from '@angular/core';
@@ -36,6 +37,19 @@ import type {
   GmDatepickerHourFormat,
   GmDatepickerSelectionMode,
 } from './datepicker.types';
+
+/**
+ * `count` values from 0, keeping every `step`-th one. A step below 1 would
+ * produce an empty or infinite list, so it falls back to every value.
+ */
+function gmStepped(count: number, step: number): number[] {
+  const stride = Number.isFinite(step) && step >= 1 ? Math.floor(step) : 1;
+  const values: number[] = [];
+  for (let value = 0; value < count; value += stride) {
+    values.push(value);
+  }
+  return values;
+}
 
 /** `hourFormat="12"` (attribute) and `[hourFormat]="12"` both have to work. */
 function hourFormatAttribute(
@@ -107,6 +121,16 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
   /** Time controls only — no calendar. The value is still a `Date`. */
   readonly timeOnly = input(false, { transform: booleanAttribute });
 
+  /**
+   * Granularity of the minute list, e.g. `30` offers only :00 and :30.
+   * The time controls are option lists rather than spinners, so a step
+   * narrows the list instead of sizing an increment.
+   */
+  readonly stepMinute = input(1, { transform: numberAttribute });
+
+  /** Granularity of the hour list. */
+  readonly stepHour = input(1, { transform: numberAttribute });
+
   readonly hourFormat = input<GmDatepickerHourFormat, GmDatepickerHourFormat | '12' | '24'>(
     24,
     { transform: hourFormatAttribute },
@@ -132,7 +156,9 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
 
   readonly calendarId = gmUniqueId('gm-calendar');
 
-  protected readonly minuteOptions = Array.from({ length: 60 }, (_, i) => i);
+  protected readonly minuteOptions = computed(() =>
+    gmStepped(60, this.stepMinute()),
+  );
 
   /** Whether the calendar can be opened at all. */
   protected readonly locked = computed(
@@ -239,8 +265,8 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
 
   protected readonly hourOptions = computed(() =>
     this.hourFormat() === 24
-      ? Array.from({ length: 24 }, (_, i) => i)
-      : Array.from({ length: 12 }, (_, i) => i + 1),
+      ? gmStepped(24, this.stepHour())
+      : gmStepped(12, this.stepHour()).map((hour) => hour + 1),
   );
 
   /**

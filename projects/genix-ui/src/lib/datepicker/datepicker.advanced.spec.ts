@@ -511,3 +511,92 @@ describe('gm-datepicker time and range', () => {
     expect(panel()).toBeNull();
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, GmDatepickerComponent],
+  template: `
+    <gm-datepicker
+      class="halfHour"
+      [formControl]="slot"
+      [timeOnly]="true"
+      [stepMinute]="30"
+    />
+    <gm-datepicker
+      class="everyThirdHour"
+      [formControl]="shift"
+      [timeOnly]="true"
+      [stepHour]="3"
+    />
+    <gm-datepicker
+      class="zeroStep"
+      [formControl]="anyTime"
+      [timeOnly]="true"
+      [stepMinute]="0"
+    />
+  `,
+})
+class StepHostComponent {
+  readonly slot = new FormControl<Date | null>(null);
+  readonly shift = new FormControl<Date | null>(null);
+  readonly anyTime = new FormControl<Date | null>(null);
+}
+
+describe('gm-datepicker time steps', () => {
+  let fixture: ComponentFixture<StepHostComponent>;
+
+  const open = (cls: string) => {
+    (
+      fixture.nativeElement.querySelector(
+        `${cls} .gm-datepicker__trigger`,
+      ) as HTMLElement
+    ).click();
+    fixture.detectChanges();
+  };
+  const timeSelects = () =>
+    Array.from(
+      document.querySelectorAll<HTMLSelectElement>(
+        '.cdk-overlay-container .gm-datepicker__time-select',
+      ),
+    );
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [StepHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(StepHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('offers only the stepped minutes', () => {
+    open('.halfHour');
+    const [, minute] = timeSelects();
+
+    expect(minute.options.length).toBe(2);
+    expect(Array.from(minute.options).map((o) => o.value)).toEqual(['0', '30']);
+  });
+
+  it('steps the hour list too', () => {
+    open('.everyThirdHour');
+    const [hour] = timeSelects();
+
+    expect(Array.from(hour.options).map((o) => o.value)).toEqual([
+      '0',
+      '3',
+      '6',
+      '9',
+      '12',
+      '15',
+      '18',
+      '21',
+    ]);
+  });
+
+  // A step below 1 would make an empty or endless list; fall back to every value.
+  it('treats a step below 1 as no step', () => {
+    open('.zeroStep');
+    const [, minute] = timeSelects();
+
+    expect(minute.options.length).toBe(60);
+  });
+});

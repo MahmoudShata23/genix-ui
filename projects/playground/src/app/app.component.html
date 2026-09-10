@@ -1,6 +1,6 @@
 <header class="pg-header">
   <h1>Genix UI</h1>
-  <gm-badge value="v0.4.0" severity="info" />
+  <gm-badge value="v0.5.0" severity="info" />
   <span class="pg-header__note">
     every component, resolved from <code>dist/genix-ui</code> — the published build output
   </span>
@@ -501,6 +501,13 @@
             [formControl]="appointment"
             [showTime]="true"
             [clearable]="true"
+          />
+          <gm-datepicker
+            label="Slot (30-minute steps)"
+            [formControl]="appointment"
+            [showTime]="true"
+            [stepMinute]="30"
+            hint="stepMinute narrows the minute list rather than sizing a spinner"
           />
           <gm-datepicker
             label="Meeting (12h)"

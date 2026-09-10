@@ -21,6 +21,7 @@ export * from './lib/spinner';
 export * from './lib/tooltip';
 export * from './lib/dialog';
 export * from './lib/toast';
+export * from './lib/message';
 export * from './lib/tabs';
 export * from './lib/accordion';
 export * from './lib/select';

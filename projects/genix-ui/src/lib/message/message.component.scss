@@ -1,0 +1,81 @@
+/* ==========================================================================
+   gm-message
+   --------------------------------------------------------------------------
+   A tinted inline panel. Severity sets three colour slots — fill, border and
+   text — so the shared rule stays one block, matching how `gm-badge` handles
+   its tints.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.gm-message {
+  --gm-message-bg: var(--gm-info-light);
+  --gm-message-fg: var(--gm-info-text);
+  --gm-message-border: var(--gm-info);
+
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gm-space-2);
+
+  padding: var(--gm-space-3) var(--gm-space-4);
+  border: 1px solid var(--gm-message-border);
+  border-radius: var(--gm-radius-md);
+
+  background: var(--gm-message-bg);
+  color: var(--gm-message-fg);
+
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+  line-height: 1.5;
+
+  /* ---- Severities ---------------------------------------------------- */
+
+  &--primary {
+    --gm-message-bg: var(--gm-primary-light);
+    --gm-message-fg: var(--gm-primary-dark);
+    --gm-message-border: var(--gm-primary);
+  }
+
+  &--secondary {
+    --gm-message-bg: var(--gm-gray-100);
+    --gm-message-fg: var(--gm-gray-700);
+    --gm-message-border: var(--gm-gray-300);
+  }
+
+  &--success {
+    --gm-message-bg: var(--gm-success-light);
+    --gm-message-fg: var(--gm-success-text);
+    --gm-message-border: var(--gm-success);
+  }
+
+  &--warning {
+    --gm-message-bg: var(--gm-warning-light);
+    --gm-message-fg: var(--gm-warning-text);
+    --gm-message-border: var(--gm-warning);
+  }
+
+  &--danger {
+    --gm-message-bg: var(--gm-danger-light);
+    --gm-message-fg: var(--gm-danger-text);
+    --gm-message-border: var(--gm-danger);
+  }
+
+  &--contrast {
+    --gm-message-bg: var(--gm-gray-900);
+    --gm-message-fg: var(--gm-white);
+    --gm-message-border: var(--gm-gray-900);
+  }
+}
+
+.gm-message__icon {
+  flex: 0 0 auto;
+  /* Nudge onto the first line's optical centre. */
+  margin-top: 2px;
+}
+
+.gm-message__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}

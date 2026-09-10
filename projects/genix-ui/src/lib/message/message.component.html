@@ -1,0 +1,13 @@
+<div class="gm-message" [class]="'gm-message--' + severity()" [attr.role]="role">
+  @if (icon()) {
+    <i class="gm-message__icon" [class]="icon()" aria-hidden="true"></i>
+  }
+
+  <span class="gm-message__body">
+    @if (text()) {
+      {{ text() }}
+    } @else {
+      <ng-content />
+    }
+  </span>
+</div>

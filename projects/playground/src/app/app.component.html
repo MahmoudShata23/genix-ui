@@ -1,6 +1,6 @@
 <header class="pg-header">
   <h1>Genix UI</h1>
-  <gm-badge value="v0.2.2" severity="info" />
+  <gm-badge value="v0.4.0" severity="info" />
   <span class="pg-header__note">
     every component, resolved from <code>dist/genix-ui</code> — the published build output
   </span>
@@ -188,6 +188,18 @@
           <gm-input label="Disabled" [formControl]="demoDisabled" />
           <gm-input label="Max length 10" [maxLength]="10" placeholder="Stops at 10" />
           <gm-input label="No label, aria only" ariaLabel="Search providers" placeholder="Labelled by aria-label" />
+        </div>
+      </gm-card>
+
+      <gm-card header="Icon slots" subheader="Inside the border box; the side follows the writing direction">
+        <div class="pg-grid">
+          <gm-input label="Leading icon" iconStart="pi pi-search" placeholder="Search providers" />
+          <gm-input label="Trailing icon" iconEnd="pi pi-calendar" placeholder="Pick a date" />
+          <gm-input label="Both" iconStart="pi pi-user" iconEnd="pi pi-check" placeholder="Assignee" />
+          @for (size of sizes; track size) {
+            <gm-input [label]="'Leading icon, ' + size" [size]="size" iconStart="pi pi-search" placeholder="Search" />
+          }
+          <gm-input label="Icon with error" iconStart="pi pi-search" error="No match for that term" />
         </div>
       </gm-card>
     </section>
@@ -818,6 +830,36 @@
             variant="text"
             (onClick)="toastClear()"
           />
+        </div>
+      </gm-card>
+    </section>
+
+    <!-- ── Message ──────────────────────────────── -->
+    <section id="message">
+      <h2>Message</h2>
+      <p class="pg-lead">
+        Inline and persistent, unlike a toast — for a condition the user needs to
+        keep seeing. Warnings and errors take <code>role="alert"</code>; anything
+        else is announced politely.
+      </p>
+
+      <gm-card header="Severities">
+        <div class="pg-stack">
+          @for (severity of severities; track severity) {
+            <gm-message [severity]="severity" [text]="severity + ' message'" />
+          }
+        </div>
+      </gm-card>
+
+      <gm-card header="With icons, and with projected content">
+        <div class="pg-stack">
+          <gm-message severity="info" icon="pi pi-info-circle" text="This identification is in use by an active policy." />
+          <gm-message severity="warning" icon="pi pi-lock" text="This mapping version is locked and cannot be edited." />
+          <gm-message severity="danger" icon="pi pi-times-circle" text="Saving failed. Check the highlighted fields." />
+          <gm-message severity="success" icon="pi pi-check-circle">
+            Projected content, so it can hold <b>markup</b> and
+            <a href="#message">links</a>.
+          </gm-message>
         </div>
       </gm-card>
     </section>

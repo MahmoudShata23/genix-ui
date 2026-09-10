@@ -118,11 +118,17 @@ component's `imports` array. There is no `NgModule` to register.
 
 ## What's in it
 
-`gm-button` · `gm-input` · `gm-textarea` · `gm-checkbox` · `gm-radio` ·
-`gm-select` · `gm-multiselect` · `gm-datepicker` · `gm-card` · `gm-badge` ·
-`gm-chip` · `gm-spinner` · `gm-tabs` / `gm-tab` · `gm-accordion` ·
-`gm-pagination` · `gm-table` · `[gmTooltip]` · `gm-file-upload` ·
-`gm-stepper` / `gm-step` · `gm-order-list` · `gm-chart`
+`gm-button` · `gm-input` · `gm-input-number` · `gm-textarea` ·
+`gm-checkbox` · `gm-radio` · `gm-toggle-switch` · `gm-select` ·
+`gm-multiselect` · `gm-select-button` · `gm-autocomplete` ·
+`gm-datepicker` · `gm-file-upload` · `gm-card` · `gm-badge` · `gm-chip` ·
+`gm-message` · `gm-spinner` · `gm-tabs` / `gm-tab` · `gm-accordion` ·
+`gm-stepper` / `gm-step` · `gm-pagination` · `gm-table` · `gm-menu` ·
+`gm-popover` · `gm-order-list` · `gm-chart` · `[gmTooltip]`
+
+`gm-input` carries `iconStart` / `iconEnd` for an icon inside the field box
+(a search box, a clear affordance); the side follows the writing direction, so
+RTL needs no override.
 
 Plus `GmToastService` for notifications (`success` / `info` / `warning` /
 `error`, or `show({ severity, summary, detail })`) — it creates its own host on

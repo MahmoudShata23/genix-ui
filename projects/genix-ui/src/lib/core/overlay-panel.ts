@@ -65,11 +65,13 @@ export class GmOverlayPanel {
 
   /**
    * Attaches `template` under the host. `onOutsideClick` fires only for clicks
-   * genuinely outside both the panel and the trigger.
+   * genuinely outside both the panel and the trigger, and receives the event so
+   * a caller can qualify it further — a panel that itself contains a `gm-select`
+   * has to ignore clicks landing in that select's own overlay.
    */
   open(
     template: TemplateRef<unknown>,
-    onOutsideClick: () => void,
+    onOutsideClick: (event: MouseEvent) => void,
     options: { minWidth?: number | string; origin?: HTMLElement } = {},
   ): void {
     if (this.overlayRef) {
@@ -105,7 +107,7 @@ export class GmOverlayPanel {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         if (!this.origin?.contains(event.target as Node)) {
-          onOutsideClick();
+          onOutsideClick(event);
         }
       });
   }

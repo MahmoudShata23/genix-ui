@@ -3,16 +3,19 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   booleanAttribute,
   computed,
   contentChild,
   contentChildren,
+  effect,
   inject,
   input,
   model,
   numberAttribute,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
@@ -26,19 +29,24 @@ import {
 import { GmCheckboxComponent } from '../checkbox/checkbox.component';
 import { GmRadioComponent } from '../radio/radio.component';
 import { GmSpinnerComponent } from '../spinner/spinner.component';
+import { GmTooltipDirective } from '../tooltip/tooltip.directive';
 import { gmUniqueId } from '../core/unique-id';
 import { gmBuildCsv } from './table-export';
 import type { GmTableExportOptions } from './table-export';
-import { GmTableFilterCellComponent } from './table-filter-cell.component';
+import { GmTableFilterMenuComponent } from './table-filter-menu.component';
 import {
   GmTableCellDirective,
   GmTableEmptyDirective,
   GmTableFilterDirective,
   GmTableHeaderDirective,
 } from './table-templates';
+import { GM_TABLE_FILTER_LABELS } from './table-filter.types';
 import type {
-  GmFilterOperator,
+  GmFilterMatchLogic,
   GmTableFilter,
+  GmTableFilterConstraint,
+  GmTableFilterLabels,
+  GmTableFilterMenuEvent,
   GmTableFilterMode,
   GmTableFiltersChangeEvent,
 } from './table-filter.types';
@@ -68,8 +76,14 @@ import type { GmPageChangeEvent } from '../pagination/pagination.types';
  * in through cell templates — and never fetches data: server-side sorting is
  * just `sortChange` for the feature to act on.
  *
- * Pagination is deliberately *not* built in; compose `gm-pagination` alongside
- * it so there is only ever one paginator implementation.
+ * A `filterable` column gets a funnel in its header opening a filter menu:
+ * match logic, up to `filterMaxConstraints` rules, and an explicit Apply. The
+ * rules leave as one flat `GmTableFilter` per comparison, so a filter API
+ * receives a list it can map straight onto its own descriptors.
+ *
+ * Pagination and the toolbar are deliberately *not* built in; compose
+ * `gm-card` above and `gm-pagination` below so there is only ever one
+ * paginator implementation and the toolbar stays the feature's own.
  */
 @Component({
   selector: 'gm-table',
@@ -80,7 +94,8 @@ import type { GmPageChangeEvent } from '../pagination/pagination.types';
     GmCheckboxComponent,
     GmRadioComponent,
     GmSpinnerComponent,
-    GmTableFilterCellComponent,
+    GmTableFilterMenuComponent,
+    GmTooltipDirective,
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
@@ -106,6 +121,21 @@ export class GmTableComponent<T> {
   readonly rowKey = input<(keyof T & string) | undefined>(undefined);
 
   readonly selectionMode = input<GmTableSelectionMode | null>(null);
+
+  /**
+   * Which rows the user may select. A row the predicate rejects renders its
+   * checkbox (or radio) disabled, is skipped by select-all, and cannot be
+   * toggled programmatically through `toggleRow`.
+   *
+   * It gates the *user's* ability to change a row's selection, in both
+   * directions — so a locked row that arrives already selected stays selected,
+   * including through a deselect-all. The consumer owns `selection`, and
+   * silently dropping rows out of it would be a worse surprise than leaving
+   * them.
+   */
+  readonly rowSelectable = input<
+    ((row: T, index: number) => boolean) | undefined
+  >(undefined);
 
   /**
    * Selected rows. Always an array, in both modes — `single` simply never holds
@@ -208,12 +238,25 @@ export class GmTableComponent<T> {
 
   readonly filterMode = input<GmTableFilterMode>('server');
 
-  /** Milliseconds to wait before a typed filter is applied. */
+  /**
+   * Milliseconds to wait before a typed *global search* term is applied. The
+   * column filters do not debounce: their menu has an explicit Apply, so a
+   * half-typed rule never reaches the table in the first place.
+   */
   readonly filterDebounce = input(400, { transform: numberAttribute });
 
-  readonly showClearFilters = input(true, { transform: booleanAttribute });
+  /**
+   * Overrides for the filter menu's wording — partial, merged over the English
+   * defaults, so a host application translates the whole feature with one
+   * binding instead of a dozen.
+   */
+  readonly filterLabels = input<Partial<GmTableFilterLabels>>({});
 
-  readonly clearFiltersLabel = input<string>('Clear filters');
+  /** Public so a `gmTableHeader` template can pass it to its own menus. */
+  readonly resolvedFilterLabels = computed<GmTableFilterLabels>(() => ({
+    ...GM_TABLE_FILTER_LABELS,
+    ...this.filterLabels(),
+  }));
 
   readonly filtersChange = output<GmTableFiltersChangeEvent>();
 
@@ -274,7 +317,7 @@ export class GmTableComponent<T> {
 
   /** Draggable columns in DOM order — the order CDK's indices refer to. */
   private readonly dragColumns = computed(() =>
-    this.columns().filter((column) => this.isReorderable(column)),
+    this.renderColumns().filter((column) => this.isReorderable(column)),
   );
 
   /**
@@ -323,18 +366,34 @@ export class GmTableComponent<T> {
     this.columnReorder.emit({ columns, previousIndex, currentIndex });
   }
 
-  /** Pending debounce timers, keyed by field. */
-  private readonly debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
-
   readonly tableId = gmUniqueId('gm-table');
 
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
-    // A pending filter timer must not fire into a destroyed table: under
+    // A pending search timer must not fire into a destroyed table: under
     // `serverSide` that would emit a query and start a request after the
     // consumer that would have handled it is gone.
     this.destroyRef.onDestroy(() => this.cancelPendingFilters());
+
+    // Only observed while something is actually pinned beside the selection
+    // column — otherwise no offset depends on its width.
+    effect((onCleanup) => {
+      const cell = this.selectHeaderCell()?.nativeElement;
+      if (!cell || !this.selectionFrozen() || typeof ResizeObserver === 'undefined') {
+        this.selectWidthPx.set(null);
+        return;
+      }
+
+      const observer = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        this.selectWidthPx.set(
+          entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width,
+        );
+      });
+      observer.observe(cell);
+      onCleanup(() => observer.disconnect());
+    });
   }
 
   /** Sort applied by the user; null means "follow the inputs". */
@@ -371,21 +430,68 @@ export class GmTableComponent<T> {
    */
   private readonly filteredData = computed<readonly T[]>(() => {
     const rows = this.data();
-    const filters = this.activeFilters();
+    const columns = [...this.filtersByField()];
     const term = this.activeGlobalSearch().trim().toLowerCase();
 
-    if (this.serverFilter() || (filters.length === 0 && term === '')) {
+    if (this.serverFilter() || (columns.length === 0 && term === '')) {
       return rows;
     }
 
     // `filter` returns a new array, so the bound data is never mutated.
     return rows.filter(
       (row) =>
-        filters.every((filter) =>
-          this.matches(this.read(row, filter.field), filter),
+        columns.every(([field, state]) =>
+          this.matchesColumn(row, field, state),
         ) && this.matchesGlobalSearch(row, term),
     );
   });
+
+  /**
+   * The flat filter list bucketed by column: each column's rules plus the
+   * logic joining them. Buckets themselves always AND, which is the only
+   * reading of two different columns both being filtered.
+   *
+   * Memoised because it also backs `constraintsFor` and `logicFor`, which the
+   * template calls on every change detection — recomputing them there would
+   * hand each filter menu a new array reference every cycle and mark it dirty
+   * for no reason.
+   */
+  private readonly filtersByField = computed(() => {
+    const columns = new Map<string, ColumnFilterState>();
+
+    for (const filter of this.activeFilters()) {
+      const constraint = { operator: filter.operator, value: filter.value };
+      const existing = columns.get(filter.field);
+      if (existing) {
+        existing.constraints.push(constraint);
+        // Every rule of a field carries the same logic; the last one wins if a
+        // consumer hand-built the array and they disagree.
+        if (filter.logic) {
+          existing.logic = filter.logic;
+        }
+      } else {
+        columns.set(filter.field, {
+          logic: filter.logic ?? 'and',
+          constraints: [constraint],
+        });
+      }
+    }
+
+    return columns;
+  });
+
+  private matchesColumn(
+    row: T,
+    field: string,
+    state: ColumnFilterState,
+  ): boolean {
+    const cellValue = this.read(row, field);
+    const test = (rule: GmTableFilterConstraint) =>
+      this.matches(cellValue, rule);
+    return state.logic === 'or'
+      ? state.constraints.some(test)
+      : state.constraints.every(test);
+  }
 
   /** Fields to search: the explicit list, else every column with a field. */
   private readonly searchFields = computed<readonly string[]>(() => {
@@ -421,10 +527,39 @@ export class GmTableComponent<T> {
     () => this.columns().length + (this.selectionMode() ? 1 : 0),
   );
 
+  protected isRowSelectable(row: T, index: number): boolean {
+    return this.rowSelectable()?.(row, index) ?? true;
+  }
+
+  /**
+   * The rows the user could actually tick. Select-all and its checkbox state
+   * describe *these*, not every rendered row — otherwise a single locked row
+   * would stop the header checkbox ever reaching "checked".
+   */
+  private readonly selectableRows = computed<readonly T[]>(() => {
+    const predicate = this.rowSelectable();
+    if (!predicate) {
+      return this.rows();
+    }
+    // Filtered with its own index, so it matches the index the template
+    // renders each row under.
+    return this.rows().filter((row, index) => predicate(row, index));
+  });
+
   protected readonly allSelected = computed(() => {
-    const rows = this.rows();
+    const rows = this.selectableRows();
     return rows.length > 0 && rows.every((row) => this.isSelected(row));
   });
+
+  /** Drives the header checkbox's indeterminate mark. */
+  protected readonly someSelected = computed(() =>
+    this.selectableRows().some((row) => this.isSelected(row)),
+  );
+
+  /** Nothing on this page can be ticked, so the header checkbox is inert. */
+  protected readonly selectAllDisabled = computed(
+    () => this.selectableRows().length === 0,
+  );
 
   protected readonly emptyContent = computed(
     () => this.emptyTemplate()?.template ?? null,
@@ -470,6 +605,37 @@ export class GmTableComponent<T> {
     return value === null || value === undefined ? '' : String(value);
   }
 
+  /**
+   * Characters of default cell text shown before the rest moves into a tooltip.
+   * `0` turns truncation off for the whole table; a column's own `truncateAt`
+   * overrides it either way.
+   *
+   * Only the built-in text rendering is affected — a `gmTableCell` template
+   * owns its own markup, and second-guessing it would be wrong.
+   */
+  readonly truncateAt = input(25, { transform: numberAttribute });
+
+  /** The effective limit for a column: its own override, else the table's. */
+  private truncateLimit(column: GmTableColumn<T>): number {
+    const limit = column.truncateAt ?? this.truncateAt();
+    return Number.isFinite(limit) && limit > 0 ? Math.trunc(limit) : 0;
+  }
+
+  protected isTruncated(row: T, column: GmTableColumn<T>): boolean {
+    const limit = this.truncateLimit(column);
+    return limit > 0 && this.cellText(row, column).length > limit;
+  }
+
+  /**
+   * The visible head of an over-long value, with an ellipsis so the user can
+   * see there is more rather than having to hover to find out. The trailing
+   * trim stops the ellipsis from following a space.
+   */
+  protected truncatedText(row: T, column: GmTableColumn<T>): string {
+    const limit = this.truncateLimit(column);
+    return this.cellText(row, column).slice(0, limit).trimEnd() + '…';
+  }
+
   private read(row: T, field: string): unknown {
     return (row as Record<string, unknown>)[field];
   }
@@ -479,6 +645,22 @@ export class GmTableComponent<T> {
   protected sortStateOf(column: GmTableColumn<T>): GmSortDirection {
     const { field, direction } = this.activeSort();
     return column.field && column.field === field ? direction : null;
+  }
+
+  /**
+   * `column.align` as a flex value. The header's contents are a flex row — the
+   * label, the sort control and the funnel — so `text-align` alone, which is
+   * what the body cells use, would not move them.
+   */
+  protected headerJustify(column: GmTableColumn<T>): string | null {
+    switch (column.align) {
+      case 'center':
+        return 'center';
+      case 'end':
+        return 'flex-end';
+      default:
+        return null;
+    }
   }
 
   /** For `aria-sort`, which needs these exact words. */
@@ -551,11 +733,26 @@ export class GmTableComponent<T> {
 
   // ── Frozen columns ──────────────────────────────────────────────────────
 
+  private readonly selectHeaderCell =
+    viewChild<ElementRef<HTMLElement>>('selectHeaderCell');
+
   /**
-   * Width reserved for the selection column. Fixed rather than measured, so
-   * frozen offsets are pure CSS arithmetic with no layout reads.
+   * Measured width of the selection column, published to CSS so a frozen
+   * column can start exactly where the checkbox ends.
+   *
+   * It has to be measured rather than declared: in automatic table layout a
+   * `width` is only a preference, `max-width` is ignored on cells outright,
+   * and a table wider than the sum of its columns spreads the surplus across
+   * every one of them — including this column. A constant was out by the
+   * column's share of that surplus, which showed up as the pinned column
+   * sliding over the checkbox on first scroll.
    */
-  private static readonly SELECT_WIDTH = '3rem';
+  private readonly selectWidthPx = signal<number | null>(null);
+
+  protected readonly selectWidthCss = computed(() => {
+    const width = this.selectWidthPx();
+    return width === null ? null : `${width}px`;
+  });
 
   protected isFrozenStart(column: GmTableColumn<T>): boolean {
     return !!column.frozen && (column.frozenPosition ?? 'start') === 'start';
@@ -564,6 +761,36 @@ export class GmTableComponent<T> {
   protected isFrozenEnd(column: GmTableColumn<T>): boolean {
     return !!column.frozen && column.frozenPosition === 'end';
   }
+
+  /**
+   * Columns in the order they are rendered: start-frozen first, then unfrozen,
+   * then end-frozen.
+   *
+   * Sticky offsets are DOM-order arithmetic, so a start-frozen column sitting
+   * *after* unfrozen ones would pin itself on top of its neighbours. Banding
+   * the columns here makes `frozen` + `frozenPosition` the whole configuration
+   * — an actions column moves edge to edge by changing `frozenPosition` alone,
+   * without the consumer also having to move the entry in the array.
+   *
+   * `filter` is stable, so the consumer's relative order within each band is
+   * preserved, and a table with nothing frozen gets the array untouched.
+   */
+  protected readonly renderColumns = computed<readonly GmTableColumn<T>[]>(
+    () => {
+      const columns = this.columns();
+      const start = columns.filter((column) => this.isFrozenStart(column));
+      const end = columns.filter((column) => this.isFrozenEnd(column));
+
+      if (start.length === 0 && end.length === 0) {
+        return columns;
+      }
+
+      const middle = columns.filter(
+        (column) => !this.isFrozenStart(column) && !this.isFrozenEnd(column),
+      );
+      return [...start, ...middle, ...end];
+    },
+  );
 
   /**
    * The selection column pins itself whenever a start-frozen column exists —
@@ -586,9 +813,9 @@ export class GmTableComponent<T> {
       return null;
     }
     const parts: string[] = this.selectionFrozen()
-      ? [GmTableComponent.SELECT_WIDTH]
+      ? ['var(--gm-table-select-offset)']
       : [];
-    for (const candidate of this.columns()) {
+    for (const candidate of this.renderColumns()) {
       if (candidate === column) {
         break;
       }
@@ -604,7 +831,7 @@ export class GmTableComponent<T> {
     if (!this.isFrozenEnd(column)) {
       return null;
     }
-    const columns = this.columns();
+    const columns = this.renderColumns();
     const parts: string[] = [];
     for (let i = columns.length - 1; i >= 0; i--) {
       if (columns[i] === column) {
@@ -625,7 +852,7 @@ export class GmTableComponent<T> {
     if (!this.isFrozenStart(column)) {
       return false;
     }
-    const frozen = this.columns().filter((c) => this.isFrozenStart(c));
+    const frozen = this.renderColumns().filter((c) => this.isFrozenStart(c));
     return frozen[frozen.length - 1] === column;
   }
 
@@ -633,18 +860,13 @@ export class GmTableComponent<T> {
     if (!this.isFrozenEnd(column)) {
       return false;
     }
-    return this.columns().find((c) => this.isFrozenEnd(c)) === column;
+    return this.renderColumns().find((c) => this.isFrozenEnd(c)) === column;
   }
 
   // ── Filtering ───────────────────────────────────────────────────────────
 
-  protected readonly hasFilterRow = computed(() =>
-    this.columns().some((column) => column.filterable && column.field),
-  );
-
-  protected readonly hasActiveFilters = computed(
-    () => this.activeFilters().length > 0,
-  );
+  /** True while any column is filtered — for a composed toolbar's Clear button. */
+  readonly hasActiveFilters = computed(() => this.activeFilters().length > 0);
 
   protected filterTemplateFor(column: GmTableColumn<T>) {
     return (
@@ -653,117 +875,92 @@ export class GmTableComponent<T> {
     );
   }
 
-  /** Current value for a column's control, or null when unfiltered. */
-  protected filterValueOf(column: GmTableColumn<T>): unknown {
+  /**
+   * A column's applied rules, in menu order, for seeding its menu's draft.
+   *
+   * Public, like `sortBy` and `sortDirectionOf`, so a `gmTableHeader` template
+   * can mount its own `gm-table-filter-menu` and keep filtering working.
+   */
+  constraintsFor(
+    column: GmTableColumn<T>,
+  ): readonly GmTableFilterConstraint[] {
+    return this.columnFilterState(column)?.constraints ?? NO_CONSTRAINTS;
+  }
+
+  logicFor(column: GmTableColumn<T>): GmFilterMatchLogic {
+    return this.columnFilterState(column)?.logic ?? 'and';
+  }
+
+  private columnFilterState(
+    column: GmTableColumn<T>,
+  ): ColumnFilterState | undefined {
     const field = column.field;
-    if (!field) {
-      return null;
-    }
-    return this.activeFilters().find((f) => f.field === field)?.value ?? null;
+    return field ? this.filtersByField().get(field) : undefined;
   }
 
   /**
-   * Operator for a column: explicit config wins, else one inferred from the
-   * control type — `in` for a multiselect, `equals` for a discrete value, and
-   * `contains` for free text, which is what most tables want.
+   * One column's menu was applied. Its rules become one `GmTableFilter` each,
+   * so the emitted array stays a flat list of comparisons — which is the shape
+   * a filter API takes — rather than a nested structure every consumer would
+   * have to unpack.
    */
-  private operatorFor(column: GmTableColumn<T>): GmFilterOperator {
-    if (column.filterOperator) {
-      return column.filterOperator;
-    }
-    switch (column.filterType) {
-      case 'multiselect':
-        return 'in';
-      case 'select':
-      case 'boolean':
-      case 'date':
-      case 'numeric':
-        return 'equals';
-      default:
-        return 'contains';
-    }
+  applyFilterMenu(event: GmTableFilterMenuEvent): void {
+    // Only a multi-rule column carries `logic`; a single rule combines with
+    // nothing, so tagging it would be noise in the request payload.
+    const carriesLogic = event.constraints.length > 1;
+    this.commitFilters(
+      this.replaceFieldFilters(
+        event.field,
+        event.constraints.map((rule) => ({
+          field: event.field,
+          operator: rule.operator,
+          value: rule.value,
+          ...(carriesLogic ? { logic: event.logic } : {}),
+        })),
+      ),
+    );
   }
 
-  /** Text-like filters debounce; discrete pickers apply immediately. */
-  private isDebounced(column: GmTableColumn<T>): boolean {
-    const type = column.filterType ?? 'text';
-    return type === 'text' || type === 'numeric';
-  }
-
-  protected onFilterValue(column: GmTableColumn<T>, value: unknown): void {
-    const field = column.field;
-    if (!field) {
-      return;
-    }
-
-    const apply = () => this.applyFilter(field, this.operatorFor(column), value);
-    const existing = this.debounceTimers.get(field);
-    if (existing !== undefined) {
-      clearTimeout(existing);
-      this.debounceTimers.delete(field);
-    }
-
-    if (this.isDebounced(column) && this.filterDebounce() > 0) {
-      this.debounceTimers.set(
-        field,
-        setTimeout(() => {
-          this.debounceTimers.delete(field);
-          apply();
-        }, this.filterDebounce()),
-      );
-      return;
-    }
-
-    apply();
-  }
-
-  /**
-   * Writes one filter into the set, replacing any filter on the same field. An
-   * empty value removes it, so "cleared" and "absent" are the same state.
-   */
-  private applyFilter(
-    field: string,
-    operator: GmFilterOperator,
-    value: unknown,
-  ): void {
-    const others = this.activeFilters().filter((f) => f.field !== field);
-    const next = this.isEmptyValue(value)
-      ? others
-      : [...others, { field, operator, value }];
-
-    this.userFilters.set(next);
-    this.filtersChange.emit({ filters: next });
-    this.emitQueryFromFirstPage();
-  }
-
-  private isEmptyValue(value: unknown): boolean {
-    if (value === null || value === undefined || value === '') {
-      return true;
-    }
-    return Array.isArray(value) && value.length === 0;
-  }
-
-  protected clearFilter(field: string): void {
-    const next = this.activeFilters().filter((f) => f.field !== field);
-    this.userFilters.set(next);
-    this.filtersChange.emit({ filters: next });
-    this.emitQueryFromFirstPage();
+  clearColumnFilters(field: string): void {
+    this.commitFilters(this.replaceFieldFilters(field, []));
   }
 
   clearAllFilters(): void {
     this.cancelPendingFilters();
-    this.userFilters.set([]);
-    this.filtersChange.emit({ filters: [] });
+    this.commitFilters([]);
+  }
+
+  /**
+   * Swaps a field's filters in place rather than appending them, so re-applying
+   * the same rules produces an identical array and `commitFilters` can tell
+   * "nothing changed" from "changed back".
+   */
+  private replaceFieldFilters(
+    field: string,
+    added: readonly GmTableFilter[],
+  ): GmTableFilter[] {
+    const current = this.activeFilters();
+    const others = current.filter((filter) => filter.field !== field);
+    const at = current.findIndex((filter) => filter.field === field);
+    const insert = at < 0 ? others.length : Math.min(at, others.length);
+    return [...others.slice(0, insert), ...added, ...others.slice(insert)];
+  }
+
+  /**
+   * The one place filters are written. Pressing Apply without having changed
+   * anything is a no-op rather than a second identical request.
+   */
+  private commitFilters(next: GmTableFilter[]): void {
+    if (sameFilters(this.activeFilters(), next)) {
+      return;
+    }
+    this.userFilters.set(next);
+    this.filtersChange.emit({ filters: next });
     this.emitQueryFromFirstPage();
   }
 
-  /** Drops anything still waiting, so a stale keystroke cannot re-add a filter. */
+  /** Drops a pending search, so a stale keystroke cannot re-apply a term. */
   private cancelPendingFilters(): void {
-    for (const timer of this.debounceTimers.values()) {
-      clearTimeout(timer);
-    }
-    this.debounceTimers.clear();
-
     if (this.globalSearchTimer !== undefined) {
       clearTimeout(this.globalSearchTimer);
       this.globalSearchTimer = undefined;
@@ -771,8 +968,11 @@ export class GmTableComponent<T> {
   }
 
   /** Client-side predicate for one filter. */
-  private matches(cellValue: unknown, filter: GmTableFilter): boolean {
-    const { operator, value } = filter;
+  private matches(
+    cellValue: unknown,
+    rule: GmTableFilterConstraint,
+  ): boolean {
+    const { operator, value } = rule;
 
     if (operator === 'in') {
       const list = Array.isArray(value) ? value : [value];
@@ -937,7 +1137,13 @@ export class GmTableComponent<T> {
     return this.selection().some((item) => this.identity(item) === id);
   }
 
-  protected toggleRow(row: T): void {
+  protected toggleRow(row: T, index: number): void {
+    // Guarded here as well as disabled in the template: the control is not the
+    // only way in, and a locked row must not be toggleable at all.
+    if (!this.isRowSelectable(row, index)) {
+      return;
+    }
+
     if (this.selectionMode() === 'single') {
       // Re-selecting the current row clears it, matching a checkbox's feel.
       this.selection.set(this.isSelected(row) ? [] : [row]);
@@ -952,10 +1158,18 @@ export class GmTableComponent<T> {
     );
   }
 
-  /** Header checkbox: selects or clears every row currently rendered. */
+  /**
+   * Header checkbox: selects or clears every *selectable* row on the page.
+   * Locked rows are left exactly as they are in both directions.
+   */
   protected toggleAll(): void {
+    const selectable = this.selectableRows();
+    if (selectable.length === 0) {
+      return;
+    }
+
     if (this.allSelected()) {
-      const visible = this.rows().map((row) => this.identity(row));
+      const visible = selectable.map((row) => this.identity(row));
       this.selection.set(
         this.selection().filter(
           (item) => !visible.includes(this.identity(item)),
@@ -965,7 +1179,7 @@ export class GmTableComponent<T> {
     }
 
     const merged = [...this.selection()];
-    for (const row of this.rows()) {
+    for (const row of selectable) {
       if (!this.isSelected(row)) {
         merged.push(row);
       }
@@ -979,7 +1193,7 @@ export class GmTableComponent<T> {
 
   /** Columns carrying data: utility columns have no field or opt out. */
   private exportColumns(): GmTableColumn<T>[] {
-    return this.columns().filter(
+    return this.renderColumns().filter(
       (column) => !!column.field && column.exportable !== false,
     );
   }
@@ -1017,4 +1231,49 @@ export class GmTableComponent<T> {
   protected rowLabel(index: number): string {
     return `Select row ${index + 1}`;
   }
+}
+
+/** One column's rules plus the logic joining them. */
+interface ColumnFilterState {
+  logic: GmFilterMatchLogic;
+  constraints: GmTableFilterConstraint[];
+}
+
+/**
+ * Shared empty result for an unfiltered column. A fresh `[]` per call would
+ * hand the column's menu a new input reference on every change detection.
+ */
+const NO_CONSTRAINTS: readonly GmTableFilterConstraint[] = [];
+
+/**
+ * Whether two filter sets express the same query. Order matters, which is what
+ * `replaceFieldFilters` keeps stable so an unchanged re-apply compares equal.
+ */
+function sameFilters(
+  a: readonly GmTableFilter[],
+  b: readonly GmTableFilter[],
+): boolean {
+  return (
+    a.length === b.length &&
+    a.every((filter, i) => {
+      const other = b[i];
+      return (
+        filter.field === other.field &&
+        filter.operator === other.operator &&
+        (filter.logic ?? 'and') === (other.logic ?? 'and') &&
+        sameFilterValue(filter.value, other.value)
+      );
+    })
+  );
+}
+
+/** Dates and `in` arrays are the only non-primitive filter values. */
+function sameFilterValue(a: unknown, b: unknown): boolean {
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() === b.getTime();
+  }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((item, i) => item === b[i]);
+  }
+  return a === b;
 }

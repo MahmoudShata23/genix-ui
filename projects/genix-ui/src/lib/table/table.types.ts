@@ -1,4 +1,5 @@
 import type {
+  GmFilterMatchModeOption,
   GmFilterOperator,
   GmTableFilterOption,
   GmTableFilterType,
@@ -11,15 +12,39 @@ export interface GmTableColumn<T> {
   header: string;
   sortable?: boolean;
 
-  /** Renders a filter control for this column in the filter row. */
+  /** Gives the column a funnel button in its header, opening a filter menu. */
   filterable?: boolean;
-  /** Control to render. Defaults to `text`. */
+  /** Control the menu renders for a rule's value. Defaults to `text`. */
   filterType?: GmTableFilterType;
   /** Options for a `select` or `multiselect` filter. */
   filterOptions?: readonly GmTableFilterOption[];
-  /** Overrides the operator inferred from `filterType`. */
+  /** Match mode pre-selected on the column's first rule. */
   filterOperator?: GmFilterOperator;
   filterPlaceholder?: string;
+
+  /**
+   * Replaces the match modes the menu offers. An empty array hides the
+   * match-mode dropdown and pins the column to `filterOperator`, which is how
+   * a column filters on one fixed comparison.
+   */
+  filterMatchModes?: readonly GmFilterMatchModeOption[];
+
+  /**
+   * How many rules the menu allows. `1` also hides the match-logic dropdown
+   * and the Add Rule button, neither of which means anything for one rule.
+   * Defaults to 2.
+   */
+  filterMaxConstraints?: number;
+
+  /**
+   * Characters of default cell text to show before the rest moves into a
+   * tooltip, overriding the table's `truncateAt`. `0` keeps this column's
+   * values whole.
+   *
+   * Only affects the *default* text rendering — a `gmTableCell` template owns
+   * its own markup, so nothing is done to it.
+   */
+  truncateAt?: number;
 
   /** Any CSS width, e.g. `'8rem'` or `'15%'`. Required on frozen columns. */
   width?: string;
@@ -46,6 +71,13 @@ export interface GmTableColumn<T> {
    * row controls — whose rendered content is not data.
    */
   exportable?: boolean;
+
+  /**
+   * Excludes one column from `gm-table-toolbar`'s column chooser, so the same
+   * array can be handed to both the table and the toolbar. Defaults to true;
+   * a column with no `field` is never offered, having nothing to key on.
+   */
+  toggleable?: boolean;
 }
 
 export type GmSortDirection = 'asc' | 'desc' | null;

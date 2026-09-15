@@ -70,16 +70,37 @@ describe('gm-table server-side query', () => {
     Array.from(
       fixture.nativeElement.querySelectorAll('.gm-table__sort'),
     ) as HTMLButtonElement[];
-  const filterInput = () =>
-    fixture.nativeElement.querySelector(
-      '.gm-table__filter-row input',
-    ) as HTMLInputElement;
+  /** The open filter panel. It is portalled into the overlay. */
+  const panel = () =>
+    document.querySelector('.gm-filter-menu') as HTMLElement | null;
+
+  const openFilter = () => {
+    (
+      fixture.nativeElement.querySelector(
+        '.gm-filter-trigger',
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+  };
+
+  const menuInput = () =>
+    panel()!.querySelector('gm-table-filter-cell input') as HTMLInputElement;
+
+  /** Filters the Name column end to end: open, type, Apply. */
   const type = (text: string) => {
-    const input = filterInput();
+    openFilter();
+    const input = menuInput();
     input.value = text;
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
+    (
+      Array.from(panel()!.querySelectorAll('button')).find(
+        (b) => b.textContent?.trim() === 'Apply',
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
   };
+
   const lastQuery = () => host.queries[host.queries.length - 1];
 
   beforeEach(async () => {
@@ -90,6 +111,12 @@ describe('gm-table server-side query', () => {
     host = fixture.componentInstance;
     fixture.detectChanges();
     table = fixture.debugElement.children[0].componentInstance;
+  });
+
+  afterEach(() => {
+    // Filter panels live in the overlay container, outside the fixture, so
+    // they have to be torn down explicitly or they leak into the next spec.
+    fixture.destroy();
   });
 
   // ── no initial emission ────────────────────────────────────────────────
@@ -149,52 +176,53 @@ describe('gm-table server-side query', () => {
     expect(host.queries[0].pageSize).toBe(50);
   });
 
-  it('emits one query per filter change, after the debounce', fakeAsync(() => {
-    host.filterDebounce.set(300);
+  it('emits nothing while a rule is only being typed', () => {
+    openFilter();
+    const input = menuInput();
+    input.value = 'ca';
+    input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    type('ca');
+    // The menu's Apply is the commit point, so an unfinished rule fetches
+    // nothing — which is what replaces the old typing debounce.
+    expect(host.queries.length).toBe(0);
+  });
+
+  it('emits exactly one query per applied filter', () => {
     type('car');
 
-    // Still inside the debounce window: nothing fetched yet.
-    expect(host.queries.length).toBe(0);
-
-    tick(300);
-    fixture.detectChanges();
     expect(host.queries.length).toBe(1);
     expect(host.queries[0].filters).toEqual([
-      { field: 'name', operator: 'contains', value: 'car' },
+      { field: 'name', operator: 'startsWith', value: 'car' },
     ]);
-  }));
+  });
 
   // ── combined state ─────────────────────────────────────────────────────
 
-  it('carries sort and filters together once both are set', fakeAsync(() => {
+  it('carries sort and filters together once both are set', () => {
     sortButtons()[1].click();
     fixture.detectChanges();
     type('ca');
-    tick(0);
-    fixture.detectChanges();
 
     expect(lastQuery().sort).toEqual({ field: 'status', direction: 'asc' });
     expect(lastQuery().filters.length).toBe(1);
-  }));
+  });
 
-  it('keeps sort and filters when paging', fakeAsync(() => {
+  it('keeps sort and filters when paging', () => {
     sortButtons()[0].click();
+    fixture.detectChanges();
     type('ca');
-    tick(0);
 
     table.setPage({ page: 2, pageSize: 10, first: 10 });
 
     expect(lastQuery().page).toBe(2);
     expect(lastQuery().sort).toEqual({ field: 'name', direction: 'asc' });
     expect(lastQuery().filters.length).toBe(1);
-  }));
+  });
 
   // ── page reset ─────────────────────────────────────────────────────────
 
-  it('returns to the first page when the result set changes', fakeAsync(() => {
+  it('returns to the first page when the result set changes', () => {
     table.setPage({ page: 5, pageSize: 10, first: 40 });
 
     sortButtons()[0].click();
@@ -202,11 +230,10 @@ describe('gm-table server-side query', () => {
     expect(lastQuery().page).toBe(1);
 
     type('ca');
-    tick(0);
     // A filter applied on page 5 of the old results would show an empty page.
     expect(lastQuery().page).toBe(1);
     expect(lastQuery().first).toBe(0);
-  }));
+  });
 
   it('reports the current page size when sorting after a size change', () => {
     host.pageSize.set(25);
@@ -224,40 +251,40 @@ describe('gm-table server-side query', () => {
 
   // ── external reset ─────────────────────────────────────────────────────
 
-  it('resetQueryState clears sort and filters without emitting', fakeAsync(() => {
+  it('resetQueryState clears sort and filters without emitting', async () => {
     sortButtons()[0].click();
+    fixture.detectChanges();
     type('ca');
-    tick(0);
     const before = host.queries.length;
 
     table.resetQueryState();
     fixture.detectChanges();
-    // NgModel pushes the new value to the control on a microtask, so the
-    // cleared input is only observable after a flush plus a second render.
-    tick();
-    fixture.detectChanges();
 
     // The caller issues its own request; emitting here would fetch twice.
     expect(host.queries.length).toBe(before);
-    expect(filterInput().value).toBe('');
     expect(sortButtons()[0].closest('th')!.getAttribute('aria-sort')).toBe('none');
-  }));
 
-  it('resetQueryState drops a filter still inside its debounce window', fakeAsync(() => {
+    // The panel re-seeds from the (now empty) filters each time it opens.
+    openFilter();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(menuInput().value).toBe('');
+  });
+
+  it('resetQueryState drops a search still inside its debounce window', fakeAsync(() => {
     host.filterDebounce.set(500);
     fixture.detectChanges();
-    type('ca');
+    table.setGlobalSearch('ca');
 
     table.resetQueryState();
     tick(500);
     fixture.detectChanges();
-    // A stale keystroke must not re-apply a filter after the reset.
+    // A stale keystroke must not re-apply a search after the reset.
     expect(host.queries.length).toBe(0);
   }));
 
-  it('clearAllFilters is callable from outside and emits one query', fakeAsync(() => {
+  it('clearAllFilters is callable from outside and emits one query', () => {
     type('ca');
-    tick(0);
     const before = host.queries.length;
 
     table.clearAllFilters();
@@ -265,11 +292,11 @@ describe('gm-table server-side query', () => {
 
     expect(host.queries.length).toBe(before + 1);
     expect(lastQuery().filters).toEqual([]);
-  }));
+  });
 
   // ── rendering stays server-driven ──────────────────────────────────────
 
-  it('renders rows untouched: no local sorting or filtering', fakeAsync(() => {
+  it('renders rows untouched: no local sorting or filtering', () => {
     const rowText = () =>
       Array.from(
         fixture.nativeElement.querySelectorAll('tbody .gm-table__row'),
@@ -281,31 +308,28 @@ describe('gm-table server-side query', () => {
     expect(rowText()[0]).toContain('Cara');
 
     type('zzz');
-    tick(0);
-    fixture.detectChanges();
     // Filtering locally would empty the table; the server owns that.
     expect(rowText().length).toBe(2);
-  }));
+  });
 
-  it('still emits the granular sort and filter events for existing consumers', fakeAsync(() => {
+  it('still emits the granular sort and filter events for existing consumers', () => {
     sortButtons()[0].click();
+    fixture.detectChanges();
     type('ca');
-    tick(0);
 
     expect(host.sorts).toBe(1);
     expect(host.filterEvents).toBe(1);
-  }));
+  });
 
-  it('emits a snapshot: a later change does not mutate a past event', fakeAsync(() => {
+  it('emits a snapshot: a later change does not mutate a past event', () => {
     type('ca');
-    tick(0);
 
     const firstFilters = host.queries[0].filters as readonly GmTableFilter[];
     table.clearAllFilters();
     fixture.detectChanges();
 
     expect(firstFilters.length).toBe(1);
-  }));
+  });
 });
 
 describe('gm-table without serverSide', () => {

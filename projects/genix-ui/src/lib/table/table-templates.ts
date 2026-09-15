@@ -40,9 +40,13 @@ export class GmTableEmptyDirective {
  * Marks a template as the filter control for one column, for filters the
  * built-in types cannot express.
  *
+ * It replaces the rule editor *inside* that column's filter menu, so the
+ * funnel, the panel and its Clear/Apply footer all stay. `apply` takes the
+ * value and an optional operator; `clear` drops the column's filters.
+ *
  * ```html
  * <ng-template gmTableFilter="status" let-value let-apply="apply">
- *   <my-control [value]="value" (changed)="apply($event)" />
+ *   <my-control [value]="value" (changed)="apply($event, 'equals')" />
  * </ng-template>
  * ```
  */
@@ -77,8 +81,14 @@ export class GmTableFilterDirective {
  * </ng-template>
  * ```
  *
- * The generated filter row still renders below it, so filtering keeps working;
- * for sorting, call the table's `sortBy(field)` and read `sortDirectionOf(field)`.
+ * The template owns the whole header, so the generated sort controls and
+ * filter funnels are not rendered — mount whatever the custom header needs
+ * from the table's own public API:
+ *
+ * - sorting: `sortBy(field)` and `sortDirectionOf(field)`
+ * - filtering: a `gm-table-filter-menu` wired to `constraintsFor(column)`,
+ *   `logicFor(column)`, `resolvedFilterLabels()`, `applyFilterMenu($event)`
+ *   and `clearColumnFilters($event)`
  */
 @Directive({
   selector: '[gmTableHeader]',

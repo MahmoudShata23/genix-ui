@@ -123,7 +123,8 @@ component's `imports` array. There is no `NgModule` to register.
 `gm-multiselect` · `gm-select-button` · `gm-autocomplete` ·
 `gm-datepicker` · `gm-file-upload` · `gm-card` · `gm-badge` · `gm-chip` ·
 `gm-message` · `gm-spinner` · `gm-tabs` / `gm-tab` · `gm-accordion` ·
-`gm-stepper` / `gm-step` · `gm-pagination` · `gm-table` · `gm-menu` ·
+`gm-stepper` / `gm-step` · `gm-pagination` · `gm-table` ·
+`gm-table-toolbar` · `gm-menu` ·
 `gm-popover` · `gm-order-list` · `gm-chart` · `[gmTooltip]`
 
 `gm-input` carries `iconStart` / `iconEnd` for an icon inside the field box
@@ -254,6 +255,190 @@ bootstrapApplication(AppComponent, {
 `unknown` so this package never re-declares them. Both are compared by
 identity, so pass a new object to redraw; a new `type` rebuilds the chart, and
 the instance is destroyed with the view.
+
+### The data grid
+
+`gm-table` renders a real `<table>`: sorting, selection, frozen columns,
+column reorder, CSV export, and a per-column filter menu. Give a column
+`filterable: true` and its header grows a funnel; the funnel opens a panel with
+match logic (**Match All** / **Match Any**), up to `filterMaxConstraints` rules
+(default 2), and an explicit **Apply** — so a half-typed rule never triggers a
+request.
+
+Rules leave the component as a *flat* list, one `GmTableFilter` per
+comparison, which is the shape a filter API already takes:
+
+```ts
+// name startsWith "be" OR name contains "clinic"
+[
+  { field: 'name', operator: 'startsWith', value: 'be', logic: 'or' },
+  { field: 'name', operator: 'contains',   value: 'clinic', logic: 'or' },
+]
+```
+
+`logic` is only present when a column produced more than one rule. Rules
+within a field combine with that `logic`; different fields always AND.
+
+Translate the whole panel through one binding:
+
+```html
+<gm-table [filterLabels]="{ matchAll: 'Tout', apply: 'Appliquer' }" … />
+```
+
+Per column, `filterMatchModes` replaces the offered comparisons (an empty array
+pins the column to `filterOperator` and hides the dropdown), and a
+`gmTableFilter` template replaces the rule editor while keeping the panel and
+its footer.
+
+**Wide tables scroll sideways, and columns can be pinned.** Give the table a
+`minWidth` past its container and it scrolls inside its own box rather than
+widening the page; mark a column `frozen` and it stays put while the rest
+scroll under it:
+
+```ts
+{
+  field: 'actions',
+  header: 'Actions',
+  width: '7rem',          // required on a frozen column
+  frozen: true,
+  frozenPosition: 'end',  // 'start' (the default) or 'end'
+}
+```
+
+`frozenPosition` is the *whole* configuration — the table bands frozen columns
+into render order itself (start-frozen, then unfrozen, then end-frozen), so an
+actions column moves from one edge to the other by changing that one value,
+wherever it sits in your `columns` array. Offsets use logical
+`inset-inline-start/end`, so RTL is the browser's job, and only the column at
+each boundary draws the divider shadow.
+
+The selection column pins itself automatically whenever a start-frozen column
+exists — being leftmost, it would otherwise scroll out from under the pinned
+data.
+
+**Some rows can be locked out of selection** with `rowSelectable` — a
+predicate, so it is per row rather than per column:
+
+```html
+<gm-table
+  selectionMode="multiple"
+  [rowSelectable]="isSelectable"
+  [(selection)]="selected"
+  … />
+```
+
+```ts
+protected readonly isSelectable = (row: Provider, index: number) => row.active;
+```
+
+A rejected row renders its checkbox (or radio) disabled, is skipped by
+select-all, and is refused by `toggleRow`. Select-all reports "all" once every
+*selectable* row is ticked, so one locked row cannot stop the header checkbox
+reaching checked; with nothing selectable on the page it is disabled outright.
+
+It gates what the **user** can change, in both directions — a locked row that
+arrives already selected stays selected, including through a deselect-all. The
+consumer owns `selection`, and silently dropping rows out of it would be the
+worse surprise. Locked rows also get `.gm-table__row--select-disabled` as a
+styling hook.
+
+**Long values are truncated** so one verbose field cannot stretch a row: past
+`truncateAt` characters (default **25**) the cell shows the head plus an
+ellipsis and moves the whole value into a tooltip. The span is focusable, so
+the rest is reachable by keyboard, not only on hover.
+
+```html
+<gm-table [truncateAt]="40" … />   <!-- table-wide; 0 turns it off -->
+```
+
+```ts
+{ field: 'notes', header: 'Notes', truncateAt: 18 }  // per column
+{ field: 'iban',  header: 'IBAN',  truncateAt: 0 }   // never truncate this one
+```
+
+A column's `truncateAt` wins over the table's, in both directions — so one
+column can stay whole while the rest truncate, or truncate while the table
+default is off. Only the **built-in** text rendering is affected; a
+`gmTableCell` template owns its own markup and is left alone.
+
+**The toolbar and the paginator are separate components**, stacked around the
+table rather than built into it. Wrap the three in a **flush, flat card** and
+they read as one framed panel — the card contributes only the border and the
+radius, so the toolbar's grey band and the table's header band meet its edges:
+
+```html
+<gm-card padding="none" variant="flat">
+  <gm-table-toolbar … />
+  <gm-table … />
+  <gm-pagination … />
+</gm-card>
+```
+
+That is the grid's intended look, and what the playground's second Table card
+builds. Put the title and any page-level chrome *outside* the card: a flush
+card has no padding, so `header` / `subheader` do not belong in one.
+
+Run the table `serverSide` and it emits one `queryChange` per user action
+carrying page, size, sort and filters together, so one action is one request.
+
+`gm-table-toolbar` takes its buttons as **data**, so a feature declares its
+toolbar next to its columns. An action with `scope: 'selection'` stays hidden
+until rows are ticked — which is how a bulk Delete is wired:
+
+```ts
+readonly actions: GmTableAction<Provider>[] = [
+  { key: 'add', label: 'Add', icon: 'pi pi-plus' },
+  {
+    key: 'delete',
+    label: 'Delete',
+    icon: 'pi pi-trash',
+    severity: 'danger',
+    scope: 'selection',          // absent until something is selected
+    minSelection: 1,             // raise it for a two-or-more bulk action
+    visible: () => canDelete,    // applied on top of the scope rule
+    disabled: (rows) => rows.some((r) => r.locked),
+    command: (rows) => this.remove(rows),
+  },
+];
+```
+
+```html
+<gm-table-toolbar
+  [actions]="actions"
+  [selection]="selected()"
+  [columns]="allColumns"
+  [(visibleFields)]="visibleFields"
+  showColumnChooser
+  [minVisibleColumns]="2"
+  (columnChooserRejected)="toast.warning('Keep at least ' + $event)"
+  (actionClick)="onAction($event)"
+>
+  <gm-button gmTableToolbarEnd icon="pi pi-filter-slash" … />
+</gm-table-toolbar>
+
+<gm-table [(selection)]="selected" [columns]="visibleColumns()" … />
+```
+
+The **column chooser** is built in. `columns` takes the same array the table
+gets — a column with no `field`, or with `toggleable: false`, is skipped, so an
+actions column never shows up in it. `visibleFields` is two-way and
+authoritative: seed it with every field that should start visible and filter the
+table's own `columns` by it. `minVisibleColumns` is a floor; an attempt to go
+below it reverts the control and fires `columnChooserRejected` with the floor,
+so you can explain it.
+
+`actionsAlign` decides which edge the buttons sit on. The default, `auto`,
+keeps them on the start edge while the end edge has something in it and moves
+them across when it does not — so switching `showColumnChooser` off does not
+leave the bar half empty. `"start"` and `"end"` force it either way.
+
+Handle clicks per action with `command`, or centrally by switching on
+`event.action.key` in `(actionClick)` — both fire, so a consumer can pick
+either. `rows` is a **snapshot** of the selection, so a handler that clears the
+selection as it deletes still sees what it was given.
+
+For the end slot, `clearAllFilters()` and `hasActiveFilters()` are public on
+the table for a Clear filters button, and `exportCsv()` for Export.
 
 ### Deliberately not built
 

@@ -35,8 +35,14 @@
   box-shadow: none;
 }
 
+/* Flush content meets the border, so it has to be clipped to the radius —
+   otherwise a full-bleed band such as a table toolbar or header squares off
+   the top corners. Overlay-based children (select panels, tooltips, filter
+   menus) are portalled to the CDK container, so nothing that has to escape
+   the card is affected by this. */
 :host(.gm-card-host--flush) .gm-card {
   padding: 0;
+  overflow: hidden;
 }
 
 .gm-card__header {

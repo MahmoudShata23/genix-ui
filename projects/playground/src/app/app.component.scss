@@ -233,3 +233,27 @@ code {
     }
   }
 }
+
+/* Two icon buttons on one line: they are inline-flex, so a narrow actions
+   column would otherwise wrap the second onto its own row. */
+.pg-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gm-space-1);
+}
+
+/* Heading row for the composed grid. The frame below it is flush, so its title
+   sits outside the card rather than in a padded card header. */
+.pg-grid-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gm-space-3);
+
+  h3 {
+    margin: 0;
+    font-size: var(--gm-font-size-lg);
+    font-weight: var(--gm-font-weight-semibold);
+  }
+}

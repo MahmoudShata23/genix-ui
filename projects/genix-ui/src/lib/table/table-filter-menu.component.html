@@ -1,0 +1,112 @@
+<!-- The funnel sits in the header cell; the panel below is portalled out. -->
+<button
+  type="button"
+  class="gm-filter-trigger"
+  [class.gm-filter-trigger--active]="active()"
+  [attr.aria-label]="labels().filterMenu + ': ' + column().header"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-controls]="isOpen() ? panelId : null"
+  [attr.title]="labels().filterMenu"
+  [disabled]="disabled()"
+  (click)="toggle($event)"
+>
+  <span class="gm-filter-trigger__icon" aria-hidden="true"></span>
+</button>
+
+<ng-template #panel>
+  <div
+    class="gm-filter-menu"
+    role="dialog"
+    aria-modal="false"
+    tabindex="-1"
+    [attr.id]="panelId"
+    [attr.aria-label]="labels().filterMenu + ': ' + column().header"
+    (keydown)="onPanelKeydown($event)"
+  >
+    @if (contentTemplate()) {
+      <div class="gm-filter-menu__custom">
+        <ng-container
+          [ngTemplateOutlet]="contentTemplate()!"
+          [ngTemplateOutletContext]="templateContext()"
+        />
+      </div>
+    } @else {
+      @if (showLogic()) {
+        <!-- gm-select is a ControlValueAccessor, so a standalone ngModel is how
+             its value is driven without a parent form. -->
+        <gm-select
+          class="gm-filter-menu__logic"
+          [options]="logicOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ariaLabel]="labels().matchAll"
+          [ngModel]="draftLogic()"
+          [ngModelOptions]="{ standalone: true }"
+          (valueChange)="setLogic($event)"
+        />
+      }
+
+      <div class="gm-filter-menu__rules">
+        @for (rule of draft(); track $index; let i = $index) {
+          <div class="gm-filter-menu__rule">
+            @if (showMatchModes()) {
+              <gm-select
+                [options]="modeOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [ariaLabel]="labels().filterMenu"
+                [ngModel]="rule.operator"
+                [ngModelOptions]="{ standalone: true }"
+                (valueChange)="setOperator(i, $event)"
+              />
+            }
+
+            <gm-table-filter-cell
+              [type]="type()"
+              [options]="column().filterOptions ?? []"
+              [placeholder]="column().filterPlaceholder ?? ''"
+              [ariaLabel]="column().header"
+              [value]="rule.value"
+              (valueChange)="setValue(i, $event)"
+            />
+
+            @if (canRemoveRule()) {
+              <button
+                type="button"
+                class="gm-filter-menu__remove"
+                [attr.aria-label]="labels().removeRule"
+                [title]="labels().removeRule"
+                (click)="removeRule(i)"
+              >
+                <span class="gm-filter-menu__remove-icon" aria-hidden="true"></span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (canAddRule()) {
+        <button type="button" class="gm-filter-menu__add" (click)="addRule()">
+          <span class="gm-filter-menu__add-icon" aria-hidden="true"></span>
+          {{ labels().addRule }}
+        </button>
+      }
+    }
+
+    <div class="gm-filter-menu__footer">
+      <gm-button
+        severity="primary"
+        variant="outlined"
+        size="small"
+        [label]="labels().clear"
+        (onClick)="onClear()"
+      />
+      <gm-button
+        severity="primary"
+        size="small"
+        [label]="labels().apply"
+        (onClick)="onApply()"
+      />
+    </div>
+  </div>
+</ng-template>

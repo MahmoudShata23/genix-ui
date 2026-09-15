@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GmTableComponent } from './table.component';
+import { GmTableFilterMenuComponent } from './table-filter-menu.component';
 import {
   GmTableCellDirective,
   GmTableHeaderDirective,
@@ -24,7 +25,12 @@ const ROWS: Row[] = [
 
 @Component({
   standalone: true,
-  imports: [GmTableComponent, GmTableHeaderDirective, GmTableCellDirective],
+  imports: [
+    GmTableComponent,
+    GmTableHeaderDirective,
+    GmTableCellDirective,
+    GmTableFilterMenuComponent,
+  ],
   template: `
     <gm-table #table [data]="rows" [columns]="columns" rowKey="id">
       <ng-template gmTableHeader>
@@ -33,6 +39,16 @@ const ROWS: Row[] = [
             <button class="sort-name" type="button" (click)="table.sortBy('name')">
               Name {{ table.sortDirectionOf('name') }}
             </button>
+            <!-- A custom header owns the whole row, so it mounts its own menu
+                 from the table's public filter API. -->
+            <gm-table-filter-menu
+              [column]="columns[0]"
+              [constraints]="table.constraintsFor(columns[0])"
+              [logic]="table.logicFor(columns[0])"
+              [labels]="table.resolvedFilterLabels()"
+              (apply)="table.applyFilterMenu($event)"
+              (clear)="table.clearColumnFilters($event)"
+            />
           </th>
           <th colspan="2" scope="colgroup">Contact</th>
         </tr>
@@ -74,12 +90,9 @@ describe('gm-table grouped header template', () => {
   });
 
   it('replaces the generated header rather than adding to it', () => {
-    // The generated row would have rendered a sortable .gm-table__th per
-    // column; only the filter row's cells should remain.
+    // The generated row would have rendered a .gm-table__th per column.
     expect(
-      fixture.nativeElement.querySelectorAll(
-        'thead .gm-table__th:not(.gm-table__th--filter)',
-      ).length,
+      fixture.nativeElement.querySelectorAll('thead .gm-table__th').length,
     ).toBe(0);
     expect(headerRows()[0].querySelectorAll('th').length).toBe(2);
   });
@@ -103,10 +116,34 @@ describe('gm-table grouped header template', () => {
     expect(first[1].getAttribute('scope')).toBe('colgroup');
   });
 
-  it('still renders the generated filter row, so filtering keeps working', () => {
-    const filterRow = fixture.nativeElement.querySelector('.gm-table__filter-row');
-    expect(filterRow).toBeTruthy();
-    expect(filterRow.querySelector('gm-table-filter-cell')).toBeTruthy();
+  it('lets the custom header mount its own filter menu', () => {
+    const funnel = fixture.nativeElement.querySelector(
+      '.gm-filter-trigger',
+    ) as HTMLButtonElement;
+    expect(funnel).toBeTruthy();
+
+    funnel.click();
+    fixture.detectChanges();
+    const panel = document.querySelector('.gm-filter-menu')!;
+    expect(panel).toBeTruthy();
+
+    const input = panel.querySelector(
+      'gm-table-filter-cell input',
+    ) as HTMLInputElement;
+    input.value = 'al';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.query((n) => n.name === 'gm-table')
+      .componentInstance as GmTableComponent<Row>;
+    (
+      Array.from(panel.querySelectorAll('button')).find(
+        (b) => b.textContent?.trim() === 'Apply',
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+
+    expect(table.hasActiveFilters()).toBe(true);
   });
 
   it('sorts from a control inside the custom header', () => {

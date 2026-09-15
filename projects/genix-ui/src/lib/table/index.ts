@@ -3,5 +3,8 @@ export * from './table.types';
 export * from './table-templates';
 export * from './table-filter.types';
 export * from './table-filter-cell.component';
+export * from './table-filter-menu.component';
+export * from './table-action.types';
+export * from './table-toolbar.component';
 export * from './table-query.types';
 export * from './table-export';

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GmTableComponent } from './table.component';
@@ -67,10 +67,6 @@ describe('gm-table frozen columns and scrolling', () => {
   const firstRowCells = () =>
     Array.from(
       fixture.nativeElement.querySelectorAll('tbody tr:first-child td'),
-    ) as HTMLElement[];
-  const filterCells = () =>
-    Array.from(
-      fixture.nativeElement.querySelectorAll('.gm-table__filter-row th'),
     ) as HTMLElement[];
 
   beforeEach(async () => {
@@ -149,19 +145,14 @@ describe('gm-table frozen columns and scrolling', () => {
     expect(bg).not.toBe('transparent');
   });
 
-  // ── header / body / filter alignment ──────────────────────────────────
+  // ── header / body alignment ───────────────────────────────────────────
 
-  it('freezes header, filter and body cells identically', () => {
+  it('freezes header and body cells identically', () => {
     const frozenIndexes = [0, 1, 4];
     for (const i of frozenIndexes) {
       expect(headers()[i].classList).toContain('gm-table__cell--frozen');
       expect(firstRowCells()[i].classList).toContain('gm-table__cell--frozen');
     }
-    // The filter row must pin too, or it slides out from under the header.
-    expect(filterCells()[0].classList).toContain('gm-table__cell--frozen');
-    expect(filterCells()[0].style.getPropertyValue('inset-inline-start')).toBe(
-      '0px',
-    );
   });
 
   it('keeps offsets identical between header and body for the same column', () => {
@@ -198,13 +189,15 @@ describe('gm-table frozen columns and scrolling', () => {
     expect(selectTh.classList).toContain('gm-table__cell--frozen');
     expect(selectTh.style.getPropertyValue('inset-inline-start')).toBe('0px');
 
-    // ID now starts after the selection column's reserved width.
+    // ID starts after the selection column, whose width is measured rather
+    // than assumed — automatic table layout will not honour a declared cell
+    // width exactly, so a constant here drifted by a pixel or two.
     expect(headers()[1].style.getPropertyValue('inset-inline-start')).toBe(
-      'calc(3rem)',
+      'calc(var(--gm-table-select-offset))',
     );
-    // The browser folds the sum, which is proof the terms were composed.
+    // Name then adds ID's own width, which is proof the terms were composed.
     expect(headers()[2].style.getPropertyValue('inset-inline-start')).toBe(
-      'calc(7rem)',
+      'calc(var(--gm-table-select-offset) + 4rem)',
     );
   });
 
@@ -240,7 +233,7 @@ describe('gm-table frozen columns and scrolling', () => {
   });
 
   it('keeps filtering working in a frozen header', () => {
-    expect(filterCells()[0].querySelector('gm-table-filter-cell')).toBeTruthy();
+    expect(headers()[0].querySelector('gm-table-filter-menu')).toBeTruthy();
   });
 
   // ── sticky header ─────────────────────────────────────────────────────
@@ -261,5 +254,132 @@ describe('gm-table frozen columns and scrolling', () => {
     fixture.detectChanges();
     // Rows still present, so no state row; then prove the state row is intact.
     expect(q('.gm-table__state')).toBeNull();
+  });
+});
+
+// ── render order (banding) ─────────────────────────────────────────────────
+//
+// Sticky offsets are DOM-order arithmetic, so the table bands frozen columns
+// to the edges itself. That is what lets an actions column move from one edge
+// to the other by changing `frozenPosition` alone.
+
+@Component({
+  standalone: true,
+  imports: [GmTableComponent],
+  template: `
+    <gm-table
+      #table
+      [data]="rows"
+      [columns]="columns()"
+      rowKey="id"
+      selectionMode="multiple"
+      minWidth="80rem"
+    />
+  `,
+})
+class BandingHost {
+  readonly rows: Row[] = [
+    { id: 1, name: 'Cara', email: 'c@x.com', status: 'open' },
+  ];
+  readonly edge = signal<'start' | 'end'>('start');
+
+  /** Actions is declared *last* whichever edge it pins to. */
+  readonly columns = computed<GmTableColumn<Row>[]>(() => [
+    { field: 'name', header: 'Name', width: '10rem' },
+    { field: 'email', header: 'Email', width: '20rem' },
+    {
+      field: 'actions',
+      header: 'Actions',
+      width: '6rem',
+      frozen: true,
+      frozenPosition: this.edge(),
+    },
+  ]);
+}
+
+describe('gm-table frozen column render order', () => {
+  let fixture: ComponentFixture<BandingHost>;
+  let host: BandingHost;
+
+  const headers = () =>
+    Array.from(
+      fixture.nativeElement.querySelectorAll('thead tr:first-child th'),
+    ) as HTMLElement[];
+
+  const headerLabels = () =>
+    headers()
+      .slice(1) // drop the selection cell, which has no label
+      .map((th) => th.textContent!.trim());
+
+  const bodyLabels = () =>
+    Array.from(
+      fixture.nativeElement.querySelectorAll('tbody tr:first-child td'),
+    )
+      .slice(1)
+      .map((td) => (td as HTMLElement).textContent!.trim());
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [BandingHost],
+    }).compileComponents();
+    fixture = TestBed.createComponent(BandingHost);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => fixture.destroy());
+
+  it('pulls a start-frozen column to the front, wherever it was declared', () => {
+    expect(headerLabels()).toEqual(['Actions', 'Name', 'Email']);
+  });
+
+  it('pushes an end-frozen column to the back', () => {
+    host.edge.set('end');
+    fixture.detectChanges();
+    expect(headerLabels()).toEqual(['Name', 'Email', 'Actions']);
+  });
+
+  it('keeps body cells in the same column order as the header', () => {
+    const actionsColumn = () => headerLabels().indexOf('Actions');
+    // Actions has no cell template and no field value, so it is the empty one:
+    // where the blank falls is where the column was rendered.
+    const blankColumn = () => bodyLabels().indexOf('');
+
+    expect(actionsColumn()).toBe(0);
+    expect(blankColumn()).toBe(actionsColumn());
+
+    host.edge.set('end');
+    fixture.detectChanges();
+
+    expect(actionsColumn()).toBe(2);
+    expect(blankColumn()).toBe(actionsColumn());
+  });
+
+  it('pins a start-frozen column after the selection column', () => {
+    const actions = headers()[1];
+    expect(actions.classList).toContain('gm-table__cell--frozen-start');
+    // Offset reads the measured selection width rather than a constant.
+    expect(actions.style.getPropertyValue('inset-inline-start')).toBe(
+      'calc(var(--gm-table-select-offset))',
+    );
+  });
+
+  it('pins an end-frozen column flush to the end edge', () => {
+    host.edge.set('end');
+    fixture.detectChanges();
+
+    const actions = headers()[headers().length - 1];
+    expect(actions.classList).toContain('gm-table__cell--frozen-end');
+    expect(actions.style.getPropertyValue('inset-inline-end')).toBe('0px');
+    expect(actions.style.getPropertyValue('inset-inline-start')).toBe('');
+  });
+
+  it('only freezes the selection column for a start-frozen neighbour', () => {
+    expect(headers()[0].classList).toContain('gm-table__cell--frozen');
+
+    host.edge.set('end');
+    fixture.detectChanges();
+    // Nothing is pinned at the start any more, so the checkbox can scroll.
+    expect(headers()[0].classList).not.toContain('gm-table__cell--frozen');
   });
 });

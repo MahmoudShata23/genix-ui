@@ -1,0 +1,71 @@
+/* ==========================================================================
+   gm-table-toolbar
+   --------------------------------------------------------------------------
+   The bar above a data grid: business actions on one edge, view controls on
+   the other.
+
+   It carries the design system's light header band and a rule along its
+   bottom, so dropped into a flush `gm-card` above `gm-table` the toolbar, the
+   table header and the paginator read as one framed panel — which is the
+   grid's intended look.
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.gm-table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gm-space-2);
+  /* Matches the table header's own padding, so the two bands line up. */
+  padding: var(--gm-space-3) var(--gm-space-4);
+  background: var(--gm-gray-50);
+  border-bottom: 1px solid var(--gm-gray-200);
+  font-family: var(--gm-font-family);
+}
+
+/* Both groups wrap internally, so a narrow container stacks the buttons
+   rather than overflowing the card. */
+.gm-table-toolbar__actions,
+.gm-table-toolbar__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gm-space-2);
+  min-width: 0;
+}
+
+.gm-table-toolbar__chooser {
+  min-width: 12rem;
+}
+
+/* ---- Action alignment --------------------------------------------------
+   `auto` is resolved in CSS rather than TypeScript, because what it depends
+   on is whether the *end slot* has content — and that is projected content
+   the component cannot see without a marker directive the consumer would
+   have to remember to import. `:has()` reads the rendered result instead, so
+   it stays correct however the slot is filled, including behind an `@if`.
+
+   `> *` matches elements only, so the comment node Angular leaves behind a
+   false `@if` is correctly treated as empty.
+   ------------------------------------------------------------------------ */
+
+/* `end`: always on the end edge, whatever the aside holds. */
+.gm-table-toolbar--align-end .gm-table-toolbar__actions {
+  margin-inline-start: auto;
+}
+
+.gm-table-toolbar--align-auto:not(:has(.gm-table-toolbar__aside > *))
+  .gm-table-toolbar__actions {
+  margin-inline-start: auto;
+}
+
+/* An empty end slot must not claim the row's gap, or the actions read as
+   off-centre in a toolbar that has no view controls at all. */
+.gm-table-toolbar:not(:has(.gm-table-toolbar__aside > *))
+  .gm-table-toolbar__aside {
+  display: none;
+}

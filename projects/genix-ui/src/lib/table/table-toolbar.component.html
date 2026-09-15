@@ -1,0 +1,50 @@
+<div
+  class="gm-table-toolbar"
+  [class.gm-table-toolbar--align-auto]="actionsAlign() === 'auto'"
+  [class.gm-table-toolbar--align-end]="actionsAlign() === 'end'"
+  [class.gm-table-toolbar--has-selection]="hasSelection()"
+>
+  <div class="gm-table-toolbar__actions">
+    @for (action of visibleActions(); track action.key) {
+      <gm-button
+        [label]="action.label"
+        [icon]="action.icon"
+        [severity]="action.severity ?? 'primary'"
+        [variant]="action.variant ?? 'filled'"
+        [size]="sizeOf(action)"
+        [disabled]="isDisabled(action)"
+        [ariaLabel]="labelFor(action)"
+        [gmTooltip]="action.tooltip ?? ''"
+        (onClick)="onAction(action)"
+      />
+    }
+
+    <!-- Anything the config cannot express: a split button, a custom menu. -->
+    <ng-content />
+  </div>
+
+  <!-- View controls, not business actions. Whether this holds anything is what
+       `actionsAlign: 'auto'` keys off, so the bar never sits half empty. -->
+  <div class="gm-table-toolbar__aside">
+    @if (showColumnChooser()) {
+      <!-- gm-multiselect is a ControlValueAccessor, so a standalone ngModel is
+           how its value is driven without a parent form. -->
+      <gm-multiselect
+        class="gm-table-toolbar__chooser"
+        [options]="columnOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ariaLabel]="columnChooserLabel()"
+        [placeholder]="columnChooserLabel()"
+        [selectedItemsLabel]="selectedColumnsLabel()"
+        [maxSelectedLabels]="1"
+        [disabled]="disabled()"
+        [ngModel]="visibleFields()"
+        [ngModelOptions]="{ standalone: true }"
+        (valueChange)="onColumnsChange($event)"
+      />
+    }
+
+    <ng-content select="[gmTableToolbarEnd]" />
+  </div>
+</div>

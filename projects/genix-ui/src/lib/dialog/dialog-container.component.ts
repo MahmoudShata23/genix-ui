@@ -22,11 +22,10 @@ import { GM_DIALOG_CONTENT } from './dialog.tokens';
  *
  * It owns full-screen positioning itself (`position: fixed` on the backdrop)
  * rather than leaning on the CDK's `.cdk-overlay-*` geometry or `hasBackdrop`.
- * Genix's styling contract is "load `tokens.css`, nothing else", and the CDK's
- * own positioning and backdrop rules live in `overlay-prebuilt.css` — a sheet
- * this package does not ask consumers to add. Fixed positioning is relative to
- * the viewport, so the panel centres correctly whether or not that sheet is
- * present. The overlay is still what puts the dialog in a container outside the
+ * Fixed positioning is relative to the viewport, so the panel centres
+ * correctly even before `styles/overlay.css` is loaded — but anything opened
+ * *inside* a dialog does need that sheet to stack above it, which is why it is
+ * part of the styling contract rather than optional. The overlay is still what puts the dialog in a container outside the
  * app's stacking contexts, and what routes Escape to the top-most dialog only.
  */
 @Component({

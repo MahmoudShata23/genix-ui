@@ -23,6 +23,10 @@ export const GM_PANEL_BELOW: ConnectedPosition[] = [
  * The one overlay engine for trigger-anchored panels (`gm-select`,
  * `gm-multiselect`, `gm-datepicker`).
  *
+ * The pane it creates carries no geometry of its own — `styles/overlay.css`
+ * supplies the positioning and stacking, without which a panel lands
+ * unpositioned at `z-index: auto` and is painted over by any open dialog.
+ *
  * Owns the CDK overlay lifecycle and the outside-click handling, including the
  * detail that makes it work: the CDK reports clicks on the *trigger* as
  * "outside" (the trigger is not inside the overlay), so those are filtered out

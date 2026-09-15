@@ -47,6 +47,13 @@
     font-size: var(--gm-field-font-size);
     line-height: 1.5;
 
+    /* Height cannot be left to content. A dropdown trigger is a flex
+       container, so an empty placeholder leaves it no line box and it renders
+       shorter than an <input>, whose height comes from `line-height` alone.
+       This pins every control in the kit to the same computed height. */
+    box-sizing: border-box;
+    min-height: calc(1.5em + (var(--gm-field-padding-y) * 2) + 2px);
+
     transition: border-color var(--gm-transition-fast),
       box-shadow var(--gm-transition-fast);
 

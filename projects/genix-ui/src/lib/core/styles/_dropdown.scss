@@ -112,6 +112,10 @@
   /* ---- Overlay panel --------------------------------------------------- */
 
   .gm-dropdown__panel {
+    /* The overlay pane carries `min-width: <trigger width>`; without this the
+       panel shrink-wraps its options and renders narrower than the trigger. */
+    box-sizing: border-box;
+    min-width: 100%;
     background: var(--gm-white);
     border: 1px solid var(--gm-gray-200);
     border-radius: var(--gm-radius-md);

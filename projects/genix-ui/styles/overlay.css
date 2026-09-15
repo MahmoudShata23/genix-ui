@@ -1,0 +1,40 @@
+/* ==========================================================================
+   CDK overlay geometry
+   --------------------------------------------------------------------------
+   Everything this package renders outside the document flow — `gm-dialog`,
+   `gm-toast`, and the trigger-anchored panels of `gm-select`, `gm-multiselect`,
+   `gm-datepicker`, `gm-menu` and `gm-popover` — is attached to the CDK's
+   overlay container, which the CDK creates carrying no styles of its own.
+
+   Without these rules a connected panel has nothing to apply its computed
+   offsets against and no stacking context to sit in, so it lands unpositioned
+   at `z-index: auto` and a dropdown opened inside a dialog paints behind it.
+   The dialog and toast containers position themselves and so survive without
+   this sheet; anything opened *inside* one does not.
+
+   Load it next to `tokens.css`. The values mirror
+   `@angular/cdk/overlay-prebuilt.css` for the selectors this package uses, so
+   loading that sheet as well is redundant rather than conflicting.
+   ========================================================================== */
+
+.cdk-overlay-container {
+  position: fixed;
+  inset: 0;
+  z-index: var(--gm-z-overlay-container);
+  /* The container spans the viewport, so only the panes inside it may take
+     pointer events — otherwise it would swallow every click on the page. */
+  pointer-events: none;
+}
+
+.cdk-overlay-container:empty {
+  display: none;
+}
+
+.cdk-overlay-pane {
+  position: absolute;
+  max-width: 100%;
+  /* Panes share one z-index so DOM order decides between them: a panel opened
+     from inside a dialog is attached later and therefore paints above it. */
+  z-index: var(--gm-z-overlay-container);
+  pointer-events: auto;
+}

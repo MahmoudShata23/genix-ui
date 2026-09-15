@@ -19,8 +19,8 @@ const TOAST_ICONS: Record<GmToastSeverity, string> = {
  * no application template mentions it.
  *
  * Like the dialog container it positions itself (`position: fixed` with logical
- * insets) rather than relying on the CDK's `overlay-prebuilt.css` geometry,
- * which this package does not ask consumers to load.
+ * insets) rather than relying on the CDK's overlay geometry, so it renders
+ * correctly even before `styles/overlay.css` is loaded.
  */
 @Component({
   selector: 'gm-toast-container',

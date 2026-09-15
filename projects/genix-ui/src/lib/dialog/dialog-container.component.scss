@@ -6,10 +6,10 @@
    the page rather than in it.
 
    The backdrop carries the fixed positioning and the centring, so the dialog
-   does not depend on the CDK's `overlay-prebuilt.css` geometry (see the
-   container component for why). `pointer-events: auto` is what makes it work
-   when that sheet *is* loaded: the CDK's overlay container sets
-   `pointer-events: none` on itself, and this re-enables them for the dialog.
+   does not depend on the CDK's overlay geometry (see the container component
+   for why). `pointer-events: auto` is what makes it work once `overlay.css` is
+   loaded: the overlay container sets `pointer-events: none` on itself, and this
+   re-enables them for the dialog.
    ========================================================================== */
 
 :host {

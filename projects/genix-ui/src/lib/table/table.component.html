@@ -1,16 +1,47 @@
+<!-- Config mode frames the grid itself: the toolbar above and the paginator
+     below are the same components a hand-composed grid would stack around it,
+     mounted here so one `tableConfig` is the whole screen. -->
+@if (configMode()) {
+  <gm-table-toolbar
+    [actions]="configToolbarActions()"
+    [selection]="selection()"
+    [columns]="configDataColumns()"
+    [visibleFields]="chooserFields()"
+    [showColumnChooser]="columnChooserVisible()"
+    [minVisibleColumns]="minVisibleColumns()"
+    [columnChooserLabel]="translate()('selectColumns')"
+    [disabled]="loading()"
+    (visibleFieldsChange)="onVisibleFieldsChange($event)"
+    (columnChooserRejected)="columnChooserRejected.emit($event)"
+  >
+    <gm-button
+      gmTableToolbarEnd
+      variant="text"
+      severity="secondary"
+      size="small"
+      icon="pi pi-filter-slash"
+      [ariaLabel]="clearFiltersLabel()"
+      [gmTooltip]="clearFiltersLabel()"
+      [disabled]="!hasActiveFilters()"
+      (onClick)="clearAllFilters()"
+    />
+  </gm-table-toolbar>
+}
+
 <!-- Scroll container: the table scrolls locally, never widening the page. It is
      also the containing block for sticky offsets. -->
 <div
   class="gm-table__scroll"
-  [class.gm-table__scroll--capped]="maxHeightCss()"
-  [style.max-height]="maxHeightCss()"
+  [class.gm-table__scroll--capped]="resolvedMaxHeight()"
+  [style.max-height]="resolvedMaxHeight()"
 >
   <table
     class="gm-table"
     [attr.id]="tableId"
-    [class.gm-table--sticky-header]="stickyHeader()"
-    [class.gm-table--striped]="striped()"
-    [class.gm-table--gridlines]="gridlines()"
+    [class.gm-table--sticky-header]="resolvedStickyHeader()"
+    [class.gm-table--striped]="resolvedStriped()"
+    [class.gm-table--gridlines]="resolvedGridlines()"
+    [class.gm-table--no-hover]="!rowHover()"
     [style.min-width]="minWidth()"
     [style.--gm-table-select-offset]="selectWidthCss()"
   >
@@ -27,11 +58,11 @@
       <tr
         cdkDropList
         cdkDropListOrientation="horizontal"
-        [cdkDropListDisabled]="!reorderableColumns()"
+        [cdkDropListDisabled]="!resolvedReorderableColumns()"
         [cdkDropListSortPredicate]="sameBand"
         (cdkDropListDropped)="onColumnDrop($event)"
       >
-        @if (selectionMode()) {
+        @if (resolvedSelectionMode()) {
           <th
             #selectHeaderCell
             class="gm-table__th gm-table__th--select"
@@ -40,7 +71,7 @@
             [class.gm-table__cell--frozen-start]="selectionFrozen()"
             [style.inset-inline-start]="selectionFrozen() ? '0px' : null"
           >
-            @if (selectionMode() === 'multiple') {
+            @if (resolvedSelectionMode() === 'multiple') {
               <!-- gm-checkbox is a ControlValueAccessor, so a standalone
                    ngModel is how its state is driven without a parent form. -->
               <gm-checkbox
@@ -152,19 +183,21 @@
         @for (row of rows(); track trackRow(row); let i = $index) {
           <tr
             class="gm-table__row"
-            [class.gm-table__row--selected]="selectionMode() && isSelected(row)"
+            [class.gm-table__row--selected]="
+              resolvedSelectionMode() && isSelected(row)
+            "
             [class.gm-table__row--select-disabled]="
-              selectionMode() && !isRowSelectable(row, i)
+              resolvedSelectionMode() && !isRowSelectable(row, i)
             "
           >
-            @if (selectionMode()) {
+            @if (resolvedSelectionMode()) {
               <td
                 class="gm-table__td gm-table__td--select"
                 [class.gm-table__cell--frozen]="selectionFrozen()"
                 [class.gm-table__cell--frozen-start]="selectionFrozen()"
                 [style.inset-inline-start]="selectionFrozen() ? '0px' : null"
               >
-                @if (selectionMode() === 'multiple') {
+                @if (resolvedSelectionMode() === 'multiple') {
                   <gm-checkbox
                     [ariaLabel]="rowLabel(i)"
                     [disabled]="!isRowSelectable(row, i)"
@@ -200,7 +233,22 @@
                 [style.inset-inline-start]="frozenInsetStart(column)"
                 [style.inset-inline-end]="frozenInsetEnd(column)"
               >
-                @if (templateFor(column)) {
+                @if (configColumnOf(column); as configColumn) {
+                  <!-- A config column carries its own renderer, so the cell is
+                       decided by the column config rather than by a template. -->
+                  <gm-table-config-cell
+                    [column]="configColumn"
+                    [row]="row"
+                    [truncateAt]="truncateLimit(column)"
+                  />
+                } @else if (isActionsColumn(column)) {
+                  <gm-table-row-actions
+                    [actions]="configSingleActions()"
+                    [visibleActionTypes]="visibleActionTypes()"
+                    [translate]="translate()"
+                    [row]="row"
+                  />
+                } @else if (templateFor(column)) {
                   <ng-container
                     [ngTemplateOutlet]="templateFor(column)!"
                     [ngTemplateOutletContext]="{
@@ -231,3 +279,16 @@
     </tbody>
   </table>
 </div>
+
+@if (configMode() && paginator()) {
+  <gm-pagination
+    [page]="currentPage()"
+    [pageSize]="currentPageSize()"
+    [totalItems]="totalRecords()"
+    [pageSizeOptions]="pageSizeOptions()"
+    [showCurrentPageReport]="true"
+    [currentPageReportTemplate]="pageReportTemplate()"
+    [disabled]="loading()"
+    (pageChange)="onConfigPage($event)"
+  />
+}

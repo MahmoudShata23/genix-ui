@@ -2,15 +2,19 @@
   @case ('select') {
     <gm-select
       size="small"
-      [options]="options()"
+      [options]="selectOptions()"
       optionLabel="label"
       optionValue="value"
       [placeholder]="placeholder()"
       [ariaLabel]="ariaLabel()"
       [clearable]="true"
       [disabled]="disabled()"
+      [filter]="!!search()"
+      [filterBy]="search() ? searchMatchField : undefined"
+      [emptyFilterMessage]="searching() ? searchingMessage() : noResultsMessage()"
       [ngModel]="value()"
       [ngModelOptions]="{ standalone: true }"
+      (filterChange)="onSearch($event)"
       (valueChange)="emit($event)"
     />
   }

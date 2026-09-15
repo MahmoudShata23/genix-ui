@@ -64,6 +64,9 @@
             <gm-table-filter-cell
               [type]="type()"
               [options]="column().filterOptions ?? []"
+              [search]="column().filterSearch"
+              [searchingMessage]="labels().searching"
+              [noResultsMessage]="labels().noResults"
               [placeholder]="column().filterPlaceholder ?? ''"
               [ariaLabel]="column().header"
               [value]="rule.value"

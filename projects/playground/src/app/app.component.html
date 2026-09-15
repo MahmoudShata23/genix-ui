@@ -1216,6 +1216,110 @@
           · last action: <code>{{ action }}</code>
         }
       </p>
+
+      <!-- ── Config-driven ───────────────────────────────────────────────── -->
+      <div class="pg-grid-heading">
+        <h3>The same grid as one config object</h3>
+        <div class="pg-row">
+          <gm-button
+            [label]="
+              configActionsEdge() === 'start'
+                ? 'Pin actions right'
+                : 'Pin actions left'
+            "
+            icon="pi pi-thumbtack"
+            size="small"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="
+              configActionsEdge.set(
+                configActionsEdge() === 'start' ? 'end' : 'start'
+              )
+            "
+          />
+          <gm-button
+            [label]="
+              configColumnChooser()
+                ? 'Hide column chooser'
+                : 'Show column chooser'
+            "
+            size="small"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="configColumnChooser.set(!configColumnChooser())"
+          />
+          <gm-button
+            [label]="configReorder() ? 'Lock column order' : 'Drag to reorder'"
+            size="small"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="configReorder.set(!configReorder())"
+          />
+          <gm-button
+            [label]="
+              configLockInactive() ? 'Unlock inactive rows' : 'Lock inactive rows'
+            "
+            size="small"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="configLockInactive.set(!configLockInactive())"
+          />
+        </div>
+      </div>
+      <p class="pg-lead">
+        Everything above is the column API. Hand the same component a
+        <code>tableConfig</code> and it mounts its own toolbar, actions column,
+        selection column and paginator, and reports sort, filter and page as
+        list-API requests — one object instead of a card, a toolbar, a template
+        per renderer and a paginator.
+      </p>
+      <p class="pg-lead">
+        This grid does everything the two above it do, and every switch is a
+        key in that object rather than an input: <code>rowSelectable</code>
+        locks the inactive rows, <code>showColumnChooser</code> offers the
+        chooser, <code>reorderableColumns</code> lets headers be dragged (the
+        table keeps the new order itself), and <code>actionsPosition</code>
+        moves the pinned actions edge to edge. Per column:
+        <code>frozen</code> pins <em>Provider</em>,
+        <code>toggleable: false</code> keeps it out of the chooser,
+        <code>align</code> puts <em>Score</em> on the right,
+        <code>truncateAt</code> moves the rest of <em>Notes</em> into a
+        tooltip, <code>cellType</code> draws <em>Tier</em> as a dot, and
+        <code>exportable: false</code> leaves <em>Notes</em> out of the CSV the
+        toolbar's Export writes.
+      </p>
+
+      <gm-table
+        #configTable
+        [records]="configRecords()"
+        [tableConfig]="providerConfig()"
+        [totalRecords]="configTotal()"
+        [translate]="configTranslate"
+        [(selection)]="configSelection"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10]"
+        [minVisibleColumns]="2"
+        minWidth="76rem"
+        caption="Contracted providers, as one config object"
+        (sortChange)="onConfigSort($event)"
+        (filterChange)="onConfigFilter($event)"
+        (pageChange)="onConfigPage($event)"
+        (columnReorder)="onConfigReorder($event)"
+        (columnChooserRejected)="onColumnChooserRejected($event)"
+        (addClicked)="lastConfigEvent.set('Add')"
+      />
+
+      <p class="pg-readout">
+        Selected: <code>{{ configSelection().length }}</code>
+        @if (configSelection().length < 2) {
+          · tick two rows to reveal <code>Delete</code>
+        }
+        @if (configLockInactive()) {
+          · <code>Inactive</code> rows cannot be ticked
+        }
+        · <code>Inactive</code> rows keep the Delete slot but lose the button
+        · last event: <code>{{ lastConfigEvent() }}</code>
+      </p>
     </section>
     <!-- ── Long tail ─────────────────────────────────────────────────────── -->
     <section id="long-tail">

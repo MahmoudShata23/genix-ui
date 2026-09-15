@@ -25,8 +25,12 @@ import {
   CdkDragHandle,
   CdkDropList,
 } from '@angular/cdk/drag-drop';
+import { from, isObservable, map } from 'rxjs';
+import type { Observable } from 'rxjs';
 
+import { GmButtonComponent } from '../button/button.component';
 import { GmCheckboxComponent } from '../checkbox/checkbox.component';
+import { GmPaginationComponent } from '../pagination/pagination.component';
 import { GmRadioComponent } from '../radio/radio.component';
 import { GmSpinnerComponent } from '../spinner/spinner.component';
 import { GmTooltipDirective } from '../tooltip/tooltip.directive';
@@ -34,6 +38,23 @@ import { gmUniqueId } from '../core/unique-id';
 import { gmBuildCsv } from './table-export';
 import type { GmTableExportOptions } from './table-export';
 import { GmTableFilterMenuComponent } from './table-filter-menu.component';
+import { GmTableToolbarComponent } from './table-toolbar.component';
+import { GmTableConfigCellComponent } from './table-config-cell.component';
+import { GmTableRowActionsComponent } from './table-row-actions.component';
+import { gmActionStyle } from './table-action-registry';
+import { gmToFilterDescriptors } from './table-config-filters';
+import { GmFilterType, GmTableBulkActionScope } from './table-config.types';
+import type {
+  GmTableActionType,
+  GmTableConfigColumn,
+  GmTableModel,
+  GmTableTranslate,
+} from './table-config.types';
+import type { GmTableAction } from './table-action.types';
+import type {
+  GmTableRequest,
+  GmTableSortChange,
+} from './table-request.types';
 import {
   GmTableCellDirective,
   GmTableEmptyDirective,
@@ -58,6 +79,7 @@ import type {
   GmTableSelectionMode,
   GmTableSortMode,
 } from './table.types';
+import type { GmTableFilterOption, GmTableFilterType } from './table-filter.types';
 import type { GmTableQueryEvent } from './table-query.types';
 import type { GmPageChangeEvent } from '../pagination/pagination.types';
 
@@ -91,10 +113,15 @@ import type { GmPageChangeEvent } from '../pagination/pagination.types';
   imports: [
     NgTemplateOutlet,
     FormsModule,
+    GmButtonComponent,
     GmCheckboxComponent,
+    GmPaginationComponent,
     GmRadioComponent,
     GmSpinnerComponent,
+    GmTableConfigCellComponent,
     GmTableFilterMenuComponent,
+    GmTableRowActionsComponent,
+    GmTableToolbarComponent,
     GmTooltipDirective,
     CdkDropList,
     CdkDrag,
@@ -109,6 +136,414 @@ export class GmTableComponent<T> {
   readonly data = input<readonly T[]>([]);
 
   readonly columns = input<readonly GmTableColumn<T>[]>([]);
+
+  // ── Config-driven mode ──────────────────────────────────────────────────
+
+  /**
+   * A whole list screen described as one object — columns, row actions and
+   * toolbar — instead of `[columns]` plus a cell template per renderer.
+   *
+   * Supplying it turns on the framing the low-level API leaves to the
+   * consumer: the toolbar above, the paginator below, an actions column, and
+   * the `GmCellType` renderers. It also puts the table in **server** mode, so
+   * sorting and filtering are reported rather than applied locally, and the
+   * rows come from `records` instead of `data`.
+   *
+   * Everything the column API does is still available underneath — the two are
+   * the same component, not a wrapper.
+   */
+  readonly tableConfig = input<GmTableModel<T> | null>(null);
+
+  /** The rows, in config mode. `data` stays the input for the column API. */
+  readonly records = input<readonly T[]>([]);
+
+  /**
+   * Turns a key into display text. Headers, action labels and the toolbar's
+   * own wording are keys, so this is the single hook a translated application
+   * needs; pass a *new* function on language change to re-render.
+   */
+  readonly translate = input<GmTableTranslate>((key) => key);
+
+  /**
+   * Total rows behind the current page, for the paginator. The table shows one
+   * page of server-held data, so it cannot know this — the feature that
+   * fetched the page reports it.
+   */
+  readonly totalRecords = input(0, { transform: numberAttribute });
+
+  /** Renders the paginator under the grid. Config mode only. */
+  readonly paginator = input(true, { transform: booleanAttribute });
+
+  readonly pageSizeOptions = input<readonly number[]>([5, 10, 20, 50]);
+
+  /** Only `{first}`, `{last}` and `{totalRecords}` are substituted. */
+  readonly pageReportTemplate = input<string>(
+    'Showing {first} to {last} of {totalRecords}',
+  );
+
+  /** Force-hides the add button regardless of `tableConfig().showAddButton`. */
+  readonly showAddButton = input(true, { transform: booleanAttribute });
+
+  readonly addButtonDisabled = input(false, { transform: booleanAttribute });
+
+  /** Force-hides the selection column regardless of bulk-action visibility. */
+  readonly showCheckbox = input(true, { transform: booleanAttribute });
+
+  /** Tinted row under the cursor. */
+  readonly rowHover = input(true, { transform: booleanAttribute });
+
+  /** Config mode's `rowKey`. */
+  readonly dataKey = input<string>('id');
+
+  /** Config mode's `maxHeight` — the body scrolls under a pinned header. */
+  readonly scrollHeight = input<string>('65dvh');
+
+  /** Config mode's `striped`. */
+  readonly stripedRows = input(true, { transform: booleanAttribute });
+
+  /** Config mode's `gridlines`. */
+  readonly showGridlines = input(false, { transform: booleanAttribute });
+
+  /** Floor on the toolbar's column chooser. */
+  readonly minVisibleColumns = input(1, { transform: numberAttribute });
+
+  /** The toolbar's add button was pressed. Where it leads is the feature's own. */
+  readonly addClicked = output<void>();
+
+  /**
+   * The filters, as the list endpoints take them, with paging reset to the
+   * first page — page 4 of the previous result set means nothing in the new
+   * one.
+   */
+  readonly filterChange = output<GmTableRequest>();
+
+  readonly pageChange = output<GmTableRequest>();
+
+  /** The rejected change's floor, for a consumer that wants to explain it. */
+  readonly columnChooserRejected = output<number>();
+
+  protected readonly configMode = computed(() => !!this.tableConfig());
+
+  protected readonly configColumnsSource = computed<
+    readonly GmTableConfigColumn<T>[]
+  >(() => this.tableConfig()?.columns ?? []);
+
+  /** Config columns mapped onto the table's own column model. */
+  protected readonly configDataColumns = computed<GmConfigColumn<T>[]>(() => {
+    const translate = this.translate();
+    return this.configColumnsSource().map((source) => ({
+      field: source.field,
+      header: translate(source.header),
+      // Config columns sort unless they opt out, which is the opposite of the
+      // column API's default — a list screen sorts on nearly every column.
+      sortable: source.sortable !== false,
+      filterable: !!source.filterType,
+      filterType: configFilterType(source.filterType),
+      filterOptions: source.filterOptions?.map((option) => ({
+        label: option.label,
+        // The label is also the value: it is what the list endpoints compare
+        // against, and what the descriptor therefore has to carry.
+        value: option.label,
+      })),
+      filterSearch: source.filterSearch
+        ? (term: string) => searchOptions(source.filterSearch!(term))
+        : undefined,
+      minWidth: source.width ?? '200px',
+      // A frozen column's offset is computed from declared widths, so one
+      // without a width would pin itself on top of its neighbour.
+      width: source.frozen ? (source.width ?? '200px') : undefined,
+      frozen: source.frozen,
+      frozenPosition: source.frozenPosition,
+      // A list screen's columns read as centred unless the config says
+      // otherwise — the one default the two APIs do not share.
+      align: source.align ?? 'center',
+      truncateAt: source.truncateAt,
+      toggleable: source.toggleable,
+      exportable: source.exportable,
+      reorderable: source.reorderable,
+      source,
+    }));
+  });
+
+  protected readonly configSingleActions = computed(
+    () => this.tableConfig()?.singleActions ?? [],
+  );
+
+  /**
+   * Action types visible on at least one row of the current page. An action
+   * hidden on every row is dropped outright rather than reserving a slot
+   * nobody sees; with no rows loaded yet they all count, so the column does
+   * not resize the moment the first page arrives.
+   */
+  protected readonly visibleActionTypes = computed<GmTableActionType[]>(() => {
+    const actions = this.configSingleActions();
+    const rows = this.resolvedData();
+    if (rows.length === 0) {
+      return actions.map((action) => action.type);
+    }
+    return actions
+      .filter((action) => rows.some((row) => action.visible?.(row) ?? true))
+      .map((action) => action.type);
+  });
+
+  /** The utility column holding the row actions. Pinned, so it survives a scroll. */
+  private readonly actionsColumn = computed<GmConfigColumn<T> | null>(() => {
+    const count = this.visibleActionTypes().length;
+    if (count === 0) {
+      return null;
+    }
+    const config = this.tableConfig();
+    return {
+      header: this.translate()(config?.actionsHeader ?? 'actions'),
+      frozen: config?.actionsFrozen !== false,
+      frozenPosition: config?.actionsPosition ?? 'start',
+      // One small icon button per action, plus the cell's own padding.
+      width: `${count * 2.5 + 1.5}rem`,
+      align: 'center',
+      sortable: false,
+      reorderable: false,
+      exportable: false,
+      toggleable: false,
+      isActions: true,
+    };
+  });
+
+  /** Fields the chooser is showing; null means "every config column". */
+  private readonly userVisibleFields = signal<string[] | null>(null);
+
+  protected readonly visibleFields = computed<string[]>(
+    () =>
+      this.userVisibleFields() ??
+      this.configDataColumns().map((column) => column.field as string),
+  );
+
+  /** Fields the chooser actually offers — a pinned column is not one of them. */
+  private readonly toggleableFields = computed<readonly string[]>(() =>
+    this.configDataColumns()
+      .filter((column) => column.toggleable !== false)
+      .map((column) => column.field as string),
+  );
+
+  /**
+   * What the chooser shows as ticked. A column it never offered is left out,
+   * so its count and its floor both describe the list the user can act on.
+   */
+  protected readonly chooserFields = computed<string[]>(() => {
+    const offered = new Set(this.toggleableFields());
+    return this.visibleFields().filter((field) => offered.has(field));
+  });
+
+  /** Field order the user dragged into place; null means "the config's own". */
+  private readonly userFieldOrder = signal<string[] | null>(null);
+
+  /**
+   * Config columns in the order they are shown. A drag lands here rather than
+   * in the config, which stays the feature's own declaration; a column the
+   * stored order does not mention — one the config grew later — keeps its
+   * declared place, after the ordered ones.
+   */
+  private readonly orderedConfigColumns = computed<GmConfigColumn<T>[]>(() => {
+    const columns = this.configDataColumns();
+    const order = this.userFieldOrder();
+    if (!order) {
+      return columns;
+    }
+    const position = new Map(order.map((field, index) => [field, index]));
+    return [...columns].sort(
+      (a, b) =>
+        (position.get(a.field as string) ?? Number.MAX_SAFE_INTEGER) -
+        (position.get(b.field as string) ?? Number.MAX_SAFE_INTEGER),
+    );
+  });
+
+  /**
+   * The columns actually rendered. In config mode: the actions column, then
+   * the chooser's selection — everywhere else, the `columns` input untouched.
+   */
+  protected readonly resolvedColumns = computed<readonly GmTableColumn<T>[]>(
+    () => {
+      if (!this.configMode()) {
+        return this.columns();
+      }
+      const visible = this.visibleFields();
+      const data = this.orderedConfigColumns().filter((column) =>
+        visible.includes(column.field as string),
+      );
+      const actions = this.actionsColumn();
+      if (!actions) {
+        return data;
+      }
+      // Position, not `frozen`, decides which end it sits at: an unpinned
+      // actions column still has to follow `actionsPosition`.
+      return this.tableConfig()?.actionsPosition === 'end'
+        ? [...data, actions]
+        : [actions, ...data];
+    },
+  );
+
+  protected readonly resolvedData = computed<readonly T[]>(() =>
+    this.configMode() ? this.records() : this.data(),
+  );
+
+  /** Hidden when the input says so, or when no bulk action could use it. */
+  protected readonly checkboxVisible = computed(
+    () =>
+      this.showCheckbox() &&
+      (this.tableConfig()?.bulkActions ?? []).some(
+        (action) => !action.visible || action.visible(),
+      ),
+  );
+
+  protected readonly addButtonVisible = computed(() => {
+    const gate = this.tableConfig()?.showAddButton;
+    return this.showAddButton() && (!gate || gate());
+  });
+
+  /**
+   * The toolbar, as data: the add button first, then one button per bulk
+   * action. A `SELECTED_ROWS_ONLY` action appears once *more than one* row is
+   * ticked — a bulk action over a single row is what the row's own actions are
+   * for.
+   */
+  protected readonly configToolbarActions = computed<GmTableAction<T>[]>(() => {
+    const config = this.tableConfig();
+    if (!config) {
+      return [];
+    }
+    const translate = this.translate();
+    const actions: GmTableAction<T>[] = [];
+
+    if (this.addButtonVisible()) {
+      actions.push({
+        key: GM_ADD_ACTION_KEY,
+        label: translate('add'),
+        icon: 'pi pi-plus',
+        severity: 'primary',
+        disabled: () => this.addButtonDisabled(),
+        command: () => this.addClicked.emit(),
+      });
+    }
+
+    for (const bulk of config.bulkActions ?? []) {
+      const style = gmActionStyle(bulk.type);
+      actions.push({
+        key: bulk.type,
+        label: translate(style.label),
+        icon: style.icon,
+        severity: style.color,
+        variant: 'text',
+        scope:
+          bulk.scope === GmTableBulkActionScope.GLOBAL ? 'global' : 'selection',
+        minSelection: 2,
+        visible: () => bulk.visible?.() ?? true,
+        command: (rows) => bulk.command([...rows]),
+      });
+    }
+
+    return actions;
+  });
+
+  protected readonly clearFiltersLabel = computed(() =>
+    this.resolvedFilterLabels().clear,
+  );
+
+  // ── Config-mode paging ──────────────────────────────────────────────────
+
+  /** Page size the user picked; null means "follow the `pageSize` input". */
+  private readonly userPageSize = signal<number | null>(null);
+
+  protected readonly currentPageSize = computed(
+    () => this.userPageSize() ?? this.pageSize(),
+  );
+
+  protected readonly currentPage = signal(1);
+
+  protected onConfigPage(event: GmPageChangeEvent): void {
+    this.currentPage.set(event.page);
+    this.userPageSize.set(event.pageSize);
+    this.pageChange.emit({
+      pageNumber: event.page,
+      pageSize: event.pageSize,
+    });
+  }
+
+  /** Reports the live filters as descriptors, back at the first page. */
+  private emitConfigFilters(): void {
+    this.currentPage.set(1);
+    this.filterChange.emit({
+      filters: gmToFilterDescriptors(
+        this.activeFilters(),
+        this.configColumnsSource(),
+      ),
+      pageNumber: 1,
+      pageSize: this.currentPageSize(),
+    });
+  }
+
+  /** The toolbar's chooser, unless the config turns it off. */
+  protected readonly columnChooserVisible = computed(
+    () => this.tableConfig()?.showColumnChooser !== false,
+  );
+
+  protected onVisibleFieldsChange(fields: string[]): void {
+    // A column the chooser never offered is not in the control's value, so it
+    // is put back rather than being dropped by a change to another column.
+    const pinned = this.configDataColumns()
+      .filter((column) => column.toggleable === false)
+      .map((column) => column.field as string);
+    this.userVisibleFields.set([...new Set([...fields, ...pinned])]);
+  }
+
+  /** The config column a rendered column came from, for the cell renderer. */
+  protected configColumnOf(
+    column: GmTableColumn<T>,
+  ): GmTableConfigColumn<T> | null {
+    return (column as GmConfigColumn<T>).source ?? null;
+  }
+
+  protected isActionsColumn(column: GmTableColumn<T>): boolean {
+    return (column as GmConfigColumn<T>).isActions === true;
+  }
+
+  // ── Inputs the two modes share under different names ────────────────────
+
+  /**
+   * Config mode selects through checkboxes whenever a bulk action could use
+   * them; everywhere else `selectionMode` is the whole answer.
+   */
+  protected readonly resolvedSelectionMode =
+    computed<GmTableSelectionMode | null>(() =>
+      this.configMode()
+        ? this.checkboxVisible()
+          ? 'multiple'
+          : null
+        : this.selectionMode(),
+    );
+
+  private readonly resolvedRowKey = computed<string | undefined>(() =>
+    this.configMode() ? this.dataKey() : this.rowKey(),
+  );
+
+  /**
+   * Config mode declares which rows may be ticked in the config; the input
+   * still wins, so a screen can lock rows without rewriting its config object.
+   */
+  private readonly resolvedRowSelectable = computed<
+    ((row: T, index: number) => boolean) | undefined
+  >(() => this.rowSelectable() ?? this.tableConfig()?.rowSelectable);
+
+  protected readonly resolvedStriped = computed(() =>
+    this.configMode() ? this.stripedRows() : this.striped(),
+  );
+
+  protected readonly resolvedGridlines = computed(() =>
+    this.configMode() ? this.showGridlines() : this.gridlines(),
+  );
+
+  /** A config grid always caps its body and pins its header over it. */
+  protected readonly resolvedStickyHeader = computed(
+    () => this.configMode() || this.stickyHeader(),
+  );
 
   readonly loading = input(false, { transform: booleanAttribute });
 
@@ -184,7 +619,13 @@ export class GmTableComponent<T> {
     return typeof value === 'number' ? `${value}px` : value;
   });
 
-  readonly sortChange = output<GmSortEvent>();
+  /** Config mode caps the body at `scrollHeight` unless `maxHeight` overrides it. */
+  protected readonly resolvedMaxHeight = computed(
+    () =>
+      this.maxHeightCss() ?? (this.configMode() ? this.scrollHeight() : null),
+  );
+
+  readonly sortChange = output<GmTableSortChange>();
 
   // ── Server-side query ────────────────────────────────────
 
@@ -210,11 +651,13 @@ export class GmTableComponent<T> {
 
   /** `serverSide` implies both modes, so consumers set one input, not three. */
   private readonly serverSort = computed(
-    () => this.serverSide() || this.sortMode() === 'server',
+    () =>
+      this.serverSide() || this.configMode() || this.sortMode() === 'server',
   );
 
   private readonly serverFilter = computed(
-    () => this.serverSide() || this.filterMode() === 'server',
+    () =>
+      this.serverSide() || this.configMode() || this.filterMode() === 'server',
   );
 
   // ── Filtering ───────────────────────────────────────────────────────────
@@ -310,9 +753,14 @@ export class GmTableComponent<T> {
 
   readonly columnReorder = output<GmColumnReorderEvent<T>>();
 
+  /** Config mode turns dragging on from the config rather than from the input. */
+  protected readonly resolvedReorderableColumns = computed(
+    () => this.reorderableColumns() || !!this.tableConfig()?.reorderableColumns,
+  );
+
   /** A column is draggable unless it opts out. */
   protected isReorderable(column: GmTableColumn<T>): boolean {
-    return this.reorderableColumns() && column.reorderable !== false;
+    return this.resolvedReorderableColumns() && column.reorderable !== false;
   }
 
   /** Draggable columns in DOM order — the order CDK's indices refer to. */
@@ -353,7 +801,7 @@ export class GmTableComponent<T> {
       return;
     }
 
-    const columns = [...this.columns()];
+    const columns = [...this.resolvedColumns()];
     const previousIndex = columns.indexOf(from);
     const currentIndex = columns.indexOf(to);
     if (previousIndex < 0 || currentIndex < 0) {
@@ -363,7 +811,33 @@ export class GmTableComponent<T> {
     columns.splice(previousIndex, 1);
     columns.splice(currentIndex, 0, from);
 
+    // Config mode owns the order — there is no `columns` array for the
+    // consumer to reassign — so the drag is applied here as well as reported.
+    if (this.configMode()) {
+      this.applyConfigOrder(from, to);
+    }
+
     this.columnReorder.emit({ columns, previousIndex, currentIndex });
+  }
+
+  /**
+   * Moves a dragged field within the *whole* config order rather than the
+   * visible slice, so a column hidden in the chooser keeps its place for when
+   * it comes back.
+   */
+  private applyConfigOrder(from: GmTableColumn<T>, to: GmTableColumn<T>): void {
+    const fields = this.orderedConfigColumns().map(
+      (column) => column.field as string,
+    );
+    const moved = from.field as string;
+    const fromIndex = fields.indexOf(moved);
+    const toIndex = fields.indexOf(to.field as string);
+    if (fromIndex < 0 || toIndex < 0) {
+      return;
+    }
+    fields.splice(fromIndex, 1);
+    fields.splice(toIndex, 0, moved);
+    this.userFieldOrder.set(fields);
   }
 
   readonly tableId = gmUniqueId('gm-table');
@@ -429,7 +903,7 @@ export class GmTableComponent<T> {
    * arrive already filtered, so they pass straight through.
    */
   private readonly filteredData = computed<readonly T[]>(() => {
-    const rows = this.data();
+    const rows = this.resolvedData();
     const columns = [...this.filtersByField()];
     const term = this.activeGlobalSearch().trim().toLowerCase();
 
@@ -499,7 +973,7 @@ export class GmTableComponent<T> {
     if (configured.length > 0) {
       return configured;
     }
-    return this.columns()
+    return this.resolvedColumns()
       .map((column) => column.field)
       .filter((field): field is string => !!field);
   });
@@ -524,11 +998,12 @@ export class GmTableComponent<T> {
 
   /** Selection column plus one per data column, for the state rows' colspan. */
   protected readonly columnCount = computed(
-    () => this.columns().length + (this.selectionMode() ? 1 : 0),
+    () =>
+      this.resolvedColumns().length + (this.resolvedSelectionMode() ? 1 : 0),
   );
 
   protected isRowSelectable(row: T, index: number): boolean {
-    return this.rowSelectable()?.(row, index) ?? true;
+    return this.resolvedRowSelectable()?.(row, index) ?? true;
   }
 
   /**
@@ -537,7 +1012,7 @@ export class GmTableComponent<T> {
    * would stop the header checkbox ever reaching "checked".
    */
   private readonly selectableRows = computed<readonly T[]>(() => {
-    const predicate = this.rowSelectable();
+    const predicate = this.resolvedRowSelectable();
     if (!predicate) {
       return this.rows();
     }
@@ -616,7 +1091,7 @@ export class GmTableComponent<T> {
   readonly truncateAt = input(25, { transform: numberAttribute });
 
   /** The effective limit for a column: its own override, else the table's. */
-  private truncateLimit(column: GmTableColumn<T>): number {
+  protected truncateLimit(column: GmTableColumn<T>): number {
     const limit = column.truncateAt ?? this.truncateAt();
     return Number.isFinite(limit) && limit > 0 ? Math.trunc(limit) : 0;
   }
@@ -687,7 +1162,9 @@ export class GmTableComponent<T> {
    * through the same states as the built-in header, so both behave alike.
    */
   sortBy(field: string): void {
-    const column = this.columns().find((candidate) => candidate.field === field);
+    const column = this.resolvedColumns().find(
+      (candidate) => candidate.field === field,
+    );
     if (column) {
       this.toggleSort({ ...column, sortable: true });
     }
@@ -702,9 +1179,16 @@ export class GmTableComponent<T> {
     const direction: GmSortDirection =
       current === null ? 'asc' : current === 'asc' ? 'desc' : null;
 
-    const event: GmSortEvent = { field: column.field, direction };
-    this.userSort.set(event);
-    this.sortChange.emit(event);
+    this.userSort.set({ field: column.field, direction });
+    this.sortChange.emit({
+      field: column.field,
+      direction,
+      // An unsorted column reports no `orderBy` at all, which is a list
+      // endpoint's "your default order" rather than a third sort state it
+      // would have to know about.
+      orderBy: direction === null ? '' : column.field,
+      ascending: direction === 'asc',
+    });
     this.emitQueryFromFirstPage();
   }
 
@@ -777,7 +1261,7 @@ export class GmTableComponent<T> {
    */
   protected readonly renderColumns = computed<readonly GmTableColumn<T>[]>(
     () => {
-      const columns = this.columns();
+      const columns = this.resolvedColumns();
       const start = columns.filter((column) => this.isFrozenStart(column));
       const end = columns.filter((column) => this.isFrozenEnd(column));
 
@@ -798,8 +1282,8 @@ export class GmTableComponent<T> {
    */
   protected readonly selectionFrozen = computed(
     () =>
-      !!this.selectionMode() &&
-      this.columns().some((column) => this.isFrozenStart(column)),
+      !!this.resolvedSelectionMode() &&
+      this.resolvedColumns().some((column) => this.isFrozenStart(column)),
   );
 
   /**
@@ -957,6 +1441,9 @@ export class GmTableComponent<T> {
     this.userFilters.set(next);
     this.filtersChange.emit({ filters: next });
     this.emitQueryFromFirstPage();
+    if (this.configMode()) {
+      this.emitConfigFilters();
+    }
   }
 
   /** Drops a pending search, so a stale keystroke cannot re-apply a term. */
@@ -1128,7 +1615,7 @@ export class GmTableComponent<T> {
 
   /** Identity used to match rows across re-fetches. */
   private identity(row: T): unknown {
-    const key = this.rowKey();
+    const key = this.resolvedRowKey();
     return key ? this.read(row, key) : row;
   }
 
@@ -1144,7 +1631,7 @@ export class GmTableComponent<T> {
       return;
     }
 
-    if (this.selectionMode() === 'single') {
+    if (this.resolvedSelectionMode() === 'single') {
       // Re-selecting the current row clears it, matching a checkbox's feel.
       this.selection.set(this.isSelected(row) ? [] : [row]);
       return;
@@ -1231,6 +1718,66 @@ export class GmTableComponent<T> {
   protected rowLabel(index: number): string {
     return `Select row ${index + 1}`;
   }
+}
+
+/**
+ * Toolbar key of the built-in add button. Not a `GmTableActionType` — Add is
+ * the one toolbar button that is not a configured action.
+ */
+const GM_ADD_ACTION_KEY = '__gmAdd';
+
+/**
+ * A `GmTableColumn` derived from a `tableConfig` entry, tagged with where it
+ * came from so the body knows which renderer the cell wants.
+ */
+interface GmConfigColumn<T> extends GmTableColumn<T> {
+  /** The config entry this was mapped from. Absent on the actions column. */
+  source?: GmTableConfigColumn<T>;
+  /** Marks the synthetic column holding the row actions. */
+  isActions?: boolean;
+}
+
+/**
+ * The control a config column's filter renders. `time` has no control of its
+ * own yet, so it falls back to a text box rather than to nothing.
+ */
+function configFilterType(
+  type: GmFilterType | undefined,
+): GmTableFilterType | undefined {
+  switch (type) {
+    case undefined:
+      return undefined;
+    case GmFilterType.NUMERIC:
+      return 'numeric';
+    case GmFilterType.DATE:
+      return 'date';
+    case GmFilterType.BOOLEAN:
+      return 'boolean';
+    case GmFilterType.SELECT:
+      return 'select';
+    case GmFilterType.MULTISELECT:
+      return 'multiselect';
+    default:
+      return 'text';
+  }
+}
+
+/**
+ * Adapts a config column's option lookup to the filter cell's own option
+ * shape. The label doubles as the value, matching the static `filterOptions`
+ * mapping — both end up in the descriptor the endpoint compares against.
+ */
+function searchOptions(
+  result:
+    | Promise<{ label: string }[]>
+    | Observable<{ label: string }[]>,
+): Observable<readonly GmTableFilterOption[]> {
+  const result$ = isObservable(result) ? result : from(result);
+  return result$.pipe(
+    map((options) =>
+      options.map((option) => ({ label: option.label, value: option.label })),
+    ),
+  );
 }
 
 /** One column's rules plus the logic joining them. */

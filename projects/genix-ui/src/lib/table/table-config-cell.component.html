@@ -1,0 +1,80 @@
+@if (column().cellType === cellType.DOT) {
+  <!-- A dot cell is *only* the dot: an unmapped value shows nothing rather
+       than falling back to text the colour was meant to replace. -->
+  @if (dotColor(); as tone) {
+    <span
+      class="gm-cell-dot"
+      [class]="'gm-cell-dot gm-cell-dot--' + tone"
+      [gmTooltip]="tooltip()"
+    ></span>
+  }
+} @else if (column().filterType === filterType.BOOLEAN) {
+  <!-- Ahead of the empty check: `false` is a value, not a missing one, and a
+       boolean column reads as a mark either way rather than as a dash. -->
+  <span
+    class="gm-cell-bool"
+    [class.gm-cell-bool--true]="!!value()"
+    [class.gm-cell-bool--false]="!value()"
+    [attr.aria-label]="value() ? 'Yes' : 'No'"
+  ></span>
+} @else if (isEmpty()) {
+  <span class="gm-cell-empty">-</span>
+} @else {
+  @switch (column().cellType) {
+    @case (cellType.AVATAR) {
+      <span class="gm-cell-avatar" [gmTooltip]="tooltip()">{{ initials() }}</span>
+    }
+
+    @case (cellType.STATUS_DOT) {
+      <span
+        class="gm-cell-dot"
+        [class]="'gm-cell-dot gm-cell-dot--' + statusTone()"
+        [gmTooltip]="tooltip()"
+      ></span>
+    }
+
+    @case (cellType.SLA_STATUS) {
+      <span
+        class="gm-cell-sla"
+        [class]="'gm-cell-sla gm-cell-sla--' + slaState()"
+        [gmTooltip]="slaTooltip()"
+      ></span>
+    }
+
+    @case (cellType.LIST) {
+      <ul class="gm-cell-list">
+        @for (item of listValue(); track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    }
+
+    @default {
+      @if (column().linkPath) {
+        <!-- A real anchor, so the value is reachable by keyboard and reads as
+             a link; the config owns where it goes. -->
+        <a class="gm-cell-link" href="#" (click)="onLink($event)">{{ text() }}</a>
+      } @else {
+        @switch (column().filterType) {
+          @case (filterType.DATE) {
+            <span>{{ dateValue() | date: "dd/MM/yyyy" }}</span>
+          }
+          @case (filterType.NUMERIC) {
+            <span>{{ text() }}</span>
+          }
+          @default {
+            @if (truncated()) {
+              <!-- tabindex, because a hover-only tooltip would put the rest of
+                   the value out of reach of a keyboard. -->
+              <span class="gm-cell-truncated" tabindex="0" [gmTooltip]="text()">{{
+                truncatedText()
+              }}</span>
+            } @else {
+              <span>{{ text() }}</span>
+            }
+          }
+        }
+      }
+    }
+  }
+}

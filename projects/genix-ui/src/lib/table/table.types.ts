@@ -1,3 +1,5 @@
+import type { Observable } from 'rxjs';
+
 import type {
   GmFilterMatchModeOption,
   GmFilterOperator,
@@ -18,6 +20,21 @@ export interface GmTableColumn<T> {
   filterType?: GmTableFilterType;
   /** Options for a `select` or `multiselect` filter. */
   filterOptions?: readonly GmTableFilterOption[];
+
+  /**
+   * Turns a `select` filter into a searchable one, fetching its options per
+   * term instead of taking them all up front. The term is debounced and only
+   * queried from three characters up, so a list of thousands never has to be
+   * materialised to filter on it.
+   *
+   * Takes precedence over `filterOptions`, which then only seeds the list
+   * before the user types.
+   */
+  filterSearch?: (
+    term: string,
+  ) =>
+    | Promise<readonly GmTableFilterOption[]>
+    | Observable<readonly GmTableFilterOption[]>;
   /** Match mode pre-selected on the column's first rule. */
   filterOperator?: GmFilterOperator;
   filterPlaceholder?: string;

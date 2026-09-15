@@ -440,6 +440,129 @@ selection as it deletes still sees what it was given.
 For the end slot, `clearAllFilters()` and `hasActiveFilters()` are public on
 the table for a Clear filters button, and `exportCsv()` for Export.
 
+### A whole list screen as one config
+
+Everything above is the *column* API: you compose the pieces and write a
+template per renderer. Pass `[tableConfig]` instead and the same component
+takes a **list screen described as data** — columns, row actions and toolbar in
+one object:
+
+```html
+<gm-table
+  [records]="records()"
+  [tableConfig]="tableConfig"
+  [totalRecords]="total()"
+  [loading]="loading()"
+  [translate]="translate"
+  (sortChange)="sort($event)"
+  (filterChange)="load($event)"
+  (pageChange)="load($event)"
+  (addClicked)="create()"
+/>
+```
+
+```ts
+readonly tableConfig: GmTableModel<Professional> = {
+  columns: [
+    { field: 'name', header: 'name', filterType: GmFilterType.TEXT,
+      linkPath: (row) => this.router.navigate(['view', row.id]) },
+    { field: 'code', header: 'code', filterType: GmFilterType.TEXT },
+    { field: 'status', header: 'status', filterType: GmFilterType.SELECT,
+      filterOptions: [{ id: 1, label: 'Validated' }],
+      cellType: GmCellType.DOT,
+      dotColorMap: { validated: GmStatusTone.SUCCESS } },
+  ],
+  singleActions: [
+    { type: GmTableActionType.EDIT, command: (row) => this.edit(row) },
+    { type: GmTableActionType.DELETE, command: (row) => this.remove(row),
+      visible: (row) => !row.locked },
+  ],
+  bulkActions: [
+    { type: GmTableActionType.DELETE, command: (rows) => this.removeAll(rows),
+      scope: GmTableBulkActionScope.SELECTED_ROWS_ONLY },
+    { type: GmTableActionType.UPLOAD, command: () => this.export(),
+      scope: GmTableBulkActionScope.GLOBAL },
+  ],
+};
+```
+
+`tableConfig` **mounts the frame the column API leaves to you**: the toolbar
+above, the paginator below, a pinned actions column, the selection column, and
+the `GmCellType` renderers. It is the same component throughout — frozen
+columns, the filter menus, truncation, CSV export and the cell templates all
+still work underneath.
+
+**Everything the column API does is a key in the config**, so a list screen
+never reaches back for an input:
+
+| On the model             | Does                                                              |
+| ------------------------ | ----------------------------------------------------------------- |
+| `rowSelectable`          | Which rows may be ticked — the rest render a disabled checkbox      |
+| `showColumnChooser`      | Offers the toolbar's chooser (default true)                         |
+| `reorderableColumns`     | Lets headers be dragged; the table keeps the new order itself       |
+| `actionsPosition`        | Which edge the actions column pins to (`start` / `end`)             |
+| `actionsFrozen`          | Unpins the actions column (default pinned)                          |
+| `actionsHeader`          | Its header, as a translation key (default `actions`)                |
+
+| On a column        | Does                                                              |
+| ------------------ | ----------------------------------------------------------------- |
+| `frozen`           | Pins the column, `frozenPosition` choosing the edge                 |
+| `align`            | `start` / `center` / `end` (config columns default to `center`)     |
+| `truncateAt`       | Characters before the rest moves into a tooltip; `0` keeps it whole |
+| `toggleable`       | `false` keeps the column out of the chooser, so it always shows     |
+| `exportable`       | `false` leaves it out of `exportCsv()`                              |
+| `reorderable`      | `false` pins its position while dragging is on                      |
+
+Reordering is the one that differs from the column API: there the consumer owns
+the `columns` array and applies the move, while a config grid has no array to
+reassign, so the table applies the drag itself and `columnReorder` is only a
+report — a column hidden in the chooser keeps its place for when it comes back.
+
+It also puts the table in **server mode**. Sorting and filtering are *reported*,
+never applied locally, because a config grid is showing one page of a much
+larger result set:
+
+| Output          | Carries                                                                     |
+| --------------- | --------------------------------------------------------------------------- |
+| `sortChange`    | `{ field, direction, orderBy, ascending }` — the same sort in both vocabularies |
+| `filterChange`  | `{ filters, pageNumber: 1, pageSize }`, `filters` being `GmFilterDescriptor[]` |
+| `pageChange`    | `{ pageNumber, pageSize }`                                                    |
+| `addClicked`    | nothing — the toolbar's Add was pressed                                       |
+
+`filterChange` hands over **`GmFilterDescriptor[]`**, not the component's own
+`GmTableFilter`: `propertyName` / `dataType` / `condition` / `value`, with
+`condition` the numeric comparison the list endpoints publish. A feature posts
+the event as it arrives rather than translating it first. Filtering always
+returns to page one — page 4 of the previous result set means nothing in the
+new one. A `SELECT` column compares by `Contains`, because its label is matched
+against a longer stored description, and an `Equals` there would find nothing.
+
+Two things the table cannot know, and so are inputs:
+
+- **`totalRecords`** — the paginator's total. The table holds one page; the
+  feature that fetched it reports how many there are.
+- **`translate`** — headers and action labels are *keys*, so one
+  `(key: string) => string` translates the whole grid. Defaults to the identity
+  function; pass a **new** function on language change to re-render.
+
+`GmTableActionType` decides an action's icon, severity and label key through
+one registry, so Delete is the same red trash button on every grid in the
+application and a config only says *what* the action is. A row action hidden by
+its `visible` predicate keeps its slot, so the icons stay in the same place from
+row to row; an action hidden on *every* loaded row is dropped outright.
+
+A bulk action is scoped: `GLOBAL` is always offered, `SELECTED_ROWS_ONLY`
+appears once **more than one** row is ticked — a bulk action over a single row
+is what that row's own actions are for. Ticking rows needs no extra input:
+the selection column appears exactly when a bulk action could use it.
+
+Config mode reads the v2-era input names where they differ (`records`,
+`dataKey`, `scrollHeight`, `stripedRows`, `showGridlines`, `rowHover`,
+`paginator`), so a screen moving off `genix-table-v2` changes its import path
+and nothing else. The one deliberate difference: **Add reports rather than
+navigates**. `(addClicked)` fires and the feature routes — the library takes no
+dependency on `@angular/router`.
+
 ### Deliberately not built
 
 Some PrimeNG pieces have no Genix component because they need none:

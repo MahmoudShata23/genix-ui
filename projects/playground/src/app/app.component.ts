@@ -55,14 +55,26 @@ import {
   GmStepperComponent,
   GmTabComponent,
   GmTabLabelDirective,
+  GmCellType,
+  GmColumnReorderEvent,
+  GmColumnSort,
+  GmFilterCondition,
+  GmFilterDescriptor,
+  GmFilterType,
+  GmStatusTone,
   GmTableAction,
   GmTableActionEvent,
+  GmTableActionType,
+  GmTableBulkActionScope,
   GmTableCellDirective,
   GmTableColumn,
   GmTableComponent,
   GmTableEmptyDirective,
   GmTableFilter,
+  GmTableModel,
   GmTableQueryEvent,
+  GmTableRequest,
+  GmTableSortChange,
   GmTableToolbarComponent,
   GmTabsComponent,
   GmTextareaComponent,
@@ -98,6 +110,8 @@ interface Provider {
   readonly country: string;
   readonly active: boolean;
   readonly score: number;
+  /** Rendered as a coloured dot by the config grid's `dotColorMap`. */
+  readonly tier: string;
   /** Deliberately long, to exercise the table's cell truncation. */
   readonly notes: string;
 }
@@ -371,6 +385,7 @@ export class AppComponent {
       country: "Lebanon",
       active: true,
       score: 92,
+      tier: "Preferred",
       notes:
         "Tertiary referral centre; cardiology and oncology under a capitated annexe.",
     },
@@ -381,6 +396,7 @@ export class AppComponent {
       country: "UAE",
       active: true,
       score: 78,
+      tier: "Standard",
       notes: "Primary care network, 6 branches. Dental excluded.",
     },
     {
@@ -390,6 +406,7 @@ export class AppComponent {
       country: "Lebanon",
       active: false,
       score: 64,
+      tier: "Standard",
       notes: "Laboratory only — no imaging. Courier pickup twice daily.",
     },
     {
@@ -399,6 +416,7 @@ export class AppComponent {
       country: "Saudi Arabia",
       active: true,
       score: 88,
+      tier: "Preferred",
       notes:
         "Full service. Renegotiating the surgical tariff schedule for next term.",
     },
@@ -409,6 +427,7 @@ export class AppComponent {
       country: "Egypt",
       active: false,
       score: 51,
+      tier: "Watch",
       notes:
         "Family practice. Paediatrics referred out to the regional hospital.",
     },
@@ -419,6 +438,7 @@ export class AppComponent {
       country: "Jordan",
       active: true,
       score: 71,
+      tier: "Standard",
       notes: "Imaging: MRI, CT, ultrasound. Reports within 24h.",
     },
     {
@@ -428,6 +448,7 @@ export class AppComponent {
       country: "Qatar",
       active: true,
       score: 95,
+      tier: "Preferred",
       notes:
         "Cardiac surgery centre of excellence; direct billing agreement in place.",
     },
@@ -438,6 +459,7 @@ export class AppComponent {
       country: "Kuwait",
       active: false,
       score: 43,
+      tier: "Watch",
       notes:
         "Day surgery only. Overnight stays are not covered under this contract.",
     },
@@ -800,6 +822,242 @@ export class AppComponent {
     this.gridRows.set(rows.slice(first, first + query.pageSize));
   }
 
+  // ── Section: table, config-driven ───────────────────────────────────────
+  // The same component as the two cards above, handed a `tableConfig` instead
+  // of `[columns]`: it mounts its own toolbar, actions column and paginator,
+  // and reports sort/filter/page as list-API requests.
+
+  /**
+   * Headers and action labels are *keys*, as a real screen's are. This stands
+   * in for a translation pipe — a key with no entry falls through unchanged,
+   * which is what the library's default does too.
+   */
+  protected readonly configTranslate = (key: string): string =>
+    ({
+      actions: "Actions",
+      add: "Add provider",
+      delete: "Delete",
+      export: "Export",
+      edit: "Edit",
+      selectColumns: "Columns",
+      provider: "Provider",
+      type: "Type",
+      country: "Country",
+      score: "Score",
+      status: "Status",
+      tier: "Tier",
+      notes: "Notes",
+    })[key] ?? key;
+
+  protected readonly configSelection = signal<Provider[]>([]);
+  protected readonly lastConfigEvent = signal("nothing yet");
+
+  /** The config grid itself, for the Export action's `exportCsv()`. */
+  private readonly configTable =
+    viewChild<GmTableComponent<Provider>>("configTable");
+
+  /**
+   * The switches above the grid. Each one only rebuilds `providerConfig` —
+   * the point of the section is that the whole view is that one object, so
+   * nothing here reaches for a table input.
+   */
+  protected readonly configColumnChooser = signal(true);
+  protected readonly configActionsEdge = signal<"start" | "end">("start");
+  protected readonly configReorder = signal(true);
+  protected readonly configLockInactive = signal(true);
+
+  private readonly configQuery = signal<{
+    filters: readonly GmFilterDescriptor[];
+    sort: GmColumnSort | null;
+    page: number;
+    pageSize: number;
+  }>({ filters: [], sort: null, page: 1, pageSize: 5 });
+
+  /**
+   * The whole grid as one object: columns and their renderers, which rows may
+   * be ticked, where the actions column pins, whether the chooser is offered
+   * and whether headers can be dragged. A `computed`, so the switches above it
+   * change the grid by handing it a new config — never by touching an input.
+   */
+  protected readonly providerConfig = computed<GmTableModel<Provider>>(() => ({
+    columns: [
+      {
+        field: "name",
+        header: "provider",
+        filterble: false,
+        sortable: false,
+        // filterType: GmFilterType.TEXT,
+        width: "16rem",
+        align: "start",
+        // Pinned, and never offered in the chooser: every other cell is about
+        // this one, so the grid would be unreadable without it.
+        frozen: false,
+        toggleable: false,
+        linkPath: (row) => this.lastConfigEvent.set(`Open → ${row.name}`),
+      },
+      {
+        field: "type",
+        header: "type",
+        filterType: GmFilterType.SELECT,
+        filterOptions: [
+          { id: 1, label: "Hospital" },
+          { id: 2, label: "Clinic" },
+          { id: 3, label: "Laboratory" },
+        ],
+      },
+      { field: "country", header: "country", filterType: GmFilterType.TEXT },
+      {
+        field: "score",
+        header: "score",
+        filterType: GmFilterType.NUMERIC,
+        width: "8rem",
+        align: "end",
+      },
+      { field: "active", header: "status", filterType: GmFilterType.BOOLEAN },
+      {
+        // The same value as `status`, drawn as a dot rather than a mark, to
+        // show a cellType renderer beside the plain ones.
+        field: "tier",
+        header: "tier",
+        sortable: false,
+        width: "7rem",
+        cellType: GmCellType.DOT,
+        dotColorMap: {
+          preferred: GmStatusTone.SUCCESS,
+          standard: GmStatusTone.INFO,
+          watch: GmStatusTone.WARNING,
+        },
+        tooltipField: "tier",
+      },
+      {
+        field: "notes",
+        header: "notes",
+        filterType: GmFilterType.TEXT,
+        width: "18rem",
+        align: "start",
+        sortable: false,
+        // Tighter than the table's own 25, so the rest moves into a tooltip.
+        truncateAt: 24,
+        // Truncated prose is display, not data worth exporting.
+        exportable: false,
+      },
+    ],
+    singleActions: [
+      {
+        type: GmTableActionType.EDIT,
+        command: (row) => this.lastConfigEvent.set(`Edit → ${row.name}`),
+      },
+      {
+        // Hidden on inactive rows: the slot stays, so the icons of every row
+        // still line up.
+        type: GmTableActionType.DELETE,
+        command: (row) => this.lastConfigEvent.set(`Delete → ${row.name}`),
+        visible: (row) => row.active,
+      },
+    ],
+    bulkActions: [
+      {
+        type: GmTableActionType.DELETE,
+        command: (rows) =>
+          this.lastConfigEvent.set(`Delete ${rows.length} providers`),
+        scope: GmTableBulkActionScope.SELECTED_ROWS_ONLY,
+      },
+      {
+        // Export is the table's own: `exportCsv()` writes the rendered rows,
+        // minus the columns that opted out.
+        type: GmTableActionType.UPLOAD,
+        command: () => this.exportConfigGrid(),
+        scope: GmTableBulkActionScope.GLOBAL,
+      },
+    ],
+    // Inactive providers cannot be ticked, so a bulk Delete can never reach
+    // one — the same predicate the composed grid passes as an input.
+    rowSelectable: this.configLockInactive()
+      ? (row: Provider) => row.active
+      : undefined,
+    showColumnChooser: this.configColumnChooser(),
+    reorderableColumns: this.configReorder(),
+    actionsPosition: this.configActionsEdge(),
+  }));
+
+  private exportConfigGrid(): void {
+    this.configTable()?.exportCsv({ fileName: "providers" });
+    this.lastConfigEvent.set("Export · exportCsv()");
+  }
+
+  protected onConfigReorder(event: GmColumnReorderEvent<Provider>): void {
+    // The table keeps the new order itself in config mode; the event is only
+    // so a feature can persist it.
+    this.lastConfigEvent.set(
+      `columnReorder · ${event.previousIndex} → ${event.currentIndex}`,
+    );
+  }
+
+  /**
+   * Stands in for the API. Worth reading as the reference for a real adapter:
+   * descriptors arrive with a numeric `condition`, which is exactly what a
+   * backend filter clause switches on.
+   */
+  private readonly configMatched = computed<readonly Provider[]>(() => {
+    const { filters, sort } = this.configQuery();
+
+    const rows = this.providers.filter((row) =>
+      filters.every((descriptor) => matchesDescriptor(row, descriptor)),
+    );
+
+    if (!sort?.orderBy) {
+      return rows;
+    }
+    const factor = sort.ascending ? 1 : -1;
+    const field = sort.orderBy as keyof Provider;
+    return [...rows].sort(
+      (a, b) =>
+        factor *
+        String(a[field]).localeCompare(String(b[field]), undefined, {
+          numeric: true,
+        }),
+    );
+  });
+
+  protected readonly configTotal = computed(() => this.configMatched().length);
+
+  protected readonly configRecords = computed<Provider[]>(() => {
+    const { page, pageSize } = this.configQuery();
+    const first = (page - 1) * pageSize;
+    return this.configMatched().slice(first, first + pageSize);
+  });
+
+  /** Filtering already comes back at page one — the event says so. */
+  protected onConfigFilter(request: GmTableRequest): void {
+    this.configQuery.update((query) => ({
+      ...query,
+      filters: request.filters ?? [],
+      page: request.pageNumber,
+      pageSize: request.pageSize,
+    }));
+    this.lastConfigEvent.set(
+      `filterChange · ${request.filters?.length ?? 0} descriptor(s)`,
+    );
+  }
+
+  protected onConfigPage(request: GmTableRequest): void {
+    this.configQuery.update((query) => ({
+      ...query,
+      page: request.pageNumber,
+      pageSize: request.pageSize,
+    }));
+    this.lastConfigEvent.set(`pageChange · page ${request.pageNumber}`);
+  }
+
+  protected onConfigSort(sort: GmTableSortChange): void {
+    this.configQuery.update((query) => ({ ...query, sort, page: 1 }));
+    this.lastConfigEvent.set(
+      sort.orderBy
+        ? `sortChange · ${sort.orderBy} ${sort.ascending ? "asc" : "desc"}`
+        : "sortChange · unsorted",
+    );
+  }
+
   // ── Dialog ──────────────────────────────────────────────────────────────
 
   private readonly dialogService = inject(GmDialogService);
@@ -1122,6 +1380,43 @@ function matchesRule(value: unknown, rule: GmTableFilter): boolean {
       return Number(value) <= Number(rule.value);
     case "in":
       return (rule.value as unknown[]).map(text).includes(cell);
+    default:
+      return cell === wanted;
+  }
+}
+
+/**
+ * The descriptor half of the same stand-in: a config-mode grid reports
+ * `GmFilterDescriptor`s, whose `condition` is the numeric comparison a list
+ * endpoint publishes rather than the component's own operator name.
+ */
+function matchesDescriptor(
+  row: object,
+  descriptor: GmFilterDescriptor,
+): boolean {
+  const value = (row as Record<string, unknown>)[descriptor.propertyName ?? ""];
+  const cell = String(value ?? "").toLowerCase();
+  const wanted = String(descriptor.value ?? "").toLowerCase();
+
+  switch (descriptor.condition) {
+    case GmFilterCondition.StartsWith:
+      return cell.startsWith(wanted);
+    case GmFilterCondition.EndsWith:
+      return cell.endsWith(wanted);
+    case GmFilterCondition.Contains:
+      return cell.includes(wanted);
+    case GmFilterCondition.NotContains:
+      return !cell.includes(wanted);
+    case GmFilterCondition.NotEquals:
+      return cell !== wanted;
+    case GmFilterCondition.GreaterThan:
+      return Number(value) > Number(descriptor.value);
+    case GmFilterCondition.GreaterThanOrEqualTo:
+      return Number(value) >= Number(descriptor.value);
+    case GmFilterCondition.LessThan:
+      return Number(value) < Number(descriptor.value);
+    case GmFilterCondition.LessThanOrEqualTo:
+      return Number(value) <= Number(descriptor.value);
     default:
       return cell === wanted;
   }

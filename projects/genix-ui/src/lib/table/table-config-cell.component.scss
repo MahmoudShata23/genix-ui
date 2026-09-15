@@ -1,0 +1,158 @@
+/* ==========================================================================
+   gm-table-config-cell
+   --------------------------------------------------------------------------
+   The cell renderers a `tableConfig` column can ask for. Every colour is a
+   `--gm-*` token, and every mark is drawn in CSS — the library ships no icon
+   font and no image assets, so a boolean cell is a shape, not an <img>.
+   ========================================================================== */
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: inherit;
+  max-width: 100%;
+}
+
+.gm-cell-empty {
+  color: var(--gm-gray-400);
+}
+
+/* ---- Status / mapped dots ---------------------------------------------- */
+
+.gm-cell-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--gm-radius-full);
+  background: var(--gm-gray-400);
+  cursor: default;
+
+  &--success {
+    background: var(--gm-success);
+  }
+
+  &--warning {
+    background: var(--gm-warning);
+  }
+
+  &--danger {
+    background: var(--gm-danger);
+  }
+
+  &--info {
+    background: var(--gm-info);
+  }
+
+  &--neutral {
+    background: var(--gm-gray-400);
+  }
+}
+
+/* ---- SLA ---------------------------------------------------------------- */
+
+.gm-cell-sla {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--gm-radius-full);
+  background: var(--gm-success);
+  cursor: default;
+
+  &--warning {
+    background: var(--gm-warning);
+  }
+
+  &--breached {
+    background: var(--gm-danger);
+  }
+}
+
+/* ---- Avatar ------------------------------------------------------------- */
+
+.gm-cell-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--gm-radius-full);
+  background: var(--gm-primary);
+  color: var(--gm-white);
+  font-size: var(--gm-font-size-xs);
+  font-weight: var(--gm-font-weight-semibold);
+  letter-spacing: 0.02em;
+  cursor: default;
+  user-select: none;
+}
+
+/* ---- Boolean ------------------------------------------------------------ */
+
+.gm-cell-bool {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--gm-radius-full);
+  position: relative;
+
+  &--true {
+    background: var(--gm-success);
+  }
+
+  &--false {
+    background: var(--gm-gray-300);
+  }
+
+  /* The tick / bar is drawn, not typed, so it never depends on a font. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+  }
+
+  &--true::after {
+    width: 0.25rem;
+    height: 0.5rem;
+    margin-top: 0.15rem;
+    border: solid var(--gm-white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  &--false::after {
+    width: 0.5rem;
+    height: 2px;
+    background: var(--gm-white);
+  }
+}
+
+/* ---- List --------------------------------------------------------------- */
+
+.gm-cell-list {
+  margin: 0;
+  padding-inline-start: var(--gm-space-4);
+  list-style: disc;
+  text-align: start;
+}
+
+/* ---- Link --------------------------------------------------------------- */
+
+.gm-cell-link {
+  color: var(--gm-primary);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+/* ---- Truncated text ----------------------------------------------------- */
+
+.gm-cell-truncated {
+  cursor: help;
+  outline-offset: 2px;
+}

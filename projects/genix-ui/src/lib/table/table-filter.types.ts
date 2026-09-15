@@ -112,6 +112,11 @@ export interface GmTableFilterLabels {
   clear: string;
   apply: string;
 
+  /** Shown in a searchable select's list while a lookup is in flight. */
+  searching: string;
+  /** Shown in a searchable select's list once a lookup came back with nothing. */
+  noResults: string;
+
   contains: string;
   notContains: string;
   startsWith: string;
@@ -139,6 +144,9 @@ export const GM_TABLE_FILTER_LABELS: GmTableFilterLabels = {
   removeRule: 'Remove rule',
   clear: 'Clear',
   apply: 'Apply',
+
+  searching: 'Searching…',
+  noResults: 'No results found',
 
   contains: 'Contains',
   notContains: 'Not contains',

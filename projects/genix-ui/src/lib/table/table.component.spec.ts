@@ -6,7 +6,8 @@ import {
   GmTableCellDirective,
   GmTableEmptyDirective,
 } from './table-templates';
-import type { GmSortEvent, GmTableColumn } from './table.types';
+import type { GmTableColumn } from './table.types';
+import type { GmTableSortChange } from './table-request.types';
 
 interface User {
   id: number;
@@ -45,7 +46,7 @@ class HostComponent {
   readonly mode = signal<'single' | 'multiple' | null>(null);
   readonly sortMode = signal<'client' | 'server'>('client');
   selected: User[] = [];
-  readonly sorts: GmSortEvent[] = [];
+  readonly sorts: GmTableSortChange[] = [];
 
   readonly columns: GmTableColumn<User>[] = [
     { field: 'name', header: 'Name', sortable: true },
@@ -171,10 +172,12 @@ describe('gm-table', () => {
     sortButton('Name').click();
     sortButton('Name').click();
     fixture.detectChanges();
+    // The same sort under both vocabularies: the component's, and the one a
+    // list endpoint takes. Unsorted reports no `orderBy` at all.
     expect(host.sorts).toEqual([
-      { field: 'name', direction: 'asc' },
-      { field: 'name', direction: 'desc' },
-      { field: 'name', direction: null },
+      { field: 'name', direction: 'asc', orderBy: 'name', ascending: true },
+      { field: 'name', direction: 'desc', orderBy: 'name', ascending: false },
+      { field: 'name', direction: null, orderBy: '', ascending: false },
     ]);
   });
 
@@ -186,7 +189,12 @@ describe('gm-table', () => {
 
     // Still source order; only the event fired.
     expect(colText(0)).toEqual(['Cara', 'alan', 'Bea']);
-    expect(host.sorts.at(-1)).toEqual({ field: 'name', direction: 'asc' });
+    expect(host.sorts.at(-1)).toEqual({
+      field: 'name',
+      direction: 'asc',
+      orderBy: 'name',
+      ascending: true,
+    });
   });
 
   // ── selection ─────────────────────────────────────────────────────────

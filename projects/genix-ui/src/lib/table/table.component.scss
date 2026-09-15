@@ -79,7 +79,10 @@
   --gm-table-row-bg: var(--gm-primary-light);
 }
 
-.gm-table .gm-table__row:hover {
+/* `:not()` raises the specificity above the three rules before it, so the
+   hover tint still wins wherever it applies while `rowHover: false` opts the
+   whole table out. */
+.gm-table:not(.gm-table--no-hover) .gm-table__row:hover {
   --gm-table-row-bg: var(--gm-primary-light);
 }
 
@@ -398,4 +401,25 @@
       border-inline-end: 0;
     }
   }
+}
+
+/* ==========================================================================
+   Config mode
+   --------------------------------------------------------------------------
+   `tableConfig` mounts the toolbar and the paginator inside the host, so the
+   three stack as one framed panel without the consumer composing a card —
+   which is the layout every list screen in the application uses.
+   ========================================================================== */
+
+:host:has(.gm-table-toolbar) {
+  display: block;
+  border: 1px solid var(--gm-gray-200);
+  border-radius: var(--gm-radius-lg);
+  background: var(--gm-white);
+  overflow: hidden;
+}
+
+:host:has(.gm-table-toolbar) .gm-pagination-host {
+  display: block;
+  border-top: 1px solid var(--gm-gray-200);
 }

@@ -17,6 +17,29 @@ consumers see on the registry. This file is about working *on* the library.
 | `projects/playground`| A small app that consumes the built package — the repo's own smoke test. |
 | `dist/genix-ui`      | Build output. This directory is what gets published, not the source.     |
 
+## Styling
+
+A consuming app must load **both** stylesheets the package ships:
+
+```scss
+@use "@globemed/genix-ui/styles/tokens.css";
+@use "@globemed/genix-ui/styles/overlay.css";
+```
+
+`tokens.css` defines the `--gm-*` custom properties every component reads; an
+app with its own `--gm-*` scale can define them itself instead.
+
+`overlay.css` is not optional. Everything rendered outside the document flow —
+`gm-dialog`, `gm-toast`, and the trigger-anchored panels of `gm-select`,
+`gm-multiselect`, `gm-datepicker`, `gm-menu` and `gm-popover` — goes into the
+CDK overlay container, which the CDK creates with no styles of its own. The
+dialog and toast containers position themselves and so look right without it,
+which makes the gap easy to miss: a `gm-select` opened *inside* a `gm-dialog`
+is the case that breaks, because its pane has no stacking context and the
+dialog paints over it. Its values mirror
+`@angular/cdk/overlay-prebuilt.css` for the selectors used here, so an app
+already loading that sheet can keep it instead.
+
 ## Develop
 
 ```bash

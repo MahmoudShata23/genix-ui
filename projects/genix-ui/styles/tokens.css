@@ -113,6 +113,9 @@
   --gm-z-slide-panel: 450;
   --gm-z-toast: 500;
 
+  /* The CDK overlay container, which holds the modal and toast layers inside it. */
+  --gm-z-overlay-container: 1000;
+
   /* ---------------------------------------------------------------- */
   /* 2. Kit-derived tokens                                            */
   /*    Values the kit states inline in a component rule; promoted    */

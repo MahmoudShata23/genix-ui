@@ -4,25 +4,6 @@
   [class.gm-table-toolbar--align-end]="actionsAlign() === 'end'"
   [class.gm-table-toolbar--has-selection]="hasSelection()"
 >
-  <div class="gm-table-toolbar__actions">
-    @for (action of visibleActions(); track action.key) {
-      <gm-button
-        [label]="action.label"
-        [icon]="action.icon"
-        [severity]="action.severity ?? 'primary'"
-        [variant]="action.variant ?? 'filled'"
-        [size]="sizeOf(action)"
-        [disabled]="isDisabled(action)"
-        [ariaLabel]="labelFor(action)"
-        [gmTooltip]="action.tooltip ?? ''"
-        (onClick)="onAction(action)"
-      />
-    }
-
-    <!-- Anything the config cannot express: a split button, a custom menu. -->
-    <ng-content />
-  </div>
-
   <!-- View controls, not business actions. Whether this holds anything is what
        `actionsAlign: 'auto'` keys off, so the bar never sits half empty. -->
   <div class="gm-table-toolbar__aside">
@@ -46,5 +27,24 @@
     }
 
     <ng-content select="[gmTableToolbarEnd]" />
+  </div>
+
+  <div class="gm-table-toolbar__actions">
+    @for (action of visibleActions(); track action.key) {
+      <gm-button
+        [label]="action.label"
+        [icon]="action.icon"
+        [severity]="action.severity ?? 'primary'"
+        [variant]="action.variant ?? 'filled'"
+        [size]="sizeOf(action)"
+        [disabled]="isDisabled(action)"
+        [ariaLabel]="labelFor(action)"
+        [gmTooltip]="action.tooltip ?? ''"
+        (onClick)="onAction(action)"
+      />
+    }
+
+    <!-- Anything the config cannot express: a split button, a custom menu. -->
+    <ng-content />
   </div>
 </div>

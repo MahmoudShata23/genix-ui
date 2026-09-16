@@ -1,7 +1,7 @@
 <!-- Config mode frames the grid itself: the toolbar above and the paginator
      below are the same components a hand-composed grid would stack around it,
      mounted here so one `tableConfig` is the whole screen. -->
-@if (configMode()) {
+@if (toolbarVisible()) {
   <gm-table-toolbar
     [actions]="configToolbarActions()"
     [selection]="selection()"

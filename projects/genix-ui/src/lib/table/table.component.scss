@@ -411,7 +411,7 @@
    which is the layout every list screen in the application uses.
    ========================================================================== */
 
-:host:has(.gm-table-toolbar) {
+:host.gm-table-host--config-mode {
   display: block;
   border: 1px solid var(--gm-gray-200);
   border-radius: var(--gm-radius-lg);
@@ -419,7 +419,7 @@
   overflow: hidden;
 }
 
-:host:has(.gm-table-toolbar) .gm-pagination-host {
+:host.gm-table-host--config-mode .gm-pagination-host {
   display: block;
   border-top: 1px solid var(--gm-gray-200);
 }

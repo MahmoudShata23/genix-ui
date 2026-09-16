@@ -1,4 +1,4 @@
-import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -16,52 +16,49 @@ import {
   output,
   signal,
   viewChild,
-} from '@angular/core';
+} from "@angular/core";
 
-import { FormsModule } from '@angular/forms';
+import { FormsModule } from "@angular/forms";
 import {
   CdkDrag,
   CdkDragDrop,
   CdkDragHandle,
   CdkDropList,
-} from '@angular/cdk/drag-drop';
-import { from, isObservable, map } from 'rxjs';
-import type { Observable } from 'rxjs';
+} from "@angular/cdk/drag-drop";
+import { from, isObservable, map } from "rxjs";
+import type { Observable } from "rxjs";
 
-import { GmButtonComponent } from '../button/button.component';
-import { GmCheckboxComponent } from '../checkbox/checkbox.component';
-import { GmPaginationComponent } from '../pagination/pagination.component';
-import { GmRadioComponent } from '../radio/radio.component';
-import { GmSpinnerComponent } from '../spinner/spinner.component';
-import { GmTooltipDirective } from '../tooltip/tooltip.directive';
-import { gmUniqueId } from '../core/unique-id';
-import { gmBuildCsv } from './table-export';
-import type { GmTableExportOptions } from './table-export';
-import { GmTableFilterMenuComponent } from './table-filter-menu.component';
-import { GmTableToolbarComponent } from './table-toolbar.component';
-import { GmTableConfigCellComponent } from './table-config-cell.component';
-import { GmTableRowActionsComponent } from './table-row-actions.component';
-import { gmActionStyle } from './table-action-registry';
-import { gmToFilterDescriptors } from './table-config-filters';
-import { GmFilterType, GmTableBulkActionScope } from './table-config.types';
+import { GmButtonComponent } from "../button/button.component";
+import { GmCheckboxComponent } from "../checkbox/checkbox.component";
+import { GmPaginationComponent } from "../pagination/pagination.component";
+import { GmRadioComponent } from "../radio/radio.component";
+import { GmSpinnerComponent } from "../spinner/spinner.component";
+import { GmTooltipDirective } from "../tooltip/tooltip.directive";
+import { gmUniqueId } from "../core/unique-id";
+import { gmBuildCsv } from "./table-export";
+import type { GmTableExportOptions } from "./table-export";
+import { GmTableFilterMenuComponent } from "./table-filter-menu.component";
+import { GmTableToolbarComponent } from "./table-toolbar.component";
+import { GmTableConfigCellComponent } from "./table-config-cell.component";
+import { GmTableRowActionsComponent } from "./table-row-actions.component";
+import { gmActionStyle } from "./table-action-registry";
+import { gmToFilterDescriptors } from "./table-config-filters";
+import { GmFilterType, GmTableBulkActionScope } from "./table-config.types";
 import type {
   GmTableActionType,
   GmTableConfigColumn,
   GmTableModel,
   GmTableTranslate,
-} from './table-config.types';
-import type { GmTableAction } from './table-action.types';
-import type {
-  GmTableRequest,
-  GmTableSortChange,
-} from './table-request.types';
+} from "./table-config.types";
+import type { GmTableAction } from "./table-action.types";
+import type { GmTableRequest, GmTableSortChange } from "./table-request.types";
 import {
   GmTableCellDirective,
   GmTableEmptyDirective,
   GmTableFilterDirective,
   GmTableHeaderDirective,
-} from './table-templates';
-import { GM_TABLE_FILTER_LABELS } from './table-filter.types';
+} from "./table-templates";
+import { GM_TABLE_FILTER_LABELS } from "./table-filter.types";
 import type {
   GmFilterMatchLogic,
   GmTableFilter,
@@ -70,7 +67,7 @@ import type {
   GmTableFilterMenuEvent,
   GmTableFilterMode,
   GmTableFiltersChangeEvent,
-} from './table-filter.types';
+} from "./table-filter.types";
 import type {
   GmColumnReorderEvent,
   GmSortDirection,
@@ -78,10 +75,13 @@ import type {
   GmTableColumn,
   GmTableSelectionMode,
   GmTableSortMode,
-} from './table.types';
-import type { GmTableFilterOption, GmTableFilterType } from './table-filter.types';
-import type { GmTableQueryEvent } from './table-query.types';
-import type { GmPageChangeEvent } from '../pagination/pagination.types';
+} from "./table.types";
+import type {
+  GmTableFilterOption,
+  GmTableFilterType,
+} from "./table-filter.types";
+import type { GmTableQueryEvent } from "./table-query.types";
+import type { GmPageChangeEvent } from "../pagination/pagination.types";
 
 /**
  * Table core: columns, rows, sorting, selection, loading and empty states.
@@ -108,7 +108,7 @@ import type { GmPageChangeEvent } from '../pagination/pagination.types';
  * paginator implementation and the toolbar stays the feature's own.
  */
 @Component({
-  selector: 'gm-table',
+  selector: "gm-table",
   standalone: true,
   imports: [
     NgTemplateOutlet,
@@ -127,10 +127,13 @@ import type { GmPageChangeEvent } from '../pagination/pagination.types';
     CdkDrag,
     CdkDragHandle,
   ],
-  templateUrl: './table.component.html',
-  styleUrl: './table.component.scss',
+  templateUrl: "./table.component.html",
+  styleUrl: "./table.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'gm-table-host' },
+  host: {
+    class: "gm-table-host",
+    "[class.gm-table-host--config-mode]": "configMode()",
+  },
 })
 export class GmTableComponent<T> {
   readonly data = input<readonly T[]>([]);
@@ -178,7 +181,7 @@ export class GmTableComponent<T> {
 
   /** Only `{first}`, `{last}` and `{totalRecords}` are substituted. */
   readonly pageReportTemplate = input<string>(
-    'Showing {first} to {last} of {totalRecords}',
+    "Showing {first} to {last} of {totalRecords}",
   );
 
   /** Force-hides the add button regardless of `tableConfig().showAddButton`. */
@@ -193,10 +196,10 @@ export class GmTableComponent<T> {
   readonly rowHover = input(true, { transform: booleanAttribute });
 
   /** Config mode's `rowKey`. */
-  readonly dataKey = input<string>('id');
+  readonly dataKey = input<string>("id");
 
   /** Config mode's `maxHeight` — the body scrolls under a pinned header. */
-  readonly scrollHeight = input<string>('65dvh');
+  readonly scrollHeight = input<string>("65dvh");
 
   /** Config mode's `striped`. */
   readonly stripedRows = input(true, { transform: booleanAttribute });
@@ -224,6 +227,11 @@ export class GmTableComponent<T> {
 
   protected readonly configMode = computed(() => !!this.tableConfig());
 
+  /** Toolbar visibility, controlled by tableConfig.showToolbar (defaults to true). */
+  protected readonly toolbarVisible = computed(
+    () => this.configMode() && this.tableConfig()?.showToolbar !== false,
+  );
+
   protected readonly configColumnsSource = computed<
     readonly GmTableConfigColumn<T>[]
   >(() => this.tableConfig()?.columns ?? []);
@@ -248,15 +256,15 @@ export class GmTableComponent<T> {
       filterSearch: source.filterSearch
         ? (term: string) => searchOptions(source.filterSearch!(term))
         : undefined,
-      minWidth: source.width ?? '200px',
+      minWidth: source.width ?? "200px",
       // A frozen column's offset is computed from declared widths, so one
       // without a width would pin itself on top of its neighbour.
-      width: source.frozen ? (source.width ?? '200px') : undefined,
+      width: source.frozen ? (source.width ?? "200px") : undefined,
       frozen: source.frozen,
       frozenPosition: source.frozenPosition,
       // A list screen's columns read as centred unless the config says
       // otherwise — the one default the two APIs do not share.
-      align: source.align ?? 'center',
+      align: source.align ?? "center",
       truncateAt: source.truncateAt,
       toggleable: source.toggleable,
       exportable: source.exportable,
@@ -294,12 +302,12 @@ export class GmTableComponent<T> {
     }
     const config = this.tableConfig();
     return {
-      header: this.translate()(config?.actionsHeader ?? 'actions'),
+      header: this.translate()(config?.actionsHeader ?? "actions"),
       frozen: config?.actionsFrozen !== false,
-      frozenPosition: config?.actionsPosition ?? 'start',
+      frozenPosition: config?.actionsPosition ?? "start",
       // One small icon button per action, plus the cell's own padding.
       width: `${count * 2.5 + 1.5}rem`,
-      align: 'center',
+      align: "center",
       sortable: false,
       reorderable: false,
       exportable: false,
@@ -375,7 +383,7 @@ export class GmTableComponent<T> {
       }
       // Position, not `frozen`, decides which end it sits at: an unpinned
       // actions column still has to follow `actionsPosition`.
-      return this.tableConfig()?.actionsPosition === 'end'
+      return this.tableConfig()?.actionsPosition === "end"
         ? [...data, actions]
         : [actions, ...data];
     },
@@ -416,9 +424,9 @@ export class GmTableComponent<T> {
     if (this.addButtonVisible()) {
       actions.push({
         key: GM_ADD_ACTION_KEY,
-        label: translate('add'),
-        icon: 'pi pi-plus',
-        severity: 'primary',
+        label: translate("add"),
+        icon: "pi pi-plus",
+        severity: "primary",
         disabled: () => this.addButtonDisabled(),
         command: () => this.addClicked.emit(),
       });
@@ -431,10 +439,10 @@ export class GmTableComponent<T> {
         label: translate(style.label),
         icon: style.icon,
         severity: style.color,
-        variant: 'text',
+        variant: "text",
         scope:
-          bulk.scope === GmTableBulkActionScope.GLOBAL ? 'global' : 'selection',
-        minSelection: 2,
+          bulk.scope === GmTableBulkActionScope.GLOBAL ? "global" : "selection",
+        minSelection: 1,
         visible: () => bulk.visible?.() ?? true,
         command: (rows) => bulk.command([...rows]),
       });
@@ -443,8 +451,8 @@ export class GmTableComponent<T> {
     return actions;
   });
 
-  protected readonly clearFiltersLabel = computed(() =>
-    this.resolvedFilterLabels().clear,
+  protected readonly clearFiltersLabel = computed(
+    () => this.resolvedFilterLabels().clear,
   );
 
   // ── Config-mode paging ──────────────────────────────────────────────────
@@ -515,7 +523,7 @@ export class GmTableComponent<T> {
     computed<GmTableSelectionMode | null>(() =>
       this.configMode()
         ? this.checkboxVisible()
-          ? 'multiple'
+          ? "multiple"
           : null
         : this.selectionMode(),
     );
@@ -547,7 +555,7 @@ export class GmTableComponent<T> {
 
   readonly loading = input(false, { transform: booleanAttribute });
 
-  readonly emptyMessage = input<string>('No records found');
+  readonly emptyMessage = input<string>("No records found");
 
   /**
    * Property giving each row a stable identity. Falls back to object reference,
@@ -578,7 +586,7 @@ export class GmTableComponent<T> {
    */
   readonly selection = model<T[]>([]);
 
-  readonly sortMode = input<GmTableSortMode>('client');
+  readonly sortMode = input<GmTableSortMode>("client");
 
   /** Initial/controlled sort. In `server` mode this is the only source. */
   readonly sortField = input<string | null>(null);
@@ -613,10 +621,10 @@ export class GmTableComponent<T> {
 
   protected readonly maxHeightCss = computed(() => {
     const value = this.maxHeight();
-    if (value === undefined || value === null || value === '') {
+    if (value === undefined || value === null || value === "") {
       return null;
     }
-    return typeof value === 'number' ? `${value}px` : value;
+    return typeof value === "number" ? `${value}px` : value;
   });
 
   /** Config mode caps the body at `scrollHeight` unless `maxHeight` overrides it. */
@@ -652,12 +660,12 @@ export class GmTableComponent<T> {
   /** `serverSide` implies both modes, so consumers set one input, not three. */
   private readonly serverSort = computed(
     () =>
-      this.serverSide() || this.configMode() || this.sortMode() === 'server',
+      this.serverSide() || this.configMode() || this.sortMode() === "server",
   );
 
   private readonly serverFilter = computed(
     () =>
-      this.serverSide() || this.configMode() || this.filterMode() === 'server',
+      this.serverSide() || this.configMode() || this.filterMode() === "server",
   );
 
   // ── Filtering ───────────────────────────────────────────────────────────
@@ -679,7 +687,7 @@ export class GmTableComponent<T> {
     () => this.userFilters() ?? this.filters(),
   );
 
-  readonly filterMode = input<GmTableFilterMode>('server');
+  readonly filterMode = input<GmTableFilterMode>("server");
 
   /**
    * Milliseconds to wait before a typed *global search* term is applied. The
@@ -713,7 +721,7 @@ export class GmTableComponent<T> {
    * `filterMode`, exactly as the column filters do, so the two cannot disagree:
    * local matching needs `filterMode="client"`.
    */
-  readonly globalSearch = input<string>('');
+  readonly globalSearch = input<string>("");
 
   /**
    * Fields the term is matched against. Defaults to every column that has a
@@ -749,7 +757,7 @@ export class GmTableComponent<T> {
   readonly reorderableColumns = input(false, { transform: booleanAttribute });
 
   /** Tooltip on the drag grip. Text, so the host app can translate it. */
-  readonly reorderHandleLabel = input<string>('Drag to reorder column');
+  readonly reorderHandleLabel = input<string>("Drag to reorder column");
 
   readonly columnReorder = output<GmColumnReorderEvent<T>>();
 
@@ -772,11 +780,11 @@ export class GmTableComponent<T> {
    * Which frozen band a column belongs to. Reordering is confined to one band,
    * so a drag can never smuggle a column out of the pinned region.
    */
-  private bandOf(column: GmTableColumn<T>): 'start' | 'end' | 'normal' {
+  private bandOf(column: GmTableColumn<T>): "start" | "end" | "normal" {
     if (this.isFrozenStart(column)) {
-      return 'start';
+      return "start";
     }
-    return this.isFrozenEnd(column) ? 'end' : 'normal';
+    return this.isFrozenEnd(column) ? "end" : "normal";
   }
 
   /**
@@ -840,7 +848,7 @@ export class GmTableComponent<T> {
     this.userFieldOrder.set(fields);
   }
 
-  readonly tableId = gmUniqueId('gm-table');
+  readonly tableId = gmUniqueId("gm-table");
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -854,7 +862,11 @@ export class GmTableComponent<T> {
     // column — otherwise no offset depends on its width.
     effect((onCleanup) => {
       const cell = this.selectHeaderCell()?.nativeElement;
-      if (!cell || !this.selectionFrozen() || typeof ResizeObserver === 'undefined') {
+      if (
+        !cell ||
+        !this.selectionFrozen() ||
+        typeof ResizeObserver === "undefined"
+      ) {
         this.selectWidthPx.set(null);
         return;
       }
@@ -876,7 +888,7 @@ export class GmTableComponent<T> {
   protected readonly activeSort = computed<GmSortEvent>(() => {
     const own = this.userSort();
     return (
-      own ?? { field: this.sortField() ?? '', direction: this.sortDirection() }
+      own ?? { field: this.sortField() ?? "", direction: this.sortDirection() }
     );
   });
 
@@ -892,7 +904,7 @@ export class GmTableComponent<T> {
       return rows;
     }
 
-    const factor = direction === 'asc' ? 1 : -1;
+    const factor = direction === "asc" ? 1 : -1;
     return [...rows].sort(
       (a, b) => factor * this.compare(this.read(a, field), this.read(b, field)),
     );
@@ -907,7 +919,7 @@ export class GmTableComponent<T> {
     const columns = [...this.filtersByField()];
     const term = this.activeGlobalSearch().trim().toLowerCase();
 
-    if (this.serverFilter() || (columns.length === 0 && term === '')) {
+    if (this.serverFilter() || (columns.length === 0 && term === "")) {
       return rows;
     }
 
@@ -945,7 +957,7 @@ export class GmTableComponent<T> {
         }
       } else {
         columns.set(filter.field, {
-          logic: filter.logic ?? 'and',
+          logic: filter.logic ?? "and",
           constraints: [constraint],
         });
       }
@@ -962,7 +974,7 @@ export class GmTableComponent<T> {
     const cellValue = this.read(row, field);
     const test = (rule: GmTableFilterConstraint) =>
       this.matches(cellValue, rule);
-    return state.logic === 'or'
+    return state.logic === "or"
       ? state.constraints.some(test)
       : state.constraints.every(test);
   }
@@ -980,7 +992,7 @@ export class GmTableComponent<T> {
 
   /** Case-insensitive substring match on any searched field. */
   private matchesGlobalSearch(row: T, term: string): boolean {
-    if (term === '') {
+    if (term === "") {
       return true;
     }
     return this.searchFields().some((field) =>
@@ -1045,7 +1057,9 @@ export class GmTableComponent<T> {
     const [first] = this.selection();
     return first === undefined
       ? -1
-      : this.rows().findIndex((row) => this.identity(row) === this.identity(first));
+      : this.rows().findIndex(
+          (row) => this.identity(row) === this.identity(first),
+        );
   });
 
   /** `@for` identity: the row key when given, else the row object itself. */
@@ -1074,10 +1088,10 @@ export class GmTableComponent<T> {
   /** Default cell text: the row's value for the column, stringified. */
   protected cellText(row: T, column: GmTableColumn<T>): string {
     if (!column.field) {
-      return '';
+      return "";
     }
     const value = this.read(row, column.field);
-    return value === null || value === undefined ? '' : String(value);
+    return value === null || value === undefined ? "" : String(value);
   }
 
   /**
@@ -1108,7 +1122,7 @@ export class GmTableComponent<T> {
    */
   protected truncatedText(row: T, column: GmTableColumn<T>): string {
     const limit = this.truncateLimit(column);
-    return this.cellText(row, column).slice(0, limit).trimEnd() + '…';
+    return this.cellText(row, column).slice(0, limit).trimEnd() + "…";
   }
 
   private read(row: T, field: string): unknown {
@@ -1129,10 +1143,10 @@ export class GmTableComponent<T> {
    */
   protected headerJustify(column: GmTableColumn<T>): string | null {
     switch (column.align) {
-      case 'center':
-        return 'center';
-      case 'end':
-        return 'flex-end';
+      case "center":
+        return "center";
+      case "end":
+        return "flex-end";
       default:
         return null;
     }
@@ -1141,14 +1155,14 @@ export class GmTableComponent<T> {
   /** For `aria-sort`, which needs these exact words. */
   protected ariaSortOf(column: GmTableColumn<T>): string {
     if (!column.sortable) {
-      return 'none';
+      return "none";
     }
     const state = this.sortStateOf(column);
-    return state === 'asc'
-      ? 'ascending'
-      : state === 'desc'
-        ? 'descending'
-        : 'none';
+    return state === "asc"
+      ? "ascending"
+      : state === "desc"
+        ? "descending"
+        : "none";
   }
 
   /** Current direction for a field, for a custom header's own indicator. */
@@ -1177,7 +1191,7 @@ export class GmTableComponent<T> {
     }
     const current = this.sortStateOf(column);
     const direction: GmSortDirection =
-      current === null ? 'asc' : current === 'asc' ? 'desc' : null;
+      current === null ? "asc" : current === "asc" ? "desc" : null;
 
     this.userSort.set({ field: column.field, direction });
     this.sortChange.emit({
@@ -1186,8 +1200,8 @@ export class GmTableComponent<T> {
       // An unsorted column reports no `orderBy` at all, which is a list
       // endpoint's "your default order" rather than a third sort state it
       // would have to know about.
-      orderBy: direction === null ? '' : column.field,
-      ascending: direction === 'asc',
+      orderBy: direction === null ? "" : column.field,
+      ascending: direction === "asc",
     });
     this.emitQueryFromFirstPage();
   }
@@ -1198,18 +1212,18 @@ export class GmTableComponent<T> {
    * and everything else compares as locale-aware text.
    */
   private compare(a: unknown, b: unknown): number {
-    const aEmpty = a === null || a === undefined || a === '';
-    const bEmpty = b === null || b === undefined || b === '';
+    const aEmpty = a === null || a === undefined || a === "";
+    const bEmpty = b === null || b === undefined || b === "";
     if (aEmpty || bEmpty) {
       return aEmpty && bEmpty ? 0 : aEmpty ? 1 : -1;
     }
-    if (typeof a === 'number' && typeof b === 'number') {
+    if (typeof a === "number" && typeof b === "number") {
       return a - b;
     }
     if (a instanceof Date && b instanceof Date) {
       return a.getTime() - b.getTime();
     }
-    if (typeof a === 'boolean' && typeof b === 'boolean') {
+    if (typeof a === "boolean" && typeof b === "boolean") {
       return Number(a) - Number(b);
     }
     return String(a).localeCompare(String(b));
@@ -1218,7 +1232,7 @@ export class GmTableComponent<T> {
   // ── Frozen columns ──────────────────────────────────────────────────────
 
   private readonly selectHeaderCell =
-    viewChild<ElementRef<HTMLElement>>('selectHeaderCell');
+    viewChild<ElementRef<HTMLElement>>("selectHeaderCell");
 
   /**
    * Measured width of the selection column, published to CSS so a frozen
@@ -1239,11 +1253,11 @@ export class GmTableComponent<T> {
   });
 
   protected isFrozenStart(column: GmTableColumn<T>): boolean {
-    return !!column.frozen && (column.frozenPosition ?? 'start') === 'start';
+    return !!column.frozen && (column.frozenPosition ?? "start") === "start";
   }
 
   protected isFrozenEnd(column: GmTableColumn<T>): boolean {
-    return !!column.frozen && column.frozenPosition === 'end';
+    return !!column.frozen && column.frozenPosition === "end";
   }
 
   /**
@@ -1297,17 +1311,17 @@ export class GmTableComponent<T> {
       return null;
     }
     const parts: string[] = this.selectionFrozen()
-      ? ['var(--gm-table-select-offset)']
+      ? ["var(--gm-table-select-offset)"]
       : [];
     for (const candidate of this.renderColumns()) {
       if (candidate === column) {
         break;
       }
       if (this.isFrozenStart(candidate)) {
-        parts.push(candidate.width ?? '0px');
+        parts.push(candidate.width ?? "0px");
       }
     }
-    return parts.length ? `calc(${parts.join(' + ')})` : '0px';
+    return parts.length ? `calc(${parts.join(" + ")})` : "0px";
   }
 
   /** Mirror of `frozenInsetStart`, accumulating from the end instead. */
@@ -1322,10 +1336,10 @@ export class GmTableComponent<T> {
         break;
       }
       if (this.isFrozenEnd(columns[i])) {
-        parts.push(columns[i].width ?? '0px');
+        parts.push(columns[i].width ?? "0px");
       }
     }
-    return parts.length ? `calc(${parts.join(' + ')})` : '0px';
+    return parts.length ? `calc(${parts.join(" + ")})` : "0px";
   }
 
   /**
@@ -1365,14 +1379,12 @@ export class GmTableComponent<T> {
    * Public, like `sortBy` and `sortDirectionOf`, so a `gmTableHeader` template
    * can mount its own `gm-table-filter-menu` and keep filtering working.
    */
-  constraintsFor(
-    column: GmTableColumn<T>,
-  ): readonly GmTableFilterConstraint[] {
+  constraintsFor(column: GmTableColumn<T>): readonly GmTableFilterConstraint[] {
     return this.columnFilterState(column)?.constraints ?? NO_CONSTRAINTS;
   }
 
   logicFor(column: GmTableColumn<T>): GmFilterMatchLogic {
-    return this.columnFilterState(column)?.logic ?? 'and';
+    return this.columnFilterState(column)?.logic ?? "and";
   }
 
   private columnFilterState(
@@ -1455,37 +1467,34 @@ export class GmTableComponent<T> {
   }
 
   /** Client-side predicate for one filter. */
-  private matches(
-    cellValue: unknown,
-    rule: GmTableFilterConstraint,
-  ): boolean {
+  private matches(cellValue: unknown, rule: GmTableFilterConstraint): boolean {
     const { operator, value } = rule;
 
-    if (operator === 'in') {
+    if (operator === "in") {
       const list = Array.isArray(value) ? value : [value];
       return list.some((item) => this.looseEquals(cellValue, item));
     }
 
     switch (operator) {
-      case 'equals':
+      case "equals":
         return this.looseEquals(cellValue, value);
-      case 'notEquals':
+      case "notEquals":
         return !this.looseEquals(cellValue, value);
-      case 'contains':
+      case "contains":
         return this.text(cellValue).includes(this.text(value));
-      case 'notContains':
+      case "notContains":
         return !this.text(cellValue).includes(this.text(value));
-      case 'startsWith':
+      case "startsWith":
         return this.text(cellValue).startsWith(this.text(value));
-      case 'endsWith':
+      case "endsWith":
         return this.text(cellValue).endsWith(this.text(value));
-      case 'gt':
+      case "gt":
         return this.compare(cellValue, value) > 0;
-      case 'gte':
+      case "gte":
         return this.compare(cellValue, value) >= 0;
-      case 'lt':
+      case "lt":
         return this.compare(cellValue, value) < 0;
-      case 'lte':
+      case "lte":
         return this.compare(cellValue, value) <= 0;
       default:
         return true;
@@ -1494,7 +1503,7 @@ export class GmTableComponent<T> {
 
   private text(value: unknown): string {
     return value === null || value === undefined
-      ? ''
+      ? ""
       : String(value).toLowerCase();
   }
 
@@ -1509,7 +1518,7 @@ export class GmTableComponent<T> {
       const b = this.toDate(value);
       return a !== null && b !== null && a.toDateString() === b.toDateString();
     }
-    if (typeof value === 'boolean' || typeof cellValue === 'boolean') {
+    if (typeof value === "boolean" || typeof cellValue === "boolean") {
       return String(cellValue) === String(value);
     }
     return this.text(cellValue) === this.text(value);
@@ -1546,7 +1555,7 @@ export class GmTableComponent<T> {
     }
 
     const term = this.activeGlobalSearch().trim();
-    if (term !== '') {
+    if (term !== "") {
       query.globalSearch = term;
     }
     return query;
@@ -1631,7 +1640,7 @@ export class GmTableComponent<T> {
       return;
     }
 
-    if (this.resolvedSelectionMode() === 'single') {
+    if (this.resolvedSelectionMode() === "single") {
       // Re-selecting the current row clears it, matching a checkbox's feel.
       this.selection.set(this.isSelected(row) ? [] : [row]);
       return;
@@ -1700,15 +1709,15 @@ export class GmTableComponent<T> {
 
     const rows = options?.selectionOnly ? this.selection() : this.rows();
     // A leading BOM, or Excel reads UTF-8 accents as mojibake.
-    const csv = '﻿' + gmBuildCsv(rows, columns);
-    const name = (options?.fileName ?? 'export').replace(/.csv$/i, '');
+    const csv = "﻿" + gmBuildCsv(rows, columns);
+    const name = (options?.fileName ?? "export").replace(/.csv$/i, "");
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = this.document.createElement('a');
+    const link = this.document.createElement("a");
     link.href = url;
-    link.download = name + '.csv';
-    link.style.display = 'none';
+    link.download = name + ".csv";
+    link.style.display = "none";
     this.document.body.appendChild(link);
     link.click();
     this.document.body.removeChild(link);
@@ -1724,7 +1733,7 @@ export class GmTableComponent<T> {
  * Toolbar key of the built-in add button. Not a `GmTableActionType` — Add is
  * the one toolbar button that is not a configured action.
  */
-const GM_ADD_ACTION_KEY = '__gmAdd';
+const GM_ADD_ACTION_KEY = "__gmAdd";
 
 /**
  * A `GmTableColumn` derived from a `tableConfig` entry, tagged with where it
@@ -1748,17 +1757,17 @@ function configFilterType(
     case undefined:
       return undefined;
     case GmFilterType.NUMERIC:
-      return 'numeric';
+      return "numeric";
     case GmFilterType.DATE:
-      return 'date';
+      return "date";
     case GmFilterType.BOOLEAN:
-      return 'boolean';
+      return "boolean";
     case GmFilterType.SELECT:
-      return 'select';
+      return "select";
     case GmFilterType.MULTISELECT:
-      return 'multiselect';
+      return "multiselect";
     default:
-      return 'text';
+      return "text";
   }
 }
 
@@ -1768,9 +1777,7 @@ function configFilterType(
  * mapping — both end up in the descriptor the endpoint compares against.
  */
 function searchOptions(
-  result:
-    | Promise<{ label: string }[]>
-    | Observable<{ label: string }[]>,
+  result: Promise<{ label: string }[]> | Observable<{ label: string }[]>,
 ): Observable<readonly GmTableFilterOption[]> {
   const result$ = isObservable(result) ? result : from(result);
   return result$.pipe(
@@ -1807,7 +1814,7 @@ function sameFilters(
       return (
         filter.field === other.field &&
         filter.operator === other.operator &&
-        (filter.logic ?? 'and') === (other.logic ?? 'and') &&
+        (filter.logic ?? "and") === (other.logic ?? "and") &&
         sameFilterValue(filter.value, other.value)
       );
     })

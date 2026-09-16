@@ -33,6 +33,12 @@ export interface GmTableModel<T> {
   rowSelectable?: (row: T, index: number) => boolean;
 
   /**
+   * Shows the toolbar above the table. Defaults to true — a config grid
+   * mounts its own toolbar by default.
+   */
+  showToolbar?: boolean;
+
+  /**
    * Offers the column chooser in the toolbar. Defaults to true — a config grid
    * mounts its own toolbar, and picking columns is what that toolbar is for.
    */

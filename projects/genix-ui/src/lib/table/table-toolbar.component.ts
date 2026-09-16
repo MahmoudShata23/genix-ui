@@ -7,19 +7,19 @@ import {
   model,
   numberAttribute,
   output,
-} from '@angular/core';
-import { FormsModule } from '@angular/forms';
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
 
-import { GmButtonComponent } from '../button/button.component';
-import { GmMultiselectComponent } from '../multiselect/multiselect.component';
-import { GmTooltipDirective } from '../tooltip/tooltip.directive';
-import type { GmSize } from '../core/types';
+import { GmButtonComponent } from "../button/button.component";
+import { GmMultiselectComponent } from "../multiselect/multiselect.component";
+import { GmTooltipDirective } from "../tooltip/tooltip.directive";
+import type { GmSize } from "../core/types";
 import type {
   GmTableAction,
   GmTableActionEvent,
   GmTableToolbarAlign,
-} from './table-action.types';
-import type { GmTableColumn } from './table.types';
+} from "./table-action.types";
+import type { GmTableColumn } from "./table.types";
 
 /**
  * The bar above a `gm-table`: config-driven action buttons on one edge, and on
@@ -48,7 +48,7 @@ import type { GmTableColumn } from './table.types';
  * is how a bulk Delete is wired up — see `GmTableAction`.
  */
 @Component({
-  selector: 'gm-table-toolbar',
+  selector: "gm-table-toolbar",
   standalone: true,
   imports: [
     FormsModule,
@@ -56,10 +56,10 @@ import type { GmTableColumn } from './table.types';
     GmMultiselectComponent,
     GmTooltipDirective,
   ],
-  templateUrl: './table-toolbar.component.html',
-  styleUrl: './table-toolbar.component.scss',
+  templateUrl: "./table-toolbar.component.html",
+  styleUrl: "./table-toolbar.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'gm-table-toolbar-host' },
+  host: { class: "gm-table-toolbar-host" },
 })
 export class GmTableToolbarComponent<T> {
   readonly actions = input<readonly GmTableAction<T>[]>([]);
@@ -68,7 +68,7 @@ export class GmTableToolbarComponent<T> {
   readonly selection = input<readonly T[]>([]);
 
   /** Size applied to every action that does not override it. */
-  readonly size = input<GmSize>('small');
+  readonly size = input<GmSize>("small");
 
   /** Disables every action and the chooser — for a toolbar over a loading table. */
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -78,7 +78,7 @@ export class GmTableToolbarComponent<T> {
    * edge only when nothing else is there, so turning `showColumnChooser` off
    * does not leave the bar lopsided.
    */
-  readonly actionsAlign = input<GmTableToolbarAlign>('auto');
+  readonly actionsAlign = input<GmTableToolbarAlign>("auto");
 
   /**
    * Fires for every action, whether or not it carries a `command`, so a
@@ -109,10 +109,10 @@ export class GmTableToolbarComponent<T> {
    */
   readonly minVisibleColumns = input(1, { transform: numberAttribute });
 
-  readonly columnChooserLabel = input<string>('Columns');
+  readonly columnChooserLabel = input<string>("Columns");
 
   /** `{0}` is replaced with the count, matching `gm-multiselect`. */
-  readonly selectedColumnsLabel = input<string>('{0} items selected');
+  readonly selectedColumnsLabel = input<string>("{0} items selected");
 
   /** The rejected change's floor, for a consumer that wants to explain it. */
   readonly columnChooserRejected = output<number>();
@@ -138,7 +138,7 @@ export class GmTableToolbarComponent<T> {
       const rows = this.selection();
       return this.actions().filter((action) => {
         if (
-          (action.scope ?? 'global') === 'selection' &&
+          (action.scope ?? "global") === "selection" &&
           rows.length < (action.minSelection ?? 1)
         ) {
           return false;
@@ -177,7 +177,7 @@ export class GmTableToolbarComponent<T> {
 
   protected onColumnsChange(value: unknown): void {
     const fields = Array.isArray(value)
-      ? value.filter((field): field is string => typeof field === 'string')
+      ? value.filter((field): field is string => typeof field === "string")
       : [];
 
     if (fields.length < this.minVisibleColumns()) {

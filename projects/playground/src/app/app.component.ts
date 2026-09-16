@@ -1,5 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
 
 import {
   GmAccordionComponent,
@@ -52,12 +63,9 @@ import {
   GmToastService,
   GmTooltipDirective,
   GmTooltipPosition,
-} from '@mahmoudshata23/genix-ui';
+} from "@mahmoudshata23/genix-ui";
 
-import {
-  PgDialogDemoComponent,
-  ProviderDraft,
-} from './dialog-demo.component';
+import { PgDialogDemoComponent, ProviderDraft } from "./dialog-demo.component";
 
 interface Person {
   readonly id: number;
@@ -109,7 +117,7 @@ interface Section {
  * exercised too — not just the static visual states.
  */
 @Component({
-  selector: 'app-root',
+  selector: "app-root",
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -153,94 +161,97 @@ interface Section {
     GmToggleSwitchComponent,
     GmTooltipDirective,
   ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  templateUrl: "./app.component.html",
+  styleUrl: "./app.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   // ── Page chrome ─────────────────────────────────────────────────────────
 
   protected readonly sections: readonly Section[] = [
-    { id: 'form', label: 'Reactive form' },
-    { id: 'button', label: 'Button' },
-    { id: 'input', label: 'Input' },
-    { id: 'textarea', label: 'Textarea' },
-    { id: 'choice', label: 'Checkbox & radio' },
-    { id: 'dropdown', label: 'Select & multiselect' },
-    { id: 'select-advanced', label: 'Select templates & virtual scroll' },
-    { id: 'multiselect-advanced', label: 'Multiselect limit & virtual scroll' },
-    { id: 'datepicker', label: 'Datepicker' },
-    { id: 'datepicker-advanced', label: 'Datepicker time & range' },
-    { id: 'card', label: 'Card' },
-    { id: 'badge', label: 'Badge, chip, spinner' },
-    { id: 'tooltip', label: 'Tooltip' },
-    { id: 'dialog', label: 'Dialog' },
-    { id: 'toast', label: 'Toast' },
-    { id: 'message', label: 'Message' },
-    { id: 'tabs', label: 'Tabs' },
-    { id: 'accordion', label: 'Accordion' },
-    { id: 'pagination', label: 'Pagination' },
-    { id: 'table', label: 'Table' },
-    { id: 'small', label: 'Popover, menu, switch, number, select button, autocomplete' },
-    { id: 'long-tail', label: 'File upload, stepper, order list, chart' },
+    { id: "form", label: "Reactive form" },
+    { id: "button", label: "Button" },
+    { id: "input", label: "Input" },
+    { id: "textarea", label: "Textarea" },
+    { id: "choice", label: "Checkbox & radio" },
+    { id: "dropdown", label: "Select & multiselect" },
+    { id: "select-advanced", label: "Select templates & virtual scroll" },
+    { id: "multiselect-advanced", label: "Multiselect limit & virtual scroll" },
+    { id: "datepicker", label: "Datepicker" },
+    { id: "datepicker-advanced", label: "Datepicker time & range" },
+    { id: "card", label: "Card" },
+    { id: "badge", label: "Badge, chip, spinner" },
+    { id: "tooltip", label: "Tooltip" },
+    { id: "dialog", label: "Dialog" },
+    { id: "toast", label: "Toast" },
+    { id: "message", label: "Message" },
+    { id: "tabs", label: "Tabs" },
+    { id: "accordion", label: "Accordion" },
+    { id: "pagination", label: "Pagination" },
+    { id: "table", label: "Table" },
+    {
+      id: "small",
+      label: "Popover, menu, switch, number, select button, autocomplete",
+    },
+    { id: "long-tail", label: "File upload, stepper, order list, chart" },
   ];
 
   protected readonly severities: readonly GmSeverity[] = [
-    'primary',
-    'secondary',
-    'success',
-    'info',
-    'warning',
-    'danger',
-    'contrast',
+    "primary",
+    "secondary",
+    "success",
+    "info",
+    "warning",
+    "danger",
+    "contrast",
   ];
 
-  protected readonly sizes: readonly GmSize[] = ['small', 'medium', 'large'];
+  protected readonly sizes: readonly GmSize[] = ["small", "medium", "large"];
 
   protected readonly tooltipPositions: readonly GmTooltipPosition[] = [
-    'top',
-    'bottom',
-    'left',
-    'right',
+    "top",
+    "bottom",
+    "left",
+    "right",
   ];
 
   // ── Shared option data ──────────────────────────────────────────────────
 
   protected readonly countries: readonly Country[] = [
-    { name: 'Lebanon', code: 'LB' },
-    { name: 'United Arab Emirates', code: 'AE' },
-    { name: 'Saudi Arabia', code: 'SA' },
-    { name: 'Egypt', code: 'EG' },
-    { name: 'Jordan', code: 'JO' },
-    { name: 'Kuwait', code: 'KW' },
-    { name: 'Qatar', code: 'QA' },
+    { name: "Lebanon", code: "LB" },
+    { name: "United Arab Emirates", code: "AE" },
+    { name: "Saudi Arabia", code: "SA" },
+    { name: "Egypt", code: "EG" },
+    { name: "Jordan", code: "JO" },
+    { name: "Kuwait", code: "KW" },
+    { name: "Qatar", code: "QA" },
   ];
 
   /** Primitive options, to prove `optionLabel` / `optionValue` really are optional. */
   protected readonly plainOptions: readonly string[] = [
-    'Cardiology',
-    'Dermatology',
-    'Neurology',
-    'Oncology',
-    'Radiology',
+    "Cardiology",
+    "Dermatology",
+    "Neurology",
+    "Oncology",
+    "Radiology",
   ];
 
   // ── Section: reactive form ──────────────────────────────────────────────
 
   protected readonly form = new FormGroup({
-    fullName: new FormControl('', {
+    fullName: new FormControl("", {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(3)],
     }),
-    email: new FormControl('', {
+    email: new FormControl("", {
       nonNullable: true,
       validators: [Validators.required, Validators.email],
     }),
-    notes: new FormControl('', { nonNullable: true }),
+    notes: new FormControl("", { nonNullable: true }),
     country: new FormControl<string | null>(null, [Validators.required]),
     specialities: new FormControl<unknown[]>([]),
     startDate: new FormControl<Date | null>(null, [Validators.required]),
-    status: new FormControl('standard', { nonNullable: true }),
+    status: new FormControl("standard", { nonNullable: true }),
     acceptsTerms: new FormControl(false, {
       nonNullable: true,
       validators: [Validators.requiredTrue],
@@ -254,12 +265,16 @@ export class AppComponent {
     this.submitted.set(
       this.form.valid
         ? JSON.stringify(this.form.getRawValue(), null, 2)
-        : 'Invalid — each control above is showing its own error state.',
+        : "Invalid — each control above is showing its own error state.",
     );
   }
 
   protected resetForm(): void {
-    this.form.reset({ status: 'standard', acceptsTerms: false, specialities: [] });
+    this.form.reset({
+      status: "standard",
+      acceptsTerms: false,
+      specialities: [],
+    });
     this.submitted.set(null);
   }
 
@@ -267,21 +282,24 @@ export class AppComponent {
   //
   // Separate controls, so poking at a demo cannot disturb the form above.
 
-  protected readonly demoText = new FormControl('Prefilled value');
+  protected readonly demoText = new FormControl("Prefilled value");
   protected readonly demoNumber = new FormControl<number | null>(42);
   protected readonly demoDisabled = new FormControl({
-    value: 'Cannot be edited',
+    value: "Cannot be edited",
     disabled: true,
   });
   protected readonly demoTextarea = new FormControl(
-    'Multi-line content.\nSecond line.',
+    "Multi-line content.\nSecond line.",
   );
   protected readonly demoCheckbox = new FormControl(true);
-  protected readonly demoRadio = new FormControl('standard');
-  protected readonly demoSelect = new FormControl<string | null>('LB');
+  protected readonly demoRadio = new FormControl("standard");
+  protected readonly demoSelect = new FormControl<string | null>("LB");
   protected readonly demoSelectPlain = new FormControl<string | null>(null);
-  protected readonly demoMultiselectMenu = new FormControl<unknown[]>(['LB', 'AE']);
-  protected readonly demoMultiselectChip = new FormControl<unknown[]>(['SA']);
+  protected readonly demoMultiselectMenu = new FormControl<unknown[]>([
+    "LB",
+    "AE",
+  ]);
+  protected readonly demoMultiselectChip = new FormControl<unknown[]>(["SA"]);
   protected readonly demoDate = new FormControl<Date | null>(new Date());
   protected readonly demoDateBounded = new FormControl<Date | null>(null);
 
@@ -301,13 +319,13 @@ export class AppComponent {
 
   // ── Section: tabs & accordion ───────────────────────────────────────────
 
-  protected readonly activeTab = signal<string | number | null>('summary');
+  protected readonly activeTab = signal<string | number | null>("summary");
   protected readonly accordionSingle = signal<
     string | number | (string | number)[] | null
-  >('what');
+  >("what");
   protected readonly accordionMultiple = signal<
     string | number | (string | number)[] | null
-  >(['tokens', 'peers']);
+  >(["tokens", "peers"]);
 
   // ── Section: pagination ─────────────────────────────────────────────────
 
@@ -333,62 +351,124 @@ export class AppComponent {
   // ── Section: table ──────────────────────────────────────────────────────
 
   protected readonly providers: readonly Provider[] = [
-    { id: 1, name: 'Beirut Medical Center', type: 'Hospital', country: 'Lebanon', active: true, score: 92 },
-    { id: 2, name: 'Al Noor Clinic', type: 'Clinic', country: 'UAE', active: true, score: 78 },
-    { id: 3, name: 'Cedars Diagnostics', type: 'Laboratory', country: 'Lebanon', active: false, score: 64 },
-    { id: 4, name: 'Gulf Specialist Hospital', type: 'Hospital', country: 'Saudi Arabia', active: true, score: 88 },
-    { id: 5, name: 'Nile Family Practice', type: 'Clinic', country: 'Egypt', active: false, score: 51 },
-    { id: 6, name: 'Petra Imaging', type: 'Laboratory', country: 'Jordan', active: true, score: 71 },
-    { id: 7, name: 'Doha Heart Institute', type: 'Hospital', country: 'Qatar', active: true, score: 95 },
-    { id: 8, name: 'Salmiya Day Surgery', type: 'Clinic', country: 'Kuwait', active: false, score: 43 },
+    {
+      id: 1,
+      name: "Beirut Medical Center",
+      type: "Hospital",
+      country: "Lebanon",
+      active: true,
+      score: 92,
+    },
+    {
+      id: 2,
+      name: "Al Noor Clinic",
+      type: "Clinic",
+      country: "UAE",
+      active: true,
+      score: 78,
+    },
+    {
+      id: 3,
+      name: "Cedars Diagnostics",
+      type: "Laboratory",
+      country: "Lebanon",
+      active: false,
+      score: 64,
+    },
+    {
+      id: 4,
+      name: "Gulf Specialist Hospital",
+      type: "Hospital",
+      country: "Saudi Arabia",
+      active: true,
+      score: 88,
+    },
+    {
+      id: 5,
+      name: "Nile Family Practice",
+      type: "Clinic",
+      country: "Egypt",
+      active: false,
+      score: 51,
+    },
+    {
+      id: 6,
+      name: "Petra Imaging",
+      type: "Laboratory",
+      country: "Jordan",
+      active: true,
+      score: 71,
+    },
+    {
+      id: 7,
+      name: "Doha Heart Institute",
+      type: "Hospital",
+      country: "Qatar",
+      active: true,
+      score: 95,
+    },
+    {
+      id: 8,
+      name: "Salmiya Day Surgery",
+      type: "Clinic",
+      country: "Kuwait",
+      active: false,
+      score: 43,
+    },
   ];
 
   protected readonly columns: readonly GmTableColumn<Provider>[] = [
     {
-      field: 'name',
-      header: 'Provider',
+      field: "name",
+      header: "Provider",
       sortable: true,
       filterable: true,
-      minWidth: '14rem',
-      width: '15rem',
+      minWidth: "14rem",
+      width: "15rem",
     },
     {
-      field: 'type',
-      header: 'Type',
+      field: "type",
+      header: "Type",
       sortable: true,
       filterable: true,
-      filterType: 'select',
+      filterType: "select",
       filterOptions: [
-        { label: 'Hospital', value: 'Hospital' },
-        { label: 'Clinic', value: 'Clinic' },
-        { label: 'Laboratory', value: 'Laboratory' },
+        { label: "Hospital", value: "Hospital" },
+        { label: "Clinic", value: "Clinic" },
+        { label: "Laboratory", value: "Laboratory" },
       ],
-      width: '10rem',
+      width: "10rem",
     },
-    { field: 'country', header: 'Country', sortable: true, filterable: true, width: '12rem' },
     {
-      field: 'active',
-      header: 'Status',
+      field: "country",
+      header: "Country",
       sortable: true,
       filterable: true,
-      filterType: 'boolean',
-      width: '9rem',
-      align: 'center',
+      width: "12rem",
     },
     {
-      field: 'score',
-      header: 'Score',
+      field: "active",
+      header: "Status",
       sortable: true,
       filterable: true,
-      filterType: 'numeric',
-      width: '7rem',
-      align: 'end',
+      filterType: "boolean",
+      width: "9rem",
+      align: "center",
     },
     {
-      field: 'actions',
-      header: '',
-      width: '7rem',
-      align: 'center',
+      field: "score",
+      header: "Score",
+      sortable: true,
+      filterable: true,
+      filterType: "numeric",
+      width: "7rem",
+      align: "end",
+    },
+    {
+      field: "actions",
+      header: "",
+      width: "7rem",
+      align: "center",
       reorderable: false,
       exportable: false,
     },
@@ -419,49 +499,53 @@ export class AppComponent {
 
   protected scoreSeverity(score: number): GmSeverity {
     if (score >= 85) {
-      return 'success';
+      return "success";
     }
-    return score >= 60 ? 'warning' : 'danger';
+    return score >= 60 ? "warning" : "danger";
   }
 
   // ── Dialog ──────────────────────────────────────────────────────────────
 
   private readonly dialogService = inject(GmDialogService);
 
-  protected readonly dialogResult = signal('nothing yet');
+  protected readonly dialogResult = signal("nothing yet");
 
   /** The everyday case: hand data in, get a result back. */
   protected openDialog(): void {
-    const ref = this.dialogService.open<PgDialogDemoComponent, ProviderDraft, string>(
+    const ref = this.dialogService.open<
       PgDialogDemoComponent,
-      {
-        header: 'Edit provider',
-        width: '480px',
-        data: { name: 'Nile Diagnostics', country: 'Egypt' },
-        dismissableMask: true,
-      },
-    );
+      ProviderDraft,
+      string
+    >(PgDialogDemoComponent, {
+      header: "Edit provider",
+      width: "480px",
+      data: { name: "Nile Diagnostics", country: "Egypt" },
+      dismissableMask: true,
+    });
 
     // Completes on close, so the subscription needs no teardown.
     ref.onClose.subscribe((result) =>
-      this.dialogResult.set(result ?? 'dismissed without a result'),
+      this.dialogResult.set(result ?? "dismissed without a result"),
     );
   }
 
   /** Proves the two escape hatches can be switched off independently. */
   protected openLockedDialog(): void {
-    const ref = this.dialogService.open<PgDialogDemoComponent, ProviderDraft, string>(
+    const ref = this.dialogService.open<
       PgDialogDemoComponent,
-      {
-        header: 'Only the buttons close this one',
-        width: '480px',
-        data: { name: 'Locked', country: 'Egypt' },
-        closable: false,
-        closeOnEscape: false,
-      },
-    );
+      ProviderDraft,
+      string
+    >(PgDialogDemoComponent, {
+      header: "Only the buttons close this one",
+      width: "480px",
+      data: { name: "Locked", country: "Egypt" },
+      closable: false,
+      closeOnEscape: false,
+    });
 
-    ref.onClose.subscribe((result) => this.dialogResult.set(result ?? 'cancelled'));
+    ref.onClose.subscribe((result) =>
+      this.dialogResult.set(result ?? "cancelled"),
+    );
   }
 
   // ── Toast ───────────────────────────────────────────────────────────────
@@ -469,34 +553,34 @@ export class AppComponent {
   private readonly toastService = inject(GmToastService);
 
   protected toastSuccess(): void {
-    this.toastService.success('Saved successfully');
+    this.toastService.success("Saved successfully");
   }
 
   protected toastInfo(): void {
-    this.toastService.info('Provider list refreshed');
+    this.toastService.info("Provider list refreshed");
   }
 
   protected toastWarning(): void {
-    this.toastService.warning('Please check the data before submitting');
+    this.toastService.warning("Please check the data before submitting");
   }
 
   /** Shown as `danger`, and the only severity that alerts assistive tech. */
   protected toastError(): void {
-    this.toastService.error('Something went wrong');
+    this.toastService.error("Something went wrong");
   }
 
   /** The generic form — what a PrimeNG `messageService.add()` becomes. */
   protected toastWithSummary(): void {
     this.toastService.show({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Saved successfully',
+      severity: "success",
+      summary: "Success",
+      detail: "Saved successfully",
     });
   }
 
   /** `duration: 0` means it waits to be dismissed. */
   protected toastSticky(): void {
-    this.toastService.error('This one waits for you', { duration: 0 });
+    this.toastService.error("This one waits for you", { duration: 0 });
   }
 
   protected toastBurst(): void {
@@ -512,10 +596,30 @@ export class AppComponent {
   // ── Select templates & virtual scroll ───────────────────────────────────
 
   protected readonly people: readonly Person[] = [
-    { id: 1, name: 'Amira Hassan', email: 'amira@globemed.test', role: 'Claims' },
-    { id: 2, name: 'Karim Fouad', email: 'karim@globemed.test', role: 'Network' },
-    { id: 3, name: 'Nadia Saleh', email: 'nadia@globemed.test', role: 'Finance' },
-    { id: 4, name: 'Omar Rashid', email: 'omar@globemed.test', role: 'Support' },
+    {
+      id: 1,
+      name: "Amira Hassan",
+      email: "amira@globemed.test",
+      role: "Claims",
+    },
+    {
+      id: 2,
+      name: "Karim Fouad",
+      email: "karim@globemed.test",
+      role: "Network",
+    },
+    {
+      id: 3,
+      name: "Nadia Saleh",
+      email: "nadia@globemed.test",
+      role: "Finance",
+    },
+    {
+      id: 4,
+      name: "Omar Rashid",
+      email: "omar@globemed.test",
+      role: "Support",
+    },
   ];
 
   protected readonly assignee = new FormControl<number | null>(2);
@@ -531,10 +635,10 @@ export class AppComponent {
   // ── Multiselect limit & virtual scroll ──────────────────────────────────
 
   protected readonly roleOptions: readonly City[] = [
-    { id: 1, name: 'Admin' },
-    { id: 2, name: 'Claims officer' },
-    { id: 3, name: 'Auditor' },
-    { id: 4, name: 'Read only' },
+    { id: 1, name: "Admin" },
+    { id: 2, name: "Claims officer" },
+    { id: 3, name: "Auditor" },
+    { id: 4, name: "Read only" },
   ];
 
   protected readonly limitedRoles = new FormControl<number[] | null>([1]);
@@ -555,20 +659,20 @@ export class AppComponent {
 
   // ── Small components ────────────────────────────────────────────────────
 
-  protected readonly lastCommand = signal('nothing yet');
+  protected readonly lastCommand = signal("nothing yet");
 
   protected readonly menuItems: GmMenuItem[] = [
     {
-      label: 'Edit',
-      icon: 'pi pi-pencil',
-      command: () => this.lastCommand.set('edit'),
+      label: "Edit",
+      icon: "pi pi-pencil",
+      command: () => this.lastCommand.set("edit"),
     },
     { separator: true },
-    { label: 'Archive', icon: 'pi pi-inbox', disabled: true },
+    { label: "Archive", icon: "pi pi-inbox", disabled: true },
     {
-      label: 'Delete',
-      icon: 'pi pi-trash',
-      command: () => this.lastCommand.set('delete'),
+      label: "Delete",
+      icon: "pi pi-trash",
+      command: () => this.lastCommand.set("delete"),
     },
   ];
 
@@ -589,13 +693,13 @@ export class AppComponent {
     value: string;
     inactive?: boolean;
   }[] = [
-    { label: 'Draft', value: 'draft' },
-    { label: 'Submitted', value: 'submitted' },
-    { label: 'Void', value: 'void', inactive: true },
-    { label: 'Settled', value: 'settled' },
+    { label: "Draft", value: "draft" },
+    { label: "Submitted", value: "submitted" },
+    { label: "Void", value: "void", inactive: true },
+    { label: "Settled", value: "settled" },
   ];
 
-  protected readonly claimStatus = new FormControl<string | null>('draft');
+  protected readonly claimStatus = new FormControl<string | null>("draft");
 
   protected readonly assignedUser = new FormControl<number | null>(null);
 
@@ -617,9 +721,7 @@ export class AppComponent {
   /** What a real page would post to its own service. */
   protected readonly attachments = signal<readonly File[]>([]);
 
-  protected readonly attachmentErrors = signal<readonly GmFileRejection[]>(
-    [],
-  );
+  protected readonly attachmentErrors = signal<readonly GmFileRejection[]>([]);
 
   protected wizardStep = 0;
 
@@ -628,27 +730,29 @@ export class AppComponent {
   protected readonly reviewDone = signal<boolean | undefined>(undefined);
 
   protected readonly benefits = signal<readonly Benefit[]>([
-    { name: 'Inpatient', cover: 'Full' },
-    { name: 'Outpatient', cover: '80%' },
-    { name: 'Dental', cover: '50%' },
-    { name: 'Optical', cover: 'Capped' },
+    { name: "Inpatient", cover: "Full" },
+    { name: "Outpatient", cover: "80%" },
+    { name: "Dental", cover: "50%" },
+    { name: "Optical", cover: "Capped" },
   ]);
 
   protected readonly benefitOrder = computed(() =>
-    this.benefits().map((benefit) => benefit.name).join(' → '),
+    this.benefits()
+      .map((benefit) => benefit.name)
+      .join(" → "),
   );
 
   protected readonly chartTypes: readonly GmChartType[] = [
-    'bar',
-    'line',
-    'doughnut',
+    "bar",
+    "line",
+    "doughnut",
   ];
 
-  protected readonly chartType = signal<GmChartType>('bar');
+  protected readonly chartType = signal<GmChartType>("bar");
 
   /** Chart.js options, typed by the app — the wrapper forwards them. */
   protected readonly chartOptions = {
-    plugins: { legend: { position: 'bottom' } },
+    plugins: { legend: { position: "bottom" } },
   };
 
   protected readonly chartData = signal<unknown>(this.buildChartData());
@@ -664,20 +768,20 @@ export class AppComponent {
 
   private buildChartData(): unknown {
     return {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+      labels: ["Jan", "Feb", "Mar", "Apr"],
       datasets: [
         {
-          label: 'Claims',
+          label: "Claims",
           data: Array.from({ length: 4 }, () =>
             Math.round(20 + Math.random() * 80),
           ),
           backgroundColor: [
-            this.token('--gm-primary'),
-            this.token('--gm-success'),
-            this.token('--gm-warning'),
-            this.token('--gm-info'),
+            this.token("--gm-primary"),
+            this.token("--gm-success"),
+            this.token("--gm-warning"),
+            this.token("--gm-info"),
           ],
-          borderColor: this.token('--gm-primary'),
+          borderColor: this.token("--gm-primary"),
         },
       ],
     };

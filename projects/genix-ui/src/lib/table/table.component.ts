@@ -410,9 +410,9 @@ export class GmTableComponent<T> {
 
   /**
    * The toolbar, as data: the add button first, then one button per bulk
-   * action. A `SELECTED_ROWS_ONLY` action appears once *more than one* row is
-   * ticked — a bulk action over a single row is what the row's own actions are
-   * for.
+   * action. A `SELECTED_ROWS_ONLY` action appears as soon as a row is ticked,
+   * so the toolbar can act on a single row without the user reaching for that
+   * row's own actions.
    */
   protected readonly configToolbarActions = computed<GmTableAction<T>[]>(() => {
     const config = this.tableConfig();
@@ -443,7 +443,7 @@ export class GmTableComponent<T> {
         variant: "text",
         scope:
           bulk.scope === GmTableBulkActionScope.GLOBAL ? "global" : "selection",
-        minSelection: 2,
+        minSelection: 1,
         visible: () => bulk.visible?.() ?? true,
         command: (rows) => bulk.command([...rows]),
       });

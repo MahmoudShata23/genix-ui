@@ -268,13 +268,13 @@ describe('gm-table config mode', () => {
 
   // ── toolbar ───────────────────────────────────────────────────────────
 
-  it('offers a global bulk action immediately and a selection one only past a single row', () => {
+  it('offers a global bulk action immediately and a selection one once a row is ticked', () => {
     expect(toolbarLabels()).toContain('IMPORT');
     expect(toolbarLabels()).not.toContain('DELETE');
 
     host.selected = [ROWS[0]];
     fixture.detectChanges();
-    expect(toolbarLabels()).not.toContain('DELETE');
+    expect(toolbarLabels()).toContain('DELETE');
 
     host.selected = [ROWS[0], ROWS[1]];
     fixture.detectChanges();

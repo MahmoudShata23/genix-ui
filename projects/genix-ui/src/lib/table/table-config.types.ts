@@ -126,8 +126,18 @@ export interface TableColumn<T> {
   /** With `cellType: GmCellType.DOT`, maps the field's value (case-insensitive) to a dot colour. */
   dotColorMap?: Record<string, GmStatusTone>;
   /**
-   * Colour of a `GmCellType.STATUS_DOT` cell. Only read for that cell type;
-   * omit it and the dot renders neutral.
+   * With `cellType: GmCellType.BADGE`, maps the field's value (case-insensitive)
+   * to the pill's tone. Same shape as `dotColorMap`, kept separate so a column
+   * can show a dot and a badge of different values without one map serving two
+   * meanings. An unmapped value still renders — as a neutral pill, since the
+   * text carries the meaning either way.
+   */
+  badgeToneMap?: Record<string, GmStatusTone>;
+  /**
+   * Colour of a `GmCellType.STATUS_DOT` or `GmCellType.BADGE` cell. For a badge
+   * it is the fallback when `badgeToneMap` has no entry, so a grid that derives
+   * its tone from the whole row does not need a map at all. Omit both and the
+   * cell renders neutral.
    */
   statusTone?: (row: T) => GmStatusTone;
 }
@@ -288,6 +298,12 @@ export enum GmStatusTone {
 export enum GmCellType {
   AVATAR = 'avatar',
   SLA_STATUS = 'sla_status',
+  /**
+   * Renders the value as a `gm-badge` pill — the design system's status
+   * treatment, and what a multi-state status column wants instead of the
+   * two-state boolean mark. Tone comes from `badgeToneMap` or `statusTone`.
+   */
+  BADGE = 'badge',
   /** Renders the cell's value as a coloured dot instead of text — see `TableColumn.dotColorMap`. */
   DOT = 'dot',
   /** Renders the field's value (expected to be a `string[]`) as a bulleted list, one entry per line. */

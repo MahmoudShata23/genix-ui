@@ -109,6 +109,8 @@ interface Provider {
   readonly type: string;
   readonly country: string;
   readonly active: boolean;
+  /** Rendered as a tinted pill by the config grid's `badgeToneMap`. */
+  readonly status: string;
   readonly score: number;
   /** Rendered as a coloured dot by the config grid's `dotColorMap`. */
   readonly tier: string;
@@ -265,6 +267,9 @@ export class AppComponent {
 
   // ── Section: reactive form ──────────────────────────────────────────────
 
+  check() {
+    console.log("addsfds");
+  }
   protected readonly form = new FormGroup({
     fullName: new FormControl("", {
       nonNullable: true,
@@ -384,6 +389,7 @@ export class AppComponent {
       type: "Hospital",
       country: "Lebanon",
       active: true,
+      status: "Active",
       score: 92,
       tier: "Preferred",
       notes:
@@ -395,6 +401,7 @@ export class AppComponent {
       type: "Clinic",
       country: "UAE",
       active: true,
+      status: "Active",
       score: 78,
       tier: "Standard",
       notes: "Primary care network, 6 branches. Dental excluded.",
@@ -405,6 +412,7 @@ export class AppComponent {
       type: "Laboratory",
       country: "Lebanon",
       active: false,
+      status: "Draft",
       score: 64,
       tier: "Standard",
       notes: "Laboratory only — no imaging. Courier pickup twice daily.",
@@ -415,6 +423,7 @@ export class AppComponent {
       type: "Hospital",
       country: "Saudi Arabia",
       active: true,
+      status: "Active",
       score: 88,
       tier: "Preferred",
       notes:
@@ -426,6 +435,7 @@ export class AppComponent {
       type: "Clinic",
       country: "Egypt",
       active: false,
+      status: "Pending",
       score: 51,
       tier: "Watch",
       notes:
@@ -437,6 +447,7 @@ export class AppComponent {
       type: "Laboratory",
       country: "Jordan",
       active: true,
+      status: "Active",
       score: 71,
       tier: "Standard",
       notes: "Imaging: MRI, CT, ultrasound. Reports within 24h.",
@@ -447,6 +458,7 @@ export class AppComponent {
       type: "Hospital",
       country: "Qatar",
       active: true,
+      status: "Active",
       score: 95,
       tier: "Preferred",
       notes:
@@ -458,6 +470,7 @@ export class AppComponent {
       type: "Clinic",
       country: "Kuwait",
       active: false,
+      status: "Draft",
       score: 43,
       tier: "Watch",
       notes:
@@ -829,23 +842,33 @@ export class AppComponent {
 
   protected readonly tableOptionsMenuItems = computed<GmMenuItem[]>(() => [
     {
-      label: this.configActionsEdge() === 'start' ? 'Pin actions right' : 'Pin actions left',
-      icon: 'pi pi-thumbtack',
-      command: () => this.configActionsEdge.set(this.configActionsEdge() === 'start' ? 'end' : 'start'),
+      label:
+        this.configActionsEdge() === "start"
+          ? "Pin actions right"
+          : "Pin actions left",
+      icon: "pi pi-thumbtack",
+      command: () =>
+        this.configActionsEdge.set(
+          this.configActionsEdge() === "start" ? "end" : "start",
+        ),
     },
     {
-      label: this.configColumnChooser() ? 'Hide column chooser' : 'Show column chooser',
-      icon: 'pi pi-list',
+      label: this.configColumnChooser()
+        ? "Hide column chooser"
+        : "Show column chooser",
+      icon: "pi pi-list",
       command: () => this.configColumnChooser.set(!this.configColumnChooser()),
     },
     {
-      label: this.configReorder() ? 'Lock column order' : 'Drag to reorder',
-      icon: 'pi pi-arrows-move',
+      label: this.configReorder() ? "Lock column order" : "Drag to reorder",
+      icon: "pi pi-arrows-move",
       command: () => this.configReorder.set(!this.configReorder()),
     },
     {
-      label: this.configLockInactive() ? 'Unlock inactive rows' : 'Lock inactive rows',
-      icon: 'pi pi-lock',
+      label: this.configLockInactive()
+        ? "Unlock inactive rows"
+        : "Lock inactive rows",
+      icon: "pi pi-lock",
       command: () => this.configLockInactive.set(!this.configLockInactive()),
     },
   ]);
@@ -868,6 +891,7 @@ export class AppComponent {
       country: "Country",
       score: "Score",
       status: "Status",
+      active: "Active",
       tier: "Tier",
       notes: "Notes",
     })[key] ?? key;
@@ -936,10 +960,28 @@ export class AppComponent {
         width: "8rem",
         align: "end",
       },
-      { field: "active", header: "status", filterType: GmFilterType.BOOLEAN },
       {
-        // The same value as `status`, drawn as a dot rather than a mark, to
-        // show a cellType renderer beside the plain ones.
+        field: "status",
+        header: "status",
+        width: "9rem",
+        cellType: GmCellType.BADGE,
+        filterType: GmFilterType.SELECT,
+        filterOptions: [
+          { id: "active", label: "Active" },
+          { id: "draft", label: "Draft" },
+          { id: "pending", label: "Pending" },
+        ],
+        badgeToneMap: {
+          active: GmStatusTone.INFO,
+          draft: GmStatusTone.NEUTRAL,
+          pending: GmStatusTone.WARNING,
+        },
+      },
+      // Kept beside the badge so the two-state boolean mark still has a demo.
+      { field: "active", header: "active", filterType: GmFilterType.BOOLEAN },
+      {
+        // Drawn as a dot rather than a pill, to show the two tone-driven
+        // renderers beside each other.
         field: "tier",
         header: "tier",
         sortable: false,

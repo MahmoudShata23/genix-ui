@@ -190,6 +190,21 @@ export class GmTableComponent<T> {
 
   readonly addButtonDisabled = input(false, { transform: booleanAttribute });
 
+  /**
+   * Opens this screen's create/edit flows in a modal rather than on a route of
+   * their own. It is what decides who owns the add button: with it on, pressing
+   * Add emits `addClicked` and nothing else happens, so the feature can open a
+   * dialog; with it off (the default) the toolbar navigates to `create`
+   * relative to the current route and the output stays silent.
+   *
+   * Angular's `output()` cannot report whether anything is bound to it, so this
+   * input is how the table is told — binding `(addClicked)` alone cannot
+   * suppress a navigation the toolbar has already decided to perform.
+   */
+  readonly displayActionsInModals = input(false, {
+    transform: booleanAttribute,
+  });
+
   /** Force-hides the selection column regardless of bulk-action visibility. */
   readonly showCheckbox = input(true, { transform: booleanAttribute });
 
@@ -211,7 +226,12 @@ export class GmTableComponent<T> {
   /** Floor on the toolbar's column chooser. */
   readonly minVisibleColumns = input(1, { transform: numberAttribute });
 
-  /** The toolbar's add button was pressed. Where it leads is the feature's own. */
+  /**
+   * The toolbar's add button was pressed. Only fires while
+   * `displayActionsInModals` is on — otherwise the toolbar's own
+   * navigate-to-`create` is the button's behaviour, and emitting as well would
+   * run the feature's dialog and a route change off one click.
+   */
   readonly addClicked = output<void>();
 
   /**
@@ -423,14 +443,23 @@ export class GmTableComponent<T> {
     const actions: GmTableAction<T>[] = [];
 
     if (this.addButtonVisible()) {
-      actions.push({
+      const add: GmTableAction<T> = {
         key: GM_ADD_ACTION_KEY,
         label: translate("add"),
         icon: "pi pi-plus",
         severity: "primary",
         disabled: () => this.addButtonDisabled(),
-        command: () => this.addClicked.emit(),
-      });
+      };
+
+      // `addClicked` is the toolbar's "someone else owns this" hook: present,
+      // it replaces the navigate default, so it is set only in modal mode and
+      // left off otherwise. `command` would not do — the toolbar reads that for
+      // every action *except* add.
+      if (this.displayActionsInModals()) {
+        add.addClicked = () => this.addClicked.emit();
+      }
+
+      actions.push(add);
     }
 
     for (const bulk of config.bulkActions ?? []) {

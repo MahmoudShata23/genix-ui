@@ -8,9 +8,12 @@
       [gmTooltip]="tooltip()"
     ></span>
   }
-} @else if (column().filterType === filterType.BOOLEAN) {
+} @else if (column().filterType === filterType.BOOLEAN && !column().cellType) {
   <!-- Ahead of the empty check: `false` is a value, not a missing one, and a
-       boolean column reads as a mark either way rather than as a dash. -->
+       boolean column reads as a mark either way rather than as a dash.
+
+       An explicit `cellType` still wins, so a boolean-filtered status column
+       can be drawn as a badge instead of the two-state mark. -->
   <span
     class="gm-cell-bool"
     [class.gm-cell-bool--true]="!!value()"
@@ -23,6 +26,17 @@
   @switch (column().cellType) {
     @case (cellType.AVATAR) {
       <span class="gm-cell-avatar" [gmTooltip]="tooltip()">{{ initials() }}</span>
+    }
+
+    @case (cellType.BADGE) {
+      <!-- `small`, because a row is a 2rem box: the medium pill's padding
+           would set the row height instead of the text doing it. -->
+      <gm-badge
+        size="small"
+        [value]="text()"
+        [severity]="badgeSeverity()"
+        [gmTooltip]="badgeTooltip()"
+      />
     }
 
     @case (cellType.STATUS_DOT) {

@@ -7,6 +7,7 @@ import {
   numberAttribute,
 } from '@angular/core';
 
+import { GmBadgeComponent } from '../badge/badge.component';
 import { GmTooltipDirective } from '../tooltip/tooltip.directive';
 import {
   GmCellType,
@@ -14,14 +15,28 @@ import {
   GmStatusTone,
 } from './table-config.types';
 import type { TableColumn } from './table-config.types';
+import type { GmSeverity } from '../core/types';
 
 /** What a `GmCellType.SLA_STATUS` value resolves to. */
 type SlaState = 'breached' | 'warning' | 'ok';
 
 /**
+ * Status tones and badge severities are separate vocabularies — a tone has no
+ * `primary` or `contrast`, a severity has no `neutral` — so a badge cell maps
+ * between them here rather than the config carrying two colour spellings.
+ */
+const BADGE_SEVERITY: Readonly<Record<GmStatusTone, GmSeverity>> = {
+  [GmStatusTone.SUCCESS]: 'success',
+  [GmStatusTone.WARNING]: 'warning',
+  [GmStatusTone.DANGER]: 'danger',
+  [GmStatusTone.INFO]: 'info',
+  [GmStatusTone.NEUTRAL]: 'secondary',
+};
+
+/**
  * Renders one cell of a config-driven column: the `cellType` renderers
- * (avatar, status dot, SLA dot, bulleted list), links, and the plain value
- * formatted from the column's `filterType`.
+ * (avatar, status badge, status dot, SLA dot, bulleted list), links, and the
+ * plain value formatted from the column's `filterType`.
  *
  * It reads the row and nothing else — no row state, no events beyond the
  * column's own `linkPath` — so the same column config renders identically
@@ -30,7 +45,7 @@ type SlaState = 'breached' | 'warning' | 'ok';
 @Component({
   selector: 'gm-table-config-cell',
   standalone: true,
-  imports: [DatePipe, GmTooltipDirective],
+  imports: [DatePipe, GmBadgeComponent, GmTooltipDirective],
   templateUrl: './table-config-cell.component.html',
   styleUrl: './table-config-cell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -93,6 +108,25 @@ export class GmTableConfigCellComponent<T> {
    */
   protected readonly statusTone = computed<GmStatusTone>(
     () => this.column().statusTone?.(this.row()) ?? GmStatusTone.NEUTRAL,
+  );
+
+  /**
+   * A badge's tone: the value's own entry first, then the row-derived
+   * `statusTone`, then neutral — so a column can key off either without the
+   * cell needing to know which statuses exist.
+   */
+  protected readonly badgeSeverity = computed<GmSeverity>(() => {
+    const mapped = this.column().badgeToneMap?.[this.text().toLowerCase()];
+    return BADGE_SEVERITY[mapped ?? this.statusTone()];
+  });
+
+  /**
+   * A badge already shows its whole value, so it only carries a tooltip when
+   * the column points at a *different* field — otherwise every status cell in
+   * the grid would mount an overlay to repeat the word under the cursor.
+   */
+  protected readonly badgeTooltip = computed(() =>
+    this.column().tooltipField ? this.tooltip() : '',
   );
 
   /** No entry in the column's `dotColorMap` — e.g. blank, or an unknown value. */

@@ -164,7 +164,7 @@
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     border-left: 0.25rem solid transparent;
@@ -285,6 +285,13 @@
   --gm-table-z-head: 2;
   /* The header/frozen intersection has to sit above both. */
   --gm-table-z-head-frozen: 3;
+
+  /* The lift a frozen band casts over the columns scrolling under it. `fade`
+     is the gradient's direction, and the only part RTL changes — the flip is
+     one override below rather than a rule per edge. */
+  --gm-table-frozen-shadow-width: 10px;
+  --gm-table-frozen-shadow-color: rgba(var(--gm-gray-800-rgb), 0.05);
+  --gm-table-frozen-shadow-fade: to right;
 }
 
 .gm-table__scroll--capped {
@@ -305,22 +312,53 @@
 }
 
 /* A single divider at each boundary, so a run of adjacent frozen columns does
-   not stack shadows between them. */
-.gm-table__cell--frozen-edge-start {
-  box-shadow: 2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+   not stack shadows between them.
+
+   The lift is a gradient strip in a pseudo-element, not a `box-shadow`:
+   `box-shadow` does not apply to internal table elements while
+   `border-collapse` is `collapse`, so on this table it would simply never
+   paint. Keeping the collapsed border model is worth the extra rule —
+   `separate` would double every border the table already draws.
+
+   The strip is positioned against the cell, which is a containing block
+   already because a frozen cell is `position: sticky`, and it spans the full
+   cell height so the strips down a frozen column abut into one continuous
+   band rather than breaking at every row border. */
+.gm-table__cell--frozen-edge-start::after,
+.gm-table__cell--frozen-edge-end::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: var(--gm-table-frozen-shadow-width);
+  /* The strip overhangs the neighbouring cell, so it must not intercept a
+     click meant for the content underneath it. */
+  pointer-events: none;
 }
 
-.gm-table__cell--frozen-edge-end {
-  box-shadow: -2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+/* Each edge casts away from its own band, so the stops run dark-to-clear at
+   the start edge and clear-to-dark at the end edge. */
+.gm-table__cell--frozen-edge-start::after {
+  inset-inline-start: 100%;
+  background: linear-gradient(
+    var(--gm-table-frozen-shadow-fade),
+    var(--gm-table-frozen-shadow-color),
+    transparent
+  );
 }
 
-/* The shadow is directional, so it flips with the writing direction. */
-:host-context([dir='rtl']) .gm-table__cell--frozen-edge-start {
-  box-shadow: -2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+.gm-table__cell--frozen-edge-end::after {
+  inset-inline-end: 100%;
+  background: linear-gradient(
+    var(--gm-table-frozen-shadow-fade),
+    transparent,
+    var(--gm-table-frozen-shadow-color)
+  );
 }
 
-:host-context([dir='rtl']) .gm-table__cell--frozen-edge-end {
-  box-shadow: 2px 0 5px rgba(var(--gm-gray-900-rgb), 0.08);
+/* A gradient takes no logical direction keyword, so the one physical axis in
+   this block flips with the writing direction. */
+:host-context([dir="rtl"]) .gm-table {
+  --gm-table-frozen-shadow-fade: to left;
 }
 
 /* ---- Sticky header ----------------------------------------------------- */

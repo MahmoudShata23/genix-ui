@@ -75,6 +75,7 @@ describe('gm-table frozen columns and scrolling', () => {
     document.documentElement.style.setProperty('--gm-white', '#ffffff');
     document.documentElement.style.setProperty('--gm-gray-50', '#f8f9fa');
     document.documentElement.style.setProperty('--gm-primary-light', '#e6f4ff');
+    document.documentElement.style.setProperty('--gm-gray-900-rgb', '17, 24, 39');
 
     await TestBed.configureTestingModule({
       imports: [HostComponent],
@@ -177,6 +178,19 @@ describe('gm-table frozen columns and scrolling', () => {
       'gm-table__cell--frozen-edge-start',
     );
     expect(headers()[4].classList).toContain('gm-table__cell--frozen-edge-end');
+  });
+
+  // `box-shadow` does not apply to internal table elements while
+  // `border-collapse` is `collapse`, so a divider declared that way computes
+  // fine and paints nothing. Assert the gradient strip that replaced it.
+  it('paints the divider as a gradient strip rather than a box-shadow', () => {
+    for (const edge of [headers()[1], headers()[4]]) {
+      const strip = getComputedStyle(edge, '::after');
+      expect(strip.content).not.toBe('none');
+      expect(strip.backgroundImage).toContain('gradient');
+      // Overhangs the neighbouring cell, so it must not eat its clicks.
+      expect(strip.pointerEvents).toBe('none');
+    }
   });
 
   // ── selection column ──────────────────────────────────────────────────

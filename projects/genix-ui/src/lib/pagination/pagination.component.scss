@@ -1,8 +1,13 @@
 /* ==========================================================================
    gm-pagination
    --------------------------------------------------------------------------
-   Matches the design system's paginator contract: transparent nav buttons that
-   tint on hover, and a filled primary chip for the current page.
+   Every control is a boxed cell of one shared size: an outlined white square
+   for the nav arrows and the idle pages, a filled primary square for the
+   current page, and the page-size select sitting flush at the end of the same
+   strip.
+
+   Geometry lives in `--gm-pagination-*` slots that one shared rule consumes, so
+   resizing the strip is a single declaration rather than an edit per element.
 
    Laid out with logical properties and flexbox only, so the whole strip mirrors
    correctly under `dir="rtl"`; the chevrons are the one thing that needs an
@@ -11,6 +16,17 @@
 
 :host {
   display: block;
+
+  /* Matched to a `small` field's computed height so the size select lines up
+     with the page cells instead of sitting a couple of pixels short. */
+  --gm-pagination-item-size: calc(
+    (var(--gm-font-size-sm) * 1.5) + (var(--gm-space-1) * 2) + 2px
+  );
+  --gm-pagination-item-radius: var(--gm-radius-md);
+  --gm-pagination-item-gap: var(--gm-space-1);
+  --gm-pagination-border: var(--gm-gray-300);
+  --gm-pagination-color: var(--gm-gray-600);
+  --gm-pagination-bg: var(--gm-white);
 }
 
 .gm-pagination {
@@ -21,6 +37,7 @@
   gap: var(--gm-space-3);
   padding: var(--gm-space-3) var(--gm-space-4);
   font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
 }
 
 .gm-pagination__report {
@@ -28,11 +45,20 @@
   font-size: var(--gm-font-size-sm);
 }
 
+/* Pages and the size select as one strip. The select gets a slightly wider gap
+   so it reads as a separate control rather than another page cell. */
+.gm-pagination__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gm-space-2);
+}
+
 .gm-pagination__list {
   /* It is a <ul>: drop the list chrome. */
   display: flex;
   align-items: center;
-  gap: var(--gm-space-1);
+  gap: var(--gm-pagination-item-gap);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -41,118 +67,95 @@
 .gm-pagination__nav,
 .gm-pagination__page {
   appearance: none;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-  padding: 0 var(--gm-space-2);
-  border: 0;
-  border-radius: var(--gm-radius-sm);
-  background: transparent;
-  color: var(--gm-gray-600);
+  min-width: var(--gm-pagination-item-size);
+  height: var(--gm-pagination-item-size);
+  padding: 0 var(--gm-space-1);
+  border: 1px solid var(--gm-pagination-border);
+  border-radius: var(--gm-pagination-item-radius);
+  background: var(--gm-pagination-bg);
+  color: var(--gm-pagination-color);
   font-family: inherit;
-  font-size: var(--gm-font-size-sm);
+  font-size: inherit;
+  line-height: 1;
   cursor: pointer;
   transition: background-color var(--gm-transition-fast),
-    color var(--gm-transition-fast);
+    border-color var(--gm-transition-fast), color var(--gm-transition-fast);
 
   &:hover:not(:disabled) {
-    background: var(--gm-primary-light);
-    color: var(--gm-primary);
+    --gm-pagination-border: var(--gm-primary);
+    --gm-pagination-bg: var(--gm-primary-light);
+    --gm-pagination-color: var(--gm-primary);
   }
 
   &:focus-visible {
     outline: none;
+    border-color: var(--gm-primary);
     box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
   }
 
   &:disabled {
-    color: var(--gm-gray-300);
+    --gm-pagination-border: var(--gm-gray-200);
+    --gm-pagination-color: var(--gm-gray-300);
     cursor: not-allowed;
   }
 }
 
+.gm-pagination__page {
+  /* Room for three digits without the cell growing taller than it is wide. */
+  padding: 0 var(--gm-space-2);
+}
+
 .gm-pagination__page--current {
-  background: var(--gm-primary);
-  color: var(--gm-white);
+  --gm-pagination-border: var(--gm-primary);
+  --gm-pagination-bg: var(--gm-primary);
+  --gm-pagination-color: var(--gm-white);
   font-weight: var(--gm-font-weight-semibold);
 
   /* Stays filled on hover — it is the active page, not a target. */
   &:hover:not(:disabled) {
-    background: var(--gm-primary-dark);
-    color: var(--gm-white);
+    --gm-pagination-border: var(--gm-primary-hover);
+    --gm-pagination-bg: var(--gm-primary-hover);
+    --gm-pagination-color: var(--gm-white);
   }
 }
 
+/* Unboxed on purpose: the gap is a break in the strip, not a cell. */
 .gm-pagination__gap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.5rem;
-  height: 2rem;
+  min-width: 1.25rem;
+  height: var(--gm-pagination-item-size);
   color: var(--gm-gray-400);
   user-select: none;
 }
 
-/* Chevrons drawn in CSS, so the library needs no icon font. `--first`/`--last`
-   add a bar to read as "jump to the end". */
+/* Chevrons drawn as inline SVG, so the library needs no icon font. `--first`
+   and `--last` are the same stroke twice, which is what reads as "jump to the
+   end" without an extra end-stop rule. */
 .gm-pagination__chevron {
-  position: relative;
-  width: 0.4rem;
-  height: 0.4rem;
-  border: solid currentColor;
-  border-width: 0 2px 2px 0;
-
-  &--prev,
-  &--first {
-    transform: rotate(135deg);
-  }
-
-  &--next,
-  &--last {
-    transform: rotate(-45deg);
-  }
-
-  /* The end-stop bar. Rotated with the arrow, so it is positioned in the
-     chevron's own rotated space. */
-  &--first::after,
-  &--last::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    bottom: -4px;
-    left: -4px;
-    border-left: 2px solid currentColor;
-  }
-
-  &--last::after {
-    left: auto;
-    right: -4px;
-    top: -4px;
-    bottom: -2px;
-    border-left: 0;
-    border-right: 2px solid currentColor;
-  }
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .gm-pagination__size {
   /* Wide enough for the largest option without the trigger jumping. */
-  min-width: 6rem;
+  min-width: 5rem;
 }
 
-/* RTL: the strip itself mirrors via flexbox, but a chevron is a rotated box, so
-   its direction has to be flipped explicitly. */
-:host-context([dir='rtl']) {
-  .gm-pagination__chevron--prev,
-  .gm-pagination__chevron--first {
-    transform: rotate(-45deg);
-  }
-
-  .gm-pagination__chevron--next,
-  .gm-pagination__chevron--last {
-    transform: rotate(135deg);
-  }
+/* RTL: the strip itself mirrors via flexbox, but an arrow still points the
+   wrong way, so every chevron is flipped on its own axis. */
+:host-context([dir='rtl']) .gm-pagination__chevron {
+  transform: scaleX(-1);
 }
 
 @media (prefers-reduced-motion: reduce) {

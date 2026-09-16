@@ -1341,9 +1341,15 @@
         <code>toggleable: false</code> keeps it out of the chooser,
         <code>align</code> puts <em>Score</em> on the right,
         <code>truncateAt</code> moves the rest of <em>Notes</em> into a tooltip,
-        <code>cellType</code> draws <em>Tier</em> as a dot, and
-        <code>exportable: false</code> leaves <em>Notes</em> out of the CSV the
-        toolbar's Export writes.
+        <code>cellType</code> draws <em>Status</em> as a badge and
+        <em>Tier</em> as a dot, and <code>exportable: false</code> leaves
+        <em>Notes</em> out of the CSV the toolbar's Export writes.
+      </p>
+      <p class="pg-lead">
+        <code>displayActionsInModals</code> is on here, so <em>Add</em> reports
+        <code>addClicked</code> below instead of routing to
+        <code>create</code> — which is what a screen that creates in a dialog
+        wants. Leave it off and the toolbar owns the button and navigates.
       </p>
 
       <gm-table
@@ -1356,6 +1362,7 @@
         [pageSize]="5"
         [pageSizeOptions]="[5, 10]"
         [minVisibleColumns]="2"
+        [displayActionsInModals]="true"
         minWidth="76rem"
         caption="Contracted providers, as one config object"
         (sortChange)="onConfigSort($event)"

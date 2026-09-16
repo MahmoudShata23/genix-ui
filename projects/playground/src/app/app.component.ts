@@ -827,6 +827,29 @@ export class AppComponent {
   // of `[columns]`: it mounts its own toolbar, actions column and paginator,
   // and reports sort/filter/page as list-API requests.
 
+  protected readonly tableOptionsMenuItems = computed<GmMenuItem[]>(() => [
+    {
+      label: this.configActionsEdge() === 'start' ? 'Pin actions right' : 'Pin actions left',
+      icon: 'pi pi-thumbtack',
+      command: () => this.configActionsEdge.set(this.configActionsEdge() === 'start' ? 'end' : 'start'),
+    },
+    {
+      label: this.configColumnChooser() ? 'Hide column chooser' : 'Show column chooser',
+      icon: 'pi pi-list',
+      command: () => this.configColumnChooser.set(!this.configColumnChooser()),
+    },
+    {
+      label: this.configReorder() ? 'Lock column order' : 'Drag to reorder',
+      icon: 'pi pi-arrows-move',
+      command: () => this.configReorder.set(!this.configReorder()),
+    },
+    {
+      label: this.configLockInactive() ? 'Unlock inactive rows' : 'Lock inactive rows',
+      icon: 'pi pi-lock',
+      command: () => this.configLockInactive.set(!this.configLockInactive()),
+    },
+  ]);
+
   /**
    * Headers and action labels are *keys*, as a real screen's are. This stands
    * in for a translation pipe — a key with no entry falls through unchanged,

@@ -2,7 +2,8 @@
   <h1>Genix UI</h1>
   <gm-badge value="v0.6.0" severity="info" />
   <span class="pg-header__note">
-    every component, resolved from <code>dist/genix-ui</code> — the published build output
+    every component, resolved from <code>dist/genix-ui</code> — the published
+    build output
   </span>
 </header>
 
@@ -10,7 +11,9 @@
   <nav class="pg-nav" aria-label="Sections">
     <ol>
       @for (section of sections; track section.id) {
-        <li><a [href]="'#' + section.id">{{ section.label }}</a></li>
+        <li>
+          <a [href]="'#' + section.id">{{ section.label }}</a>
+        </li>
       }
     </ol>
   </nav>
@@ -20,12 +23,15 @@
     <section id="form">
       <h2>Reactive form</h2>
       <p class="pg-lead">
-        Every form control bound with <code>formControlName</code>. Submit with the
-        fields empty to see each control pick up its own invalid state from the
-        control, not from a manually passed <code>error</code>.
+        Every form control bound with <code>formControlName</code>. Submit with
+        the fields empty to see each control pick up its own invalid state from
+        the control, not from a manually passed <code>error</code>.
       </p>
 
-      <gm-card header="Provider registration" subheader="ControlValueAccessor end to end">
+      <gm-card
+        header="Provider registration"
+        subheader="ControlValueAccessor end to end"
+      >
         <form class="pg-form" [formGroup]="form" (ngSubmit)="submit()">
           <div class="pg-grid">
             <gm-input
@@ -88,9 +94,24 @@
 
           <fieldset class="pg-fieldset">
             <legend>Contract</legend>
-            <gm-radio formControlName="status" name="contract" value="standard" label="Standard" />
-            <gm-radio formControlName="status" name="contract" value="preferred" label="Preferred" />
-            <gm-radio formControlName="status" name="contract" value="restricted" label="Restricted" />
+            <gm-radio
+              formControlName="status"
+              name="contract"
+              value="standard"
+              label="Standard"
+            />
+            <gm-radio
+              formControlName="status"
+              name="contract"
+              value="preferred"
+              label="Preferred"
+            />
+            <gm-radio
+              formControlName="status"
+              name="contract"
+              value="restricted"
+              label="Restricted"
+            />
           </fieldset>
 
           <gm-checkbox
@@ -100,8 +121,18 @@
           />
 
           <div class="pg-row">
-            <gm-button type="submit" label="Submit" severity="primary" icon="pi pi-check" />
-            <gm-button label="Reset" severity="secondary" variant="outlined" (onClick)="resetForm()" />
+            <gm-button
+              type="submit"
+              label="Submit"
+              severity="primary"
+              icon="pi pi-check"
+            />
+            <gm-button
+              label="Reset"
+              severity="secondary"
+              variant="outlined"
+              (onClick)="resetForm()"
+            />
             <gm-badge
               [value]="form.valid ? 'valid' : 'invalid'"
               [severity]="form.valid ? 'success' : 'danger'"
@@ -121,14 +152,20 @@
       <h2>Button</h2>
 
       <gm-card header="Severity × variant">
-        @for (variant of ['filled', 'outlined', 'text']; track variant) {
+        @for (variant of ["filled", "outlined", "text"]; track variant) {
           <div class="pg-row pg-row--labelled">
             <span class="pg-row__label">{{ variant }}</span>
             @for (severity of severities; track severity) {
               <gm-button
                 [label]="severity"
                 [severity]="severity"
-                [variant]="variant === 'filled' ? 'filled' : variant === 'outlined' ? 'outlined' : 'text'"
+                [variant]="
+                  variant === 'filled'
+                    ? 'filled'
+                    : variant === 'outlined'
+                      ? 'outlined'
+                      : 'text'
+                "
               />
             }
           </div>
@@ -145,15 +182,34 @@
         <div class="pg-row pg-row--labelled">
           <span class="pg-row__label">icons</span>
           <gm-button label="Left icon" icon="pi pi-plus" severity="primary" />
-          <gm-button label="Right icon" icon="pi pi-arrow-right" iconPosition="right" severity="primary" />
-          <gm-button icon="pi pi-cog" ariaLabel="Settings" severity="secondary" />
-          <gm-button icon="pi pi-trash" ariaLabel="Delete" severity="danger" variant="text" />
+          <gm-button
+            label="Right icon"
+            icon="pi pi-arrow-right"
+            iconPosition="right"
+            severity="primary"
+          />
+          <gm-button
+            icon="pi pi-cog"
+            ariaLabel="Settings"
+            severity="secondary"
+          />
+          <gm-button
+            icon="pi pi-trash"
+            ariaLabel="Delete"
+            severity="danger"
+            variant="text"
+          />
         </div>
         <div class="pg-row pg-row--labelled">
           <span class="pg-row__label">state</span>
           <gm-button label="Loading" severity="primary" loading />
           <gm-button label="Disabled" severity="primary" disabled />
-          <gm-button label="Disabled outline" severity="primary" variant="outlined" disabled />
+          <gm-button
+            label="Disabled outline"
+            severity="primary"
+            variant="outlined"
+            disabled
+          />
         </div>
         <div class="pg-stack">
           <span class="pg-row__label">full width</span>
@@ -171,9 +227,23 @@
           @for (size of sizes; track size) {
             <gm-input [formControl]="demoText" [label]="size" [size]="size" />
           }
-          <gm-input [formControl]="demoNumber" type="number" label="Number" hint="Commits a number, not a string" />
-          <gm-input type="password" label="Password" placeholder="••••••••" autocomplete="current-password" />
-          <gm-input type="search" label="Search" placeholder="Find a provider" />
+          <gm-input
+            [formControl]="demoNumber"
+            type="number"
+            label="Number"
+            hint="Commits a number, not a string"
+          />
+          <gm-input
+            type="password"
+            label="Password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <gm-input
+            type="search"
+            label="Search"
+            placeholder="Find a provider"
+          />
           <gm-input type="tel" label="Phone" placeholder="+961 …" />
           <gm-input type="url" label="Website" placeholder="https://" />
         </div>
@@ -181,25 +251,69 @@
 
       <gm-card header="States">
         <div class="pg-grid">
-          <gm-input label="Required" placeholder="Marked and aria-required" required />
-          <gm-input label="With hint" hint="Helper text sits below the control" />
-          <gm-input label="With error" error="This value is already taken" [formControl]="demoText" />
+          <gm-input
+            label="Required"
+            placeholder="Marked and aria-required"
+            required
+          />
+          <gm-input
+            label="With hint"
+            hint="Helper text sits below the control"
+          />
+          <gm-input
+            label="With error"
+            error="This value is already taken"
+            [formControl]="demoText"
+          />
           <gm-input label="Read-only" readonly [formControl]="demoText" />
           <gm-input label="Disabled" [formControl]="demoDisabled" />
-          <gm-input label="Max length 10" [maxLength]="10" placeholder="Stops at 10" />
-          <gm-input label="No label, aria only" ariaLabel="Search providers" placeholder="Labelled by aria-label" />
+          <gm-input
+            label="Max length 10"
+            [maxLength]="10"
+            placeholder="Stops at 10"
+          />
+          <gm-input
+            label="No label, aria only"
+            ariaLabel="Search providers"
+            placeholder="Labelled by aria-label"
+          />
         </div>
       </gm-card>
 
-      <gm-card header="Icon slots" subheader="Inside the border box; the side follows the writing direction">
+      <gm-card
+        header="Icon slots"
+        subheader="Inside the border box; the side follows the writing direction"
+      >
         <div class="pg-grid">
-          <gm-input label="Leading icon" iconStart="pi pi-search" placeholder="Search providers" />
-          <gm-input label="Trailing icon" iconEnd="pi pi-calendar" placeholder="Pick a date" />
-          <gm-input label="Both" iconStart="pi pi-user" iconEnd="pi pi-check" placeholder="Assignee" />
+          <gm-input
+            label="Leading icon"
+            iconStart="pi pi-search"
+            placeholder="Search providers"
+          />
+          <gm-input
+            label="Trailing icon"
+            iconEnd="pi pi-calendar"
+            placeholder="Pick a date"
+          />
+          <gm-input
+            label="Both"
+            iconStart="pi pi-user"
+            iconEnd="pi pi-check"
+            placeholder="Assignee"
+          />
           @for (size of sizes; track size) {
-            <gm-input [label]="'Leading icon, ' + size" [size]="size" iconStart="pi pi-search" placeholder="Search" />
+            <gm-input
+              [label]="'Leading icon, ' + size"
+              [size]="size"
+              iconStart="pi pi-search"
+              placeholder="Search"
+            />
           }
-          <gm-input label="Icon with error" iconStart="pi pi-search" error="No match for that term" />
+          <gm-input
+            label="Icon with error"
+            iconStart="pi pi-search"
+            error="No match for that term"
+          />
         </div>
       </gm-card>
     </section>
@@ -211,10 +325,22 @@
         <div class="pg-grid">
           <gm-textarea [formControl]="demoTextarea" label="Default (3 rows)" />
           <gm-textarea label="6 rows" [rows]="6" placeholder="Taller" />
-          <gm-textarea label="No resize" resize="none" placeholder="resize: none" />
-          <gm-textarea label="Both axes" resize="both" placeholder="resize: both" />
+          <gm-textarea
+            label="No resize"
+            resize="none"
+            placeholder="resize: none"
+          />
+          <gm-textarea
+            label="Both axes"
+            resize="both"
+            placeholder="resize: both"
+          />
           <gm-textarea label="With error" error="Notes are required" />
-          <gm-textarea label="Read-only" readonly [formControl]="demoTextarea" />
+          <gm-textarea
+            label="Read-only"
+            readonly
+            [formControl]="demoTextarea"
+          />
         </div>
       </gm-card>
     </section>
@@ -232,23 +358,52 @@
           <gm-checkbox label="With hint" hint="Explains the consequence" />
           <gm-checkbox label="With error" error="You must accept this" />
           <gm-checkbox label="Disabled" disabled />
-          <gm-checkbox label="Read-only" readonly [formControl]="demoCheckbox" />
+          <gm-checkbox
+            label="Read-only"
+            readonly
+            [formControl]="demoCheckbox"
+          />
         </div>
       </gm-card>
 
-      <gm-card header="Radio group" subheader="One form control, three instances sharing a name">
+      <gm-card
+        header="Radio group"
+        subheader="One form control, three instances sharing a name"
+      >
         <div class="pg-stack">
-          <gm-radio [formControl]="demoRadio" name="demo-tier" value="standard" label="Standard" />
-          <gm-radio [formControl]="demoRadio" name="demo-tier" value="preferred" label="Preferred" />
-          <gm-radio [formControl]="demoRadio" name="demo-tier" value="restricted" label="Restricted" />
+          <gm-radio
+            [formControl]="demoRadio"
+            name="demo-tier"
+            value="standard"
+            label="Standard"
+          />
+          <gm-radio
+            [formControl]="demoRadio"
+            name="demo-tier"
+            value="preferred"
+            label="Preferred"
+          />
+          <gm-radio
+            [formControl]="demoRadio"
+            name="demo-tier"
+            value="restricted"
+            label="Restricted"
+          />
         </div>
-        <p class="pg-readout">Selected: <code>{{ demoRadio.value }}</code></p>
+        <p class="pg-readout">
+          Selected: <code>{{ demoRadio.value }}</code>
+        </p>
 
         <!-- Deliberately control-free. A bare `disabled` next to `[formControl]`
              binds to Angular's own reactive-forms `disabled` input, which takes a
              boolean and disables the whole control, not this one option. -->
         <div class="pg-stack">
-          <gm-radio name="demo-standalone" value="unavailable" label="Disabled option" disabled />
+          <gm-radio
+            name="demo-standalone"
+            value="unavailable"
+            label="Disabled option"
+            disabled
+          />
         </div>
       </gm-card>
     </section>
@@ -286,10 +441,29 @@
             filter
             clearable
           />
-          <gm-select label="Loading" [options]="[]" placeholder="Fetching…" loading />
-          <gm-select label="Empty" [options]="[]" placeholder="Nothing to pick" emptyMessage="No countries configured" />
-          <gm-select label="With error" [options]="plainOptions" error="Pick a speciality" />
-          <gm-select label="Disabled" [options]="plainOptions" placeholder="Unavailable" disabled />
+          <gm-select
+            label="Loading"
+            [options]="[]"
+            placeholder="Fetching…"
+            loading
+          />
+          <gm-select
+            label="Empty"
+            [options]="[]"
+            placeholder="Nothing to pick"
+            emptyMessage="No countries configured"
+          />
+          <gm-select
+            label="With error"
+            [options]="plainOptions"
+            error="Pick a speciality"
+          />
+          <gm-select
+            label="Disabled"
+            [options]="plainOptions"
+            placeholder="Unavailable"
+            disabled
+          />
         </div>
       </gm-card>
 
@@ -373,7 +547,7 @@
           </gm-select>
 
           <p class="pg-lead">
-            Control value: <code>{{ assignee.value ?? 'null' }}</code>
+            Control value: <code>{{ assignee.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -399,7 +573,7 @@
           <p class="pg-lead">
             Filtering virtualises the filtered result; arrow keys, Home and End
             scroll the highlighted row into view. Control value:
-            <code>{{ cityId.value ?? 'null' }}</code>
+            <code>{{ cityId.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -429,7 +603,7 @@
           />
 
           <p class="pg-lead">
-            Control value: <code>{{ limitedRoles.value ?? 'null' }}</code>
+            Control value: <code>{{ limitedRoles.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -456,7 +630,7 @@
           <p class="pg-lead">
             Filtering virtualises the filtered list; arrows, Home and End scroll
             the highlighted row into view. Control value:
-            <code>{{ pickedCities.value ?? 'null' }}</code>
+            <code>{{ pickedCities.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -467,8 +641,15 @@
       <h2>Datepicker</h2>
       <gm-card header="Formats, bounds and button bar">
         <div class="pg-grid">
-          <gm-datepicker [formControl]="demoDate" label="Default (dd/MM/yyyy)" />
-          <gm-datepicker label="ISO format" dateFormat="yyyy-MM-dd" placeholder="yyyy-mm-dd" />
+          <gm-datepicker
+            [formControl]="demoDate"
+            label="Default (dd/MM/yyyy)"
+          />
+          <gm-datepicker
+            label="ISO format"
+            dateFormat="yyyy-MM-dd"
+            placeholder="yyyy-mm-dd"
+          />
           <gm-datepicker
             [formControl]="demoDateBounded"
             label="This month only"
@@ -476,12 +657,18 @@
             [maxDate]="monthEnd"
             hint="Days outside the current month are disabled"
           />
-          <gm-datepicker label="Clearable + button bar" clearable showButtonBar />
+          <gm-datepicker
+            label="Clearable + button bar"
+            clearable
+            showButtonBar
+          />
           <gm-datepicker label="Week starts Monday" [firstDayOfWeek]="1" />
           <gm-datepicker label="With error" error="A start date is required" />
           <gm-datepicker label="Disabled" disabled placeholder="Unavailable" />
         </div>
-        <p class="pg-readout">Bound value: <code>{{ demoDate.value }}</code></p>
+        <p class="pg-readout">
+          Bound value: <code>{{ demoDate.value }}</code>
+        </p>
       </gm-card>
     </section>
 
@@ -494,7 +681,10 @@
         <code>[start, end]</code> tuple.
       </p>
 
-      <gm-card header="Date + time" subheader="Picking a day keeps the time, and vice versa">
+      <gm-card
+        header="Date + time"
+        subheader="Picking a day keeps the time, and vice versa"
+      >
         <div class="pg-grid">
           <gm-datepicker
             label="Appointment (24h)"
@@ -519,16 +709,24 @@
         </div>
 
         <p class="pg-lead">
-          Appointment: <code>{{ appointment.value ?? 'null' }}</code>
+          Appointment: <code>{{ appointment.value ?? "null" }}</code>
         </p>
       </gm-card>
 
-      <gm-card header="Time only" subheader="No calendar — the same hour/minute controls">
+      <gm-card
+        header="Time only"
+        subheader="No calendar — the same hour/minute controls"
+      >
         <div class="pg-grid">
-          <gm-datepicker label="Opens at" [formControl]="startTime" [clearable]="true" [timeOnly]="true" />
+          <gm-datepicker
+            label="Opens at"
+            [formControl]="startTime"
+            [clearable]="true"
+            [timeOnly]="true"
+          />
 
           <p class="pg-lead">
-            Value: <code>{{ startTime.value ?? 'null' }}</code>
+            Value: <code>{{ startTime.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -545,7 +743,7 @@
           <p class="pg-lead">
             Clicking before the start swaps the two rather than making an
             invalid range. Value:
-            <code>{{ period.value ?? 'null' }}</code>
+            <code>{{ period.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -555,7 +753,10 @@
     <section id="small">
       <h2>Popover, menu, switch, number, select button, autocomplete</h2>
 
-      <gm-card header="Popover & menu" subheader="Both anchored by the shared overlay engine">
+      <gm-card
+        header="Popover & menu"
+        subheader="Both anchored by the shared overlay engine"
+      >
         <div class="pg-row">
           <gm-button label="Open popover" (onClick)="popover.toggle($event)" />
           <gm-popover #popover ariaLabel="Provider details">
@@ -572,12 +773,20 @@
           <gm-menu #menu [items]="menuItems" ariaLabel="Row actions" />
         </div>
 
-        <p class="pg-lead">Last command: <code>{{ lastCommand() }}</code></p>
+        <p class="pg-lead">
+          Last command: <code>{{ lastCommand() }}</code>
+        </p>
       </gm-card>
 
-      <gm-card header="Toggle switch & number" subheader="Native checkbox and native number input">
+      <gm-card
+        header="Toggle switch & number"
+        subheader="Native checkbox and native number input"
+      >
         <div class="pg-grid">
-          <gm-toggle-switch [formControl]="notifications" label="Email notifications" />
+          <gm-toggle-switch
+            [formControl]="notifications"
+            label="Email notifications"
+          />
           <gm-toggle-switch [formControl]="locked" label="Disabled switch" />
 
           <gm-input-number
@@ -589,17 +798,25 @@
             suffix="%"
             hint="Clamped to 0–100 when you leave the field"
           />
-          <gm-input-number label="Premium" [formControl]="premium" prefix="EGP" [min]="0" />
+          <gm-input-number
+            label="Premium"
+            [formControl]="premium"
+            prefix="EGP"
+            [min]="0"
+          />
         </div>
 
         <p class="pg-lead">
           Values: <code>{{ notifications.value }}</code> /
-          <code>{{ coverage.value ?? 'null' }}</code> /
-          <code>{{ premium.value ?? 'null' }}</code>
+          <code>{{ coverage.value ?? "null" }}</code> /
+          <code>{{ premium.value ?? "null" }}</code>
         </p>
       </gm-card>
 
-      <gm-card header="Select button" subheader="A radiogroup — one tab stop, arrows move and select">
+      <gm-card
+        header="Select button"
+        subheader="A radiogroup — one tab stop, arrows move and select"
+      >
         <div class="pg-grid">
           <gm-select-button
             label="Status"
@@ -611,12 +828,15 @@
           />
 
           <p class="pg-lead">
-            Value: <code>{{ claimStatus.value ?? 'null' }}</code>
+            Value: <code>{{ claimStatus.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
 
-      <gm-card header="Autocomplete" subheader="The component never fetches — it emits a term">
+      <gm-card
+        header="Autocomplete"
+        subheader="The component never fetches — it emits a term"
+      >
         <div class="pg-grid">
           <gm-autocomplete
             label="Assignee"
@@ -639,7 +859,7 @@
 
           <p class="pg-lead">
             Typing emits <code>search</code>; this page answers it from a local
-            list. Value: <code>{{ assignedUser.value ?? 'null' }}</code>
+            list. Value: <code>{{ assignedUser.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -657,20 +877,41 @@
           <p>Use inside an already-elevated surface.</p>
         </gm-card>
 
-        <gm-card header="With actions" subheader="Projected into [gmCardActions]">
+        <gm-card
+          header="With actions"
+          subheader="Projected into [gmCardActions]"
+        >
           <div gmCardActions>
-            <gm-button icon="pi pi-pencil" ariaLabel="Edit" severity="secondary" variant="text" size="small" />
-            <gm-button icon="pi pi-trash" ariaLabel="Delete" severity="danger" variant="text" size="small" />
+            <gm-button
+              icon="pi pi-pencil"
+              ariaLabel="Edit"
+              severity="secondary"
+              variant="text"
+              size="small"
+            />
+            <gm-button
+              icon="pi pi-trash"
+              ariaLabel="Delete"
+              severity="danger"
+              variant="text"
+              size="small"
+            />
           </div>
           <p>Actions render on the header row, opposite the title.</p>
         </gm-card>
 
-        <gm-card header="Interactive" subheader="Hover and focus affordances" interactive>
+        <gm-card
+          header="Interactive"
+          subheader="Hover and focus affordances"
+          interactive
+        >
           <p>Signals the whole card is clickable.</p>
         </gm-card>
 
         <gm-card padding="none">
-          <div class="pg-bleed">padding="none" — content bleeds to the edge</div>
+          <div class="pg-bleed">
+            padding="none" — content bleeds to the edge
+          </div>
         </gm-card>
 
         <gm-card>
@@ -700,7 +941,12 @@
           <span class="pg-row__label">rounded</span>
           <gm-badge value="24" severity="info" rounded />
           <gm-badge value="Active" severity="success" rounded />
-          <gm-badge value="99+" severity="danger" rounded ariaLabel="99 or more unread" />
+          <gm-badge
+            value="99+"
+            severity="danger"
+            rounded
+            ariaLabel="99 or more unread"
+          />
         </div>
       </gm-card>
 
@@ -714,7 +960,12 @@
         <div class="pg-row pg-row--labelled">
           <span class="pg-row__label">variants</span>
           <gm-chip label="With icon" icon="pi pi-user" severity="info" />
-          <gm-chip label="Removable" severity="primary" removable removeAriaLabel="Remove Cardiology" />
+          <gm-chip
+            label="Removable"
+            severity="primary"
+            removable
+            removeAriaLabel="Remove Cardiology"
+          />
           <gm-chip label="Disabled" severity="secondary" disabled />
         </div>
       </gm-card>
@@ -732,7 +983,10 @@
     <!-- ── Tooltip ─────────────────────────────────────────────────────── -->
     <section id="tooltip">
       <h2>Tooltip</h2>
-      <gm-card header="Positions" subheader="Also overlay-driven — hover or focus each target">
+      <gm-card
+        header="Positions"
+        subheader="Also overlay-driven — hover or focus each target"
+      >
         <!-- The directive's inputs are aliased: the text goes on `gmTooltip`
              itself, and the others are `tooltipPosition` / `tooltipDisabled`.
              Writing `content=` or `position=` sets a dead HTML attribute and the
@@ -747,7 +1001,11 @@
               [tooltipPosition]="position"
             />
           }
-          <span class="pg-tooltip-target" gmTooltip="Works on any element, not just buttons.">
+          <span
+            class="pg-tooltip-target"
+            gmTooltip="Works on any element, not just buttons."
+            tooltipPosition="left"
+          >
             plain span
           </span>
           <gm-button
@@ -777,7 +1035,10 @@
         result back through <code>onClose</code>.
       </p>
 
-      <gm-card header="Open" subheader="Escape, the backdrop and the close button all dismiss">
+      <gm-card
+        header="Open"
+        subheader="Escape, the backdrop and the close button all dismiss"
+      >
         <div class="pg-row">
           <gm-button label="Edit provider" (onClick)="openDialog()" />
           <gm-button
@@ -804,11 +1065,22 @@
         one goes.
       </p>
 
-      <gm-card header="Severities" subheader="Auto-dismiss after 5s; the close button is keyboard reachable">
+      <gm-card
+        header="Severities"
+        subheader="Auto-dismiss after 5s; the close button is keyboard reachable"
+      >
         <div class="pg-row">
-          <gm-button label="Success" severity="success" (onClick)="toastSuccess()" />
+          <gm-button
+            label="Success"
+            severity="success"
+            (onClick)="toastSuccess()"
+          />
           <gm-button label="Info" severity="info" (onClick)="toastInfo()" />
-          <gm-button label="Warning" severity="warning" (onClick)="toastWarning()" />
+          <gm-button
+            label="Warning"
+            severity="warning"
+            (onClick)="toastWarning()"
+          />
           <gm-button label="Error" severity="danger" (onClick)="toastError()" />
         </div>
 
@@ -845,9 +1117,9 @@
     <section id="message">
       <h2>Message</h2>
       <p class="pg-lead">
-        Inline and persistent, unlike a toast — for a condition the user needs to
-        keep seeing. Warnings and errors take <code>role="alert"</code>; anything
-        else is announced politely.
+        Inline and persistent, unlike a toast — for a condition the user needs
+        to keep seeing. Warnings and errors take <code>role="alert"</code>;
+        anything else is announced politely.
       </p>
 
       <gm-card header="Severities">
@@ -860,9 +1132,21 @@
 
       <gm-card header="With icons, and with projected content">
         <div class="pg-stack">
-          <gm-message severity="info" icon="pi pi-info-circle" text="This identification is in use by an active policy." />
-          <gm-message severity="warning" icon="pi pi-lock" text="This mapping version is locked and cannot be edited." />
-          <gm-message severity="danger" icon="pi pi-times-circle" text="Saving failed. Check the highlighted fields." />
+          <gm-message
+            severity="info"
+            icon="pi pi-info-circle"
+            text="This identification is in use by an active policy."
+          />
+          <gm-message
+            severity="warning"
+            icon="pi pi-lock"
+            text="This mapping version is locked and cannot be edited."
+          />
+          <gm-message
+            severity="danger"
+            icon="pi pi-times-circle"
+            text="Saving failed. Check the highlighted fields."
+          />
           <gm-message severity="success" icon="pi pi-check-circle">
             Projected content, so it can hold <b>markup</b> and
             <a href="#message">links</a>.
@@ -876,7 +1160,8 @@
       <h2>Tabs</h2>
       <p class="pg-lead">
         Arrow keys, Home and End move between tabs; activation follows focus. A
-        panel is created when its tab becomes active and destroyed when it leaves.
+        panel is created when its tab becomes active and destroyed when it
+        leaves.
       </p>
 
       <gm-card>
@@ -889,12 +1174,17 @@
             <ng-template gmTabLabel>
               Rich header <gm-badge value="3" severity="danger" rounded />
             </ng-template>
-            <p>This tab's header comes from a <code>gmTabLabel</code> template.</p>
+            <p>
+              This tab's header comes from a <code>gmTabLabel</code> template.
+            </p>
           </gm-tab>
 
           <gm-tab value="nested" label="Nested content">
             <gm-card header="A card inside a tab" variant="flat">
-              <gm-input label="Recreated on every visit" placeholder="Type, switch away, come back" />
+              <gm-input
+                label="Recreated on every visit"
+                placeholder="Type, switch away, come back"
+              />
             </gm-card>
           </gm-tab>
 
@@ -902,7 +1192,9 @@
             <p>Unreachable.</p>
           </gm-tab>
         </gm-tabs>
-        <p class="pg-readout">Active tab: <code>{{ activeTab() }}</code></p>
+        <p class="pg-readout">
+          Active tab: <code>{{ activeTab() }}</code>
+        </p>
       </gm-card>
     </section>
 
@@ -921,7 +1213,8 @@
           <gm-accordion-panel value="how">
             <gm-accordion-header>How is it installed?</gm-accordion-header>
             <gm-accordion-content>
-              From GitHub Packages, aliased to whatever name the consumer already imports.
+              From GitHub Packages, aliased to whatever name the consumer
+              already imports.
             </gm-accordion-content>
           </gm-accordion-panel>
           <gm-accordion-panel value="locked" disabled>
@@ -936,7 +1229,8 @@
           <gm-accordion-panel value="tokens">
             <gm-accordion-header>Design tokens</gm-accordion-header>
             <gm-accordion-content>
-              Shipped as <code>styles/tokens.css</code>; every component reads only <code>--gm-*</code>.
+              Shipped as <code>styles/tokens.css</code>; every component reads
+              only <code>--gm-*</code>.
             </gm-accordion-content>
           </gm-accordion-panel>
           <gm-accordion-panel value="peers">
@@ -948,7 +1242,8 @@
           <gm-accordion-panel value="release">
             <gm-accordion-header>Releasing</gm-accordion-header>
             <gm-accordion-content>
-              Push a <code>v*</code> tag; CI verifies it matches the manifest, then publishes.
+              Push a <code>v*</code> tag; CI verifies it matches the manifest,
+              then publishes.
             </gm-accordion-content>
           </gm-accordion-panel>
         </gm-accordion>
@@ -975,15 +1270,26 @@
         />
 
         <p class="pg-readout">
-          page <code>{{ page() }}</code>, pageSize <code>{{ pageSize() }}</code>
+          page <code>{{ page() }}</code
+          >, pageSize <code>{{ pageSize() }}</code>
         </p>
       </gm-card>
 
       <gm-card header="Variants" variant="flat">
         <div class="pg-stack">
           <gm-pagination [page]="1" [pageSize]="10" [totalItems]="0" />
-          <gm-pagination [page]="3" [pageSize]="10" [totalItems]="500" [maxPageLinks]="7" />
-          <gm-pagination [page]="2" [pageSize]="10" [totalItems]="80" disabled />
+          <gm-pagination
+            [page]="3"
+            [pageSize]="10"
+            [totalItems]="500"
+            [maxPageLinks]="7"
+          />
+          <gm-pagination
+            [page]="2"
+            [pageSize]="10"
+            [totalItems]="80"
+            disabled
+          />
         </div>
       </gm-card>
     </section>
@@ -992,9 +1298,10 @@
     <section id="table">
       <h2>Table</h2>
       <p class="pg-lead">
-        Config-driven table with sorting, filtering, selection, and a toolbar with actions.
-        Use the dropdown menu to toggle table options: pin actions, show/hide column chooser,
-        enable column reordering, and lock inactive rows.
+        Config-driven table with sorting, filtering, selection, and a toolbar
+        with actions. Use the dropdown menu to toggle table options: pin
+        actions, show/hide column chooser, enable column reordering, and lock
+        inactive rows.
       </p>
 
       <!-- ── Config-driven ───────────────────────────────────────────────── -->
@@ -1009,7 +1316,11 @@
             variant="outlined"
             (onClick)="tableOptionsMenu.toggle($event)"
           />
-          <gm-menu #tableOptionsMenu [items]="tableOptionsMenuItems()" ariaLabel="Table options" />
+          <gm-menu
+            #tableOptionsMenu
+            [items]="tableOptionsMenuItems()"
+            ariaLabel="Table options"
+          />
         </div>
       </div>
       <p class="pg-lead">
@@ -1020,17 +1331,17 @@
         per renderer and a paginator.
       </p>
       <p class="pg-lead">
-        This grid does everything the two above it do, and every switch is a
-        key in that object rather than an input: <code>rowSelectable</code>
-        locks the inactive rows, <code>showColumnChooser</code> offers the
-        chooser, <code>reorderableColumns</code> lets headers be dragged (the
-        table keeps the new order itself), and <code>actionsPosition</code>
+        This grid does everything the two above it do, and every switch is a key
+        in that object rather than an input: <code>rowSelectable</code> locks
+        the inactive rows, <code>showColumnChooser</code> offers the chooser,
+        <code>reorderableColumns</code> lets headers be dragged (the table keeps
+        the new order itself), and <code>actionsPosition</code>
         moves the pinned actions edge to edge. Per column:
         <code>frozen</code> pins <em>Provider</em>,
         <code>toggleable: false</code> keeps it out of the chooser,
         <code>align</code> puts <em>Score</em> on the right,
-        <code>truncateAt</code> moves the rest of <em>Notes</em> into a
-        tooltip, <code>cellType</code> draws <em>Tier</em> as a dot, and
+        <code>truncateAt</code> moves the rest of <em>Notes</em> into a tooltip,
+        <code>cellType</code> draws <em>Tier</em> as a dot, and
         <code>exportable: false</code> leaves <em>Notes</em> out of the CSV the
         toolbar's Export writes.
       </p>
@@ -1063,8 +1374,8 @@
         @if (configLockInactive()) {
           · <code>Inactive</code> rows cannot be ticked
         }
-        · <code>Inactive</code> rows keep the Delete slot but lose the button
-        · last event: <code>{{ lastConfigEvent() }}</code>
+        · <code>Inactive</code> rows keep the Delete slot but lose the button ·
+        last event: <code>{{ lastConfigEvent() }}</code>
       </p>
     </section>
     <!-- ── Long tail ─────────────────────────────────────────────────────── -->
@@ -1195,6 +1506,5 @@
         </p>
       </gm-card>
     </section>
-
   </main>
 </div>

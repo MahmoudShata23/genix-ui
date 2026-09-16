@@ -32,6 +32,9 @@
   --gm-btn-color: var(--gm-gray-700);
   --gm-btn-tint: var(--gm-gray-100);
   --gm-btn-ring: var(--gm-focus-ring-color);
+  /* A slot so elevation and the focus ring can coexist rather than one
+     box-shadow declaration clobbering the other. */
+  --gm-btn-shadow: none;
 
   /* Geometry slots — overridden per size below. */
   --gm-btn-padding-x: var(--gm-space-5);
@@ -51,6 +54,7 @@
 
   background: var(--gm-btn-surface);
   color: var(--gm-btn-color);
+  box-shadow: var(--gm-btn-shadow);
 
   font-family: var(--gm-font-family);
   font-size: var(--gm-btn-font-size);
@@ -76,7 +80,9 @@
   /* Keyboard-only focus ring — pointer clicks stay clean. */
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-btn-ring);
+    box-shadow:
+      0 0 0 var(--gm-focus-ring-width) var(--gm-btn-ring),
+      var(--gm-btn-shadow);
   }
 
   &:disabled {
@@ -221,7 +227,8 @@
      only on hover. `--gm-btn-accent` carries the severity colour, so this is
      one rule for every severity rather than one per pair. */
   &--outlined,
-  &--text {
+  &--text,
+  &--link {
     --gm-btn-surface: transparent;
     --gm-btn-surface-hover: var(--gm-btn-tint);
     --gm-btn-surface-active: var(--gm-btn-tint);
@@ -237,6 +244,25 @@
 
   &--text {
     --gm-btn-border: transparent;
+  }
+
+  /* A hyperlink that happens to be a button: no surface even on hover, and
+     the underline is what carries the affordance. */
+  &--link {
+    --gm-btn-border: transparent;
+    --gm-btn-surface-hover: transparent;
+    --gm-btn-surface-active: transparent;
+    text-decoration: underline;
+  }
+
+  /* ---- Shape and elevation -------------------------------------------- */
+
+  &--rounded {
+    border-radius: var(--gm-radius-full);
+  }
+
+  &--raised {
+    --gm-btn-shadow: var(--gm-shadow-md);
   }
 
   &--loading {

@@ -11,8 +11,9 @@ export type GmButtonSeverity = GmSeverity;
  * - `filled`   — solid surface (the default call-to-action)
  * - `outlined` — transparent surface, coloured border and text
  * - `text`     — no surface, no border; tint appears on hover only
+ * - `link`     — no surface, no border, underlined; reads as a hyperlink
  */
-export type GmButtonVariant = 'filled' | 'outlined' | 'text';
+export type GmButtonVariant = 'filled' | 'outlined' | 'text' | 'link';
 
 /** Size step. Maps to the design system's type/spacing scale. */
 export type GmButtonSize = GmSize;

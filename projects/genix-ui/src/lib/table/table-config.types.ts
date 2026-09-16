@@ -12,10 +12,10 @@ import type { Observable } from 'rxjs';
  * Every key here matches the shape those screens already use, so a config
  * object moves over untouched: only the import path changes.
  */
-export interface GmTableModel<T> {
-  columns: GmTableConfigColumn<T>[];
-  bulkActions?: GmDynamicBulkAction<T>[];
-  singleActions?: GmSingleAction<T>[];
+export interface TableModel<T> {
+  columns: TableColumn<T>[];
+  bulkActions?: DynamicBulkAction<T>[];
+  singleActions?: SingleAction<T>[];
   /**
    * Shows the add button only when the predicate returns true. Omit it to
    * show the button whenever the `showAddButton` input allows it (the default).
@@ -68,7 +68,7 @@ export interface GmTableModel<T> {
 }
 
 /** One column of a `tableConfig`. */
-export interface GmTableConfigColumn<T> {
+export interface TableColumn<T> {
   field: keyof T & string;
   header: string;
   /** Columns sort by default; pass `false` to opt one out. */
@@ -122,7 +122,7 @@ export interface GmTableConfigColumn<T> {
   /** Renders the value as a link and calls this on click. */
   linkPath?: (row: T) => void;
   /** Row actions scoped to this column, for a grid that varies them per column. */
-  actions?: GmSingleAction<T>[];
+  actions?: SingleAction<T>[];
   /** With `cellType: GmCellType.DOT`, maps the field's value (case-insensitive) to a dot colour. */
   dotColorMap?: Record<string, GmStatusTone>;
   /**
@@ -140,7 +140,7 @@ export interface GmActionStyle {
 }
 
 /** One icon button on a row. */
-export interface GmSingleAction<T> {
+export interface SingleAction<T> {
   type: GmTableActionType;
   command: (row: T) => void;
   /**
@@ -151,7 +151,7 @@ export interface GmSingleAction<T> {
 }
 
 /** One button in the toolbar above the grid. */
-export interface GmDynamicBulkAction<T> {
+export interface DynamicBulkAction<T> {
   type: GmTableActionType;
   command: (rows: T[]) => void;
   scope: GmTableBulkActionScope;
@@ -288,7 +288,7 @@ export enum GmStatusTone {
 export enum GmCellType {
   AVATAR = 'avatar',
   SLA_STATUS = 'sla_status',
-  /** Renders the cell's value as a coloured dot instead of text — see `GmTableConfigColumn.dotColorMap`. */
+  /** Renders the cell's value as a coloured dot instead of text — see `TableColumn.dotColorMap`. */
   DOT = 'dot',
   /** Renders the field's value (expected to be a `string[]`) as a bulleted list, one entry per line. */
   LIST = 'list',

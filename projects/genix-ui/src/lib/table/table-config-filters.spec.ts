@@ -4,7 +4,7 @@ import {
   gmToFilterDescriptors,
 } from './table-config-filters';
 import { GmFilterType } from './table-config.types';
-import type { GmTableConfigColumn } from './table-config.types';
+import type { TableColumn } from './table-config.types';
 import { GmFilterCondition, GmFilterDataType } from './table-request.types';
 
 interface Row {
@@ -16,7 +16,7 @@ interface Row {
   joined: Date;
 }
 
-const COLUMNS: GmTableConfigColumn<Row>[] = [
+const COLUMNS: TableColumn<Row>[] = [
   { field: 'name', header: 'name', filterType: GmFilterType.TEXT },
   { field: 'score', header: 'score', filterType: GmFilterType.NUMERIC },
   { field: 'status', header: 'status', filterType: GmFilterType.SELECT },

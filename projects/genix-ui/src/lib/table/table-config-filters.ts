@@ -1,5 +1,5 @@
 import { GmFilterType } from './table-config.types';
-import type { GmTableConfigColumn } from './table-config.types';
+import type { TableColumn } from './table-config.types';
 import { GmFilterCondition, GmFilterDataType } from './table-request.types';
 import type { GmFilterDescriptor } from './table-request.types';
 import type { GmFilterOperator, GmTableFilter } from './table-filter.types';
@@ -51,7 +51,7 @@ export function gmFilterConditionOf(
 
 export function gmToFilterDescriptors<T>(
   filters: readonly GmTableFilter[],
-  columns: readonly GmTableConfigColumn<T>[],
+  columns: readonly TableColumn<T>[],
 ): GmFilterDescriptor[] {
   return filters.map((filter) => {
     const column = columns.find((candidate) => candidate.field === filter.field);

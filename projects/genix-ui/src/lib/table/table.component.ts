@@ -46,8 +46,8 @@ import { gmToFilterDescriptors } from "./table-config-filters";
 import { GmFilterType, GmTableBulkActionScope } from "./table-config.types";
 import type {
   GmTableActionType,
-  GmTableConfigColumn,
-  GmTableModel,
+  TableColumn,
+  TableModel,
   GmTableTranslate,
 } from "./table-config.types";
 import type { GmTableAction } from "./table-action.types";
@@ -156,7 +156,7 @@ export class GmTableComponent<T> {
    * Everything the column API does is still available underneath — the two are
    * the same component, not a wrapper.
    */
-  readonly tableConfig = input<GmTableModel<T> | null>(null);
+  readonly tableConfig = input<TableModel<T> | null>(null);
 
   /** The rows, in config mode. `data` stays the input for the column API. */
   readonly records = input<readonly T[]>([]);
@@ -234,7 +234,7 @@ export class GmTableComponent<T> {
   );
 
   protected readonly configColumnsSource = computed<
-    readonly GmTableConfigColumn<T>[]
+    readonly TableColumn<T>[]
   >(() => this.tableConfig()?.columns ?? []);
 
   /** Config columns mapped onto the table's own column model. */
@@ -506,7 +506,7 @@ export class GmTableComponent<T> {
   /** The config column a rendered column came from, for the cell renderer. */
   protected configColumnOf(
     column: GmTableColumn<T>,
-  ): GmTableConfigColumn<T> | null {
+  ): TableColumn<T> | null {
     return (column as GmConfigColumn<T>).source ?? null;
   }
 
@@ -1736,7 +1736,7 @@ export class GmTableComponent<T> {
  */
 interface GmConfigColumn<T> extends GmTableColumn<T> {
   /** The config entry this was mapped from. Absent on the actions column. */
-  source?: GmTableConfigColumn<T>;
+  source?: TableColumn<T>;
   /** Marks the synthetic column holding the row actions. */
   isActions?: boolean;
 }

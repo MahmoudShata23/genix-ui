@@ -9,7 +9,7 @@ import {
   GmTableActionType,
   GmTableBulkActionScope,
 } from './table-config.types';
-import type { GmTableModel } from './table-config.types';
+import type { TableModel } from './table-config.types';
 import {
   GmFilterCondition,
   GmFilterDataType,
@@ -83,7 +83,7 @@ class HostComponent {
   /** A stand-in for a real translation pipe: uppercases the key. */
   readonly translate = (key: string) => key.toUpperCase();
 
-  readonly tableConfig: GmTableModel<Provider> = {
+  readonly tableConfig: TableModel<Provider> = {
     columns: [
       {
         field: 'name',

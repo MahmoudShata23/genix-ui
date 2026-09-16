@@ -7,7 +7,7 @@ import {
   GmTableActionType,
   GmTableBulkActionScope,
 } from './table-config.types';
-import type { GmTableModel } from './table-config.types';
+import type { TableModel } from './table-config.types';
 
 /**
  * The view options a config grid declares rather than binds: which rows may be
@@ -67,7 +67,7 @@ class HostComponent {
   readonly actionsEdge = signal<'start' | 'end'>('start');
   readonly lockInactive = signal(true);
 
-  readonly config = computed<GmTableModel<Row>>(() => ({
+  readonly config = computed<TableModel<Row>>(() => ({
     columns: [
       {
         field: 'name',

@@ -13,7 +13,7 @@ import {
   GmFilterType,
   GmStatusTone,
 } from './table-config.types';
-import type { GmTableConfigColumn } from './table-config.types';
+import type { TableColumn } from './table-config.types';
 
 /** What a `GmCellType.SLA_STATUS` value resolves to. */
 type SlaState = 'breached' | 'warning' | 'ok';
@@ -37,7 +37,7 @@ type SlaState = 'breached' | 'warning' | 'ok';
   host: { class: 'gm-table-config-cell' },
 })
 export class GmTableConfigCellComponent<T> {
-  readonly column = input.required<GmTableConfigColumn<T>>();
+  readonly column = input.required<TableColumn<T>>();
 
   readonly row = input.required<T>();
 

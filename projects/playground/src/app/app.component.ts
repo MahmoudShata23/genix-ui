@@ -71,7 +71,7 @@ import {
   GmTableComponent,
   GmTableEmptyDirective,
   GmTableFilter,
-  GmTableModel,
+  TableModel,
   GmTableQueryEvent,
   GmTableRequest,
   GmTableSortChange,
@@ -879,7 +879,7 @@ export class AppComponent {
    * and whether headers can be dragged. A `computed`, so the switches above it
    * change the grid by handing it a new config — never by touching an input.
    */
-  protected readonly providerConfig = computed<GmTableModel<Provider>>(() => ({
+  protected readonly providerConfig = computed<TableModel<Provider>>(() => ({
     columns: [
       {
         field: "name",

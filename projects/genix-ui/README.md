@@ -462,7 +462,7 @@ one object:
 ```
 
 ```ts
-readonly tableConfig: GmTableModel<Professional> = {
+readonly tableConfig: TableModel<Professional> = {
   columns: [
     { field: 'name', header: 'name', filterType: GmFilterType.TEXT,
       linkPath: (row) => this.router.navigate(['view', row.id]) },

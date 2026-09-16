@@ -5,7 +5,7 @@ import { GmTooltipDirective } from '../tooltip/tooltip.directive';
 import { gmActionStyle } from './table-action-registry';
 import type {
   GmActionStyle,
-  GmSingleAction,
+  SingleAction,
   GmTableActionType,
   GmTableTranslate,
 } from './table-config.types';
@@ -60,7 +60,7 @@ import type {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GmTableRowActionsComponent<T> {
-  readonly actions = input<readonly GmSingleAction<T>[]>([]);
+  readonly actions = input<readonly SingleAction<T>[]>([]);
 
   readonly row = input.required<T>();
 
@@ -80,7 +80,7 @@ export class GmTableRowActionsComponent<T> {
     ),
   );
 
-  protected isVisible(action: GmSingleAction<T>): boolean {
+  protected isVisible(action: SingleAction<T>): boolean {
     return action.visible?.(this.row()) ?? true;
   }
 

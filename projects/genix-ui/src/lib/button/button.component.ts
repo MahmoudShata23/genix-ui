@@ -63,6 +63,12 @@ export class GmButtonComponent {
   /** Stretches the button to the width of its container. */
   readonly fullWidth = input(false, { transform: booleanAttribute });
 
+  /** Pill-shaped rather than the standard radius. */
+  readonly rounded = input(false, { transform: booleanAttribute });
+
+  /** Adds elevation, for a button that floats above the page. */
+  readonly raised = input(false, { transform: booleanAttribute });
+
   readonly type = input<GmButtonType>('button');
 
   /** Accessible name. Required when there is no `label` (icon-only button). */
@@ -79,6 +85,8 @@ export class GmButtonComponent {
     `gm-button--${this.variant()}`,
     `gm-button--${this.size()}`,
     ...(this.loading() ? ['gm-button--loading'] : []),
+    ...(this.rounded() ? ['gm-button--rounded'] : []),
+    ...(this.raised() ? ['gm-button--raised'] : []),
     ...(!this.label() && this.icon() ? ['gm-button--icon-only'] : []),
   ]);
 

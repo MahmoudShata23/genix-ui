@@ -227,23 +227,72 @@ describe('gm-select virtual scroll', () => {
       '.cdk-overlay-container .gm-dropdown__filter-input',
     ) as HTMLInputElement;
 
-  /** Lets the CDK measure, scroll and re-render before the next assertion. */
-  async function settle(): Promise<void> {
-    fixture.detectChanges();
-    await fixture.whenStable();
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    fixture.detectChanges();
-    await fixture.whenStable();
+  /**
+   * One real animation frame. The `setTimeout` is a hang guard rather than the
+   * mechanism: a browser that has stopped painting should fail an assertion,
+   * not time the whole spec out.
+   */
+  function nextFrame(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      let guard: ReturnType<typeof setTimeout>;
+      const finish = () => {
+        clearTimeout(guard);
+        resolve();
+      };
+      guard = setTimeout(finish, 100);
+      requestAnimationFrame(finish);
+    });
   }
+
+  /**
+   * Lets the CDK measure, scroll and re-render before the next assertion.
+   *
+   * Frames, not milliseconds. Setting `scrollTop` starts a frame-driven
+   * pipeline: the browser dispatches `scroll` asynchronously, the viewport
+   * audits it through `auditTime(0, animationFrameScheduler)`, and only the
+   * re-render that follows puts the scrolled-to row in the DOM. A fixed delay
+   * is a bet on how many frames fit inside it — one an idle single-file run
+   * wins and a loaded full-suite run loses. Waiting on the frames themselves,
+   * and on `until` wherever the assertion needs that whole round trip, cannot
+   * lose it.
+   */
+  async function settle(until?: () => boolean): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    for (let frames = 1; frames <= 30; frames++) {
+      await nextFrame();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      // Three frames is the floor even with nothing to wait for: one for the
+      // scroll event, one for the CDK's audit of it, one for the re-render
+      // that audit schedules.
+      if (frames >= 3 && (until === undefined || until())) {
+        return;
+      }
+    }
+  }
+
+  /**
+   * The row `aria-activedescendant` names is actually in the DOM — where a
+   * keyboard move through a virtualised list has to end up, since a row
+   * scrolled out of view is not rendered at all.
+   */
+  const activeRowRendered = () => {
+    const id = trigger().getAttribute('aria-activedescendant');
+    return id !== null && document.getElementById(id) !== null;
+  };
 
   async function open(): Promise<void> {
     trigger().click();
-    await settle();
+    // Rows on screen means the viewport has been measured and sized, which
+    // every subsequent scroll offset is computed against.
+    await settle(() => optionEls().length > 0);
   }
 
-  async function keydown(key: string): Promise<void> {
+  async function keydown(key: string, until?: () => boolean): Promise<void> {
     trigger().dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-    await settle();
+    await settle(until);
   }
 
   beforeEach(async () => {
@@ -318,7 +367,7 @@ describe('gm-select virtual scroll', () => {
   it('moves the highlight with arrows and keeps aria-activedescendant', async () => {
     await open();
 
-    await keydown('ArrowDown');
+    await keydown('ArrowDown', activeRowRendered);
     const active = trigger().getAttribute('aria-activedescendant');
     expect(active).toBeTruthy();
     // The highlighted row is rendered, so the id actually resolves.
@@ -331,7 +380,7 @@ describe('gm-select virtual scroll', () => {
   it('scrolls a far-off option into view for End and back for Home', async () => {
     await open();
 
-    await keydown('End');
+    await keydown('End', activeRowRendered);
     const lastId = trigger().getAttribute('aria-activedescendant')!;
     expect(lastId).toContain('option-1199');
     // Row 1,199 is nowhere near the initial window; it exists only because the
@@ -339,7 +388,7 @@ describe('gm-select virtual scroll', () => {
     expect(document.getElementById(lastId)).not.toBeNull();
     expect(viewport()!.scrollTop).toBeGreaterThan(0);
 
-    await keydown('Home');
+    await keydown('Home', activeRowRendered);
     const firstId = trigger().getAttribute('aria-activedescendant')!;
     expect(firstId).toContain('option-0');
     expect(document.getElementById(firstId)).not.toBeNull();
@@ -372,7 +421,7 @@ describe('gm-select virtual scroll', () => {
     );
 
     // One arrow key reveals the neighbourhood of the selection.
-    await keydown('ArrowDown');
+    await keydown('ArrowDown', activeRowRendered);
     expect(viewport()!.scrollTop).toBeGreaterThan(0);
 
     const selected = document.getElementById(
@@ -382,7 +431,7 @@ describe('gm-select virtual scroll', () => {
     expect(selected.classList).toContain('gm-dropdown__option--selected');
 
     // Scrolling back to the top must not disturb the value.
-    await keydown('Home');
+    await keydown('Home', activeRowRendered);
     expect(host.bigId.value).toBe(900);
     expect(
       fixture.nativeElement.querySelector('.virtual .gm-dropdown__value')

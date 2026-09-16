@@ -268,8 +268,10 @@ describe('gm-table config view options', () => {
   // ── per-column display ────────────────────────────────────────────────
 
   it('aligns a cell from its column, defaulting the rest to centre', () => {
-    // Actions, name, code, score, notes.
+    // Selection, actions, name, code, score, notes. The selection cell sets
+    // no alignment of its own.
     expect(rowCells(0).map((cell) => cell.style.textAlign)).toEqual([
+      '',
       'center',
       'start',
       'center',

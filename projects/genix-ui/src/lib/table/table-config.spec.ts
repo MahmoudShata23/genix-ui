@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 
 import { GmTableComponent } from './table.component';
 import {
@@ -166,6 +167,7 @@ describe('gm-table config mode', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     host = fixture.componentInstance;
@@ -291,11 +293,19 @@ describe('gm-table config mode', () => {
     expect(host.bulkDeleted).toEqual([[ROWS[0], ROWS[1]]]);
   });
 
-  it('reports the add button rather than navigating itself', () => {
+  it('navigates to create itself when no handler is wired to add', () => {
+    const router = TestBed.inject(Router);
+    const route = TestBed.inject(ActivatedRoute);
+    const navigate = spyOn(router, 'navigate');
+
     const add = toolbarButtons().find((b) => b.textContent!.trim() === 'ADD')!;
     add.click();
     fixture.detectChanges();
-    expect(host.adds).toBe(1);
+
+    expect(navigate).toHaveBeenCalledWith(['create'], { relativeTo: route });
+    // The toolbar owns the default outright, so the table's own output stays
+    // silent — binding `(addClicked)` alone does not divert the navigation.
+    expect(host.adds).toBe(0);
   });
 
   // ── sorting ───────────────────────────────────────────────────────────

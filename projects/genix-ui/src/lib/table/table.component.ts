@@ -443,7 +443,7 @@ export class GmTableComponent<T> {
         variant: "text",
         scope:
           bulk.scope === GmTableBulkActionScope.GLOBAL ? "global" : "selection",
-        minSelection: 1,
+        minSelection: 2,
         visible: () => bulk.visible?.() ?? true,
         command: (rows) => bulk.command([...rows]),
       });

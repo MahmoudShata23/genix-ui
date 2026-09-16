@@ -65,8 +65,10 @@ import type { GmTableColumn } from "./table.types";
   host: { class: "gm-table-toolbar-host" },
 })
 export class GmTableToolbarComponent<T> {
-  private readonly router: Router = inject(Router);
-  private readonly route: ActivatedRoute = inject(ActivatedRoute);
+  // Optional: the toolbar must instantiate without a router, so a consumer
+  // rendering a table outside a routed context is not forced to provide one.
+  private readonly router = inject(Router, { optional: true });
+  private readonly route = inject(ActivatedRoute, { optional: true });
 
   readonly actions = input<readonly GmTableAction<T>[]>([]);
 
@@ -179,7 +181,7 @@ export class GmTableToolbarComponent<T> {
     if (action.key === GM_ADD_ACTION_KEY) {
       if (action.addClicked) {
         action.addClicked();
-      } else {
+      } else if (this.router && this.route) {
         this.router.navigate(["create"], { relativeTo: this.route });
       }
     } else {

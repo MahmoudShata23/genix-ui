@@ -363,12 +363,17 @@ describe('gm-table-toolbar column chooser', () => {
       '.gm-table-toolbar__actions',
     ) as HTMLElement;
 
-  /** `auto` is resolved in CSS, so the rendered offset is the only real check. */
+  /**
+   * `auto` is resolved in CSS, and a browser reports the *used* value of an
+   * auto margin — a non-zero pixel offset — never the keyword itself.
+   *
+   * Geometry cannot stand in for it: the bar is `space-between`, so the
+   * actions render flush to the end edge whenever the aside holds anything,
+   * with or without the margin. The applied margin is the only thing that
+   * tells the two apart.
+   */
   const actionsPushedToEnd = () =>
-    getComputedStyle(actionsEl()).marginInlineStart === 'auto' ||
-    // jsdom-less browsers resolve `auto` to a used pixel value once laid out.
-    actionsEl().getBoundingClientRect().left >
-      actionsEl().parentElement!.getBoundingClientRect().left + 1;
+    parseFloat(getComputedStyle(actionsEl()).marginInlineStart) > 0;
 
   it('keeps actions on the start edge while the chooser is showing', () => {
     expect(actionsPushedToEnd()).toBeFalse();

@@ -76,6 +76,10 @@ describe('gm-table frozen columns and scrolling', () => {
     document.documentElement.style.setProperty('--gm-gray-50', '#f8f9fa');
     document.documentElement.style.setProperty('--gm-primary-light', '#e6f4ff');
     document.documentElement.style.setProperty('--gm-gray-900-rgb', '17, 24, 39');
+    // The frozen divider's gradient reads this one. Left undefined, the rgba()
+    // around it is invalid at computed-value time, which drops the whole
+    // `background` shorthand and computes background-image as `none`.
+    document.documentElement.style.setProperty('--gm-gray-800-rgb', '31, 41, 55');
 
     await TestBed.configureTestingModule({
       imports: [HostComponent],

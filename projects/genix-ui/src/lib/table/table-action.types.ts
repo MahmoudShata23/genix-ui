@@ -2,6 +2,12 @@ import type { GmButtonVariant } from '../button/button.types';
 import type { GmSeverity, GmSize } from '../core/types';
 
 /**
+ * Toolbar key of the built-in add button. Not a `GmTableActionType` — Add is
+ * the one toolbar button that is not a configured action.
+ */
+export const GM_ADD_ACTION_KEY = '__gmAdd';
+
+/**
  * When a toolbar action is offered.
  *
  * - `global`    — always available (Add, Import, Export)
@@ -59,6 +65,12 @@ export interface GmTableAction<T> {
    * consumer can handle every action in one place instead of per entry.
    */
   command?: (rows: readonly T[]) => void;
+
+  /**
+   * For the "add" action: callback fired when the add button is clicked,
+   * instead of the default navigate-to-create behavior.
+   */
+  addClicked?: () => void;
 
   /** Accessible name. Required when there is no `label` (icon-only action). */
   ariaLabel?: string;

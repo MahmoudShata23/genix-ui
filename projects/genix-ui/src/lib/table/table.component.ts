@@ -51,6 +51,7 @@ import type {
   GmTableTranslate,
 } from "./table-config.types";
 import type { GmTableAction } from "./table-action.types";
+import { GM_ADD_ACTION_KEY } from "./table-action.types";
 import type { GmTableRequest, GmTableSortChange } from "./table-request.types";
 import {
   GmTableCellDirective,
@@ -1728,12 +1729,6 @@ export class GmTableComponent<T> {
     return `Select row ${index + 1}`;
   }
 }
-
-/**
- * Toolbar key of the built-in add button. Not a `GmTableActionType` — Add is
- * the one toolbar button that is not a configured action.
- */
-const GM_ADD_ACTION_KEY = "__gmAdd";
 
 /**
  * A `GmTableColumn` derived from a `tableConfig` entry, tagged with where it

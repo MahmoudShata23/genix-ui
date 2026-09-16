@@ -4,20 +4,23 @@ import {
   booleanAttribute,
   computed,
   input,
+  inject,
   model,
   numberAttribute,
   output,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { GmButtonComponent } from "../button/button.component";
 import { GmMultiselectComponent } from "../multiselect/multiselect.component";
 import { GmTooltipDirective } from "../tooltip/tooltip.directive";
 import type { GmSize } from "../core/types";
-import type {
-  GmTableAction,
-  GmTableActionEvent,
-  GmTableToolbarAlign,
+import {
+  GM_ADD_ACTION_KEY,
+  type GmTableAction,
+  type GmTableActionEvent,
+  type GmTableToolbarAlign,
 } from "./table-action.types";
 import type { GmTableColumn } from "./table.types";
 
@@ -62,6 +65,9 @@ import type { GmTableColumn } from "./table.types";
   host: { class: "gm-table-toolbar-host" },
 })
 export class GmTableToolbarComponent<T> {
+  private readonly router: Router = inject(Router);
+  private readonly route: ActivatedRoute = inject(ActivatedRoute);
+
   readonly actions = input<readonly GmTableAction<T>[]>([]);
 
   /** The table's current selection. Feed `[(selection)]`'s signal straight in. */
@@ -168,10 +174,18 @@ export class GmTableToolbarComponent<T> {
   }
 
   protected onAction(action: GmTableAction<T>): void {
-    // Snapshot the selection: a command that clears it must not change the
-    // array the handler is still reading.
     const rows = [...this.selection()];
-    action.command?.(rows);
+
+    if (action.key === GM_ADD_ACTION_KEY) {
+      if (action.addClicked) {
+        action.addClicked();
+      } else {
+        this.router.navigate(["create"], { relativeTo: this.route });
+      }
+    } else {
+      action.command?.(rows);
+    }
+
     this.actionClick.emit({ action, rows });
   }
 

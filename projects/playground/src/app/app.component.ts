@@ -886,7 +886,7 @@ export class AppComponent {
    */
   protected readonly configColumnChooser = signal(true);
   protected readonly configActionsEdge = signal<"start" | "end">("start");
-  protected readonly configReorder = signal(true);
+  protected readonly configReorder = signal(false);
   protected readonly configLockInactive = signal(true);
 
   private readonly configQuery = signal<{

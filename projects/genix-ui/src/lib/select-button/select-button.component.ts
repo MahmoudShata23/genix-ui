@@ -3,14 +3,17 @@ import {
   Component,
   ElementRef,
   computed,
+  contentChild,
   inject,
   input,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { GmFormFieldBase } from '../core/form-field-base';
 import { gmOptionLabel, gmOptionValue, gmReadOption } from '../core/option-reader';
 import { gmUniqueId } from '../core/unique-id';
 import type { GmSize } from '../core/types';
+import { GmSelectOptionDirective } from '../select/select-option.directive';
 
 /** One choice in a `gm-select-button`. Primitive or object, like a select's. */
 export type GmSelectButtonOption = unknown;
@@ -33,6 +36,7 @@ export type GmSelectButtonOption = unknown;
 @Component({
   selector: 'gm-select-button',
   standalone: true,
+  imports: [NgTemplateOutlet],
   templateUrl: './select-button.component.html',
   styleUrl: './select-button.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,6 +58,13 @@ export class GmSelectButtonComponent extends GmFormFieldBase<unknown> {
   readonly optionDisabled = input<string>();
 
   readonly size = input<GmSize>('medium');
+
+  /**
+   * Richer button content than `optionLabel` can express — an icon beside the
+   * text, say. Deliberately the same `gmSelectOption` directive `gm-select` and
+   * `gm-autocomplete` take, so one template shape covers every option list.
+   */
+  protected readonly optionTemplate = contentChild(GmSelectOptionDirective);
 
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
 

@@ -47,6 +47,9 @@ export type GmAutocompleteSuggestion = unknown;
  * Rows can be re-rendered with the package's option template directive, the
  * same `gmSelectOption` `gm-select` uses. Overlay, positioning and
  * outside-click handling come from the shared `GmOverlayPanel`.
+ *
+ * It opens on input and on ArrowDown. Any other gesture is the application's
+ * to define, so `show()` and `close()` are public — see `show()`.
  */
 @Component({
   selector: 'gm-autocomplete',
@@ -212,7 +215,18 @@ export class GmAutocompleteComponent extends GmFormFieldBase<unknown> {
 
   // ── Open / close ────────────────────────────────────────────────────────
 
-  protected show(): void {
+  /**
+   * Opens the suggestion list without typing, for a field that offers its
+   * options on some other gesture — a double-click, a button beside it.
+   *
+   * Public because the component cannot know that gesture: it opens on input
+   * and on ArrowDown, and anything else is the application's to define. This
+   * does **not** ask for suggestions — nothing here ever fetches — so call it
+   * *after* `suggestions` has been filled, or the panel opens empty.
+   *
+   * A no-op while disabled, read-only, or already open.
+   */
+  show(): void {
     if (this.locked() || this.open()) {
       return;
     }
@@ -222,7 +236,8 @@ export class GmAutocompleteComponent extends GmFormFieldBase<unknown> {
     this.open.set(true);
   }
 
-  protected close(): void {
+  /** Closes the suggestion list. The counterpart to `show()`. */
+  close(): void {
     this.overlayPanel.close();
     this.open.set(false);
     this.activeIndex.set(-1);

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
@@ -69,7 +69,22 @@ interface User {
       optionDisabled="inactive"
     />
 
+    <gm-select-button
+      class="status-tpl"
+      [formControl]="statusTpl"
+      label="Status"
+      [options]="statuses"
+      optionLabel="label"
+      optionValue="value"
+    >
+      <ng-template gmSelectOption let-option let-selected="selected">
+        <i class="opt-icon" [class.opt-icon--on]="selected"></i>
+        <span class="opt-label">{{ option.label }}</span>
+      </ng-template>
+    </gm-select-button>
+
     <gm-autocomplete
+      #ac
       class="user"
       [formControl]="user"
       label="User"
@@ -118,7 +133,10 @@ class HostComponent {
   readonly enabled = new FormControl<boolean | null>(false);
   readonly amount = new FormControl<number | null>(null);
   readonly status = new FormControl<string | null>(null);
+  readonly statusTpl = new FormControl<string | null>(null);
   readonly user = new FormControl<number | null>(null);
+
+  readonly ac = viewChild.required<GmAutocompleteComponent>('ac');
 
   onSearch(term: string): void {
     this.terms.push(term);
@@ -497,6 +515,40 @@ describe('small components', () => {
 
       expect(options().every((option) => option.disabled)).toBeTrue();
     });
+
+    it('renders a gmSelectOption template inside each button', () => {
+      const templated = Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+          '.status-tpl .gm-select-button__option',
+        ),
+      );
+
+      // The button keeps its role and state; only its content is the template's.
+      expect(templated.length).toBe(4);
+      expect(templated[0].getAttribute('role')).toBe('radio');
+      expect(
+        templated.map((option) => option.querySelector('.opt-label')!.textContent!.trim()),
+      ).toEqual(['Draft', 'Active', 'Void', 'Closed']);
+      expect(templated[0].querySelector('.opt-icon')).not.toBeNull();
+    });
+
+    it('passes the selected flag to the option template', () => {
+      const templated = () =>
+        Array.from(
+          (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+            '.status-tpl .gm-select-button__option',
+          ),
+        );
+
+      expect(templated()[1].querySelector('.opt-icon--on')).toBeNull();
+
+      templated()[1].click();
+      fixture.detectChanges();
+
+      expect(host.statusTpl.value).toBe('active');
+      expect(templated()[1].querySelector('.opt-icon--on')).not.toBeNull();
+      expect(templated()[0].querySelector('.opt-icon--on')).toBeNull();
+    });
   });
 
   // ── gm-autocomplete ───────────────────────────────────────────────────────
@@ -632,6 +684,36 @@ describe('small components', () => {
       fixture.detectChanges();
 
       expect(input().disabled).toBeTrue();
+    });
+
+    it('show() opens the list without typing, and close() shuts it', () => {
+      // The gesture that opens a field this way is the application's, so the
+      // suggestions are filled first — show() never asks for them.
+      host.suggestions.set(host.allUsers);
+      fixture.detectChanges();
+      expect(suggestions().length).toBe(0);
+
+      host.ac().show();
+      fixture.detectChanges();
+
+      expect(suggestions().length).toBe(3);
+      expect(input().getAttribute('aria-expanded')).toBe('true');
+      expect(host.terms).toEqual([]);
+
+      host.ac().close();
+      fixture.detectChanges();
+      expect(suggestions().length).toBe(0);
+    });
+
+    it('show() is a no-op while the control is disabled', () => {
+      host.suggestions.set(host.allUsers);
+      host.user.disable();
+      fixture.detectChanges();
+
+      host.ac().show();
+      fixture.detectChanges();
+
+      expect(suggestions().length).toBe(0);
     });
   });
 });

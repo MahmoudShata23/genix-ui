@@ -34,7 +34,18 @@
         (click)="select(option)"
         (keydown)="onKeydown($event, i)"
       >
-        {{ labelOf(option) }}
+        @if (optionTemplate(); as custom) {
+          <ng-container
+            [ngTemplateOutlet]="custom.template"
+            [ngTemplateOutletContext]="{
+              $implicit: option,
+              index: i,
+              selected: isSelected(option),
+            }"
+          />
+        } @else {
+          {{ labelOf(option) }}
+        }
       </button>
     }
   </div>

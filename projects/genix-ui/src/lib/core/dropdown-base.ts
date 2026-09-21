@@ -82,6 +82,15 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
 
   protected readonly panel = viewChild.required<TemplateRef<unknown>>('panel');
 
+  /**
+   * The trigger button, not the host. The host also wraps the label and the
+   * error/hint line below the trigger, so anchoring to it would let the
+   * panel's position drift whenever that line's content changes (e.g. an
+   * error appearing) instead of always opening directly under the trigger.
+   */
+  protected readonly triggerRef =
+    viewChild.required<ElementRef<HTMLElement>>('trigger');
+
   protected readonly open = signal(false);
   protected readonly filterText = signal('');
 
@@ -175,9 +184,16 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
       return;
     }
 
+    const triggerWidth = this.triggerRef().nativeElement.offsetWidth;
+
     this.overlayPanel.open(this.panel(), () => this.close(), {
-      // Panel matches the trigger unless its own content is wider.
-      minWidth: this.hostRef.nativeElement.offsetWidth,
+      // Pinned to the trigger's width on both sides: `maxWidth` stops a long
+      // option label from widening the panel past it (the label wraps
+      // instead), and `minWidth` stops the panel from shrink-wrapping
+      // narrower than the trigger when every option is short.
+      minWidth: triggerWidth,
+      maxWidth: triggerWidth,
+      origin: this.triggerRef().nativeElement,
     });
 
     this.open.set(true);

@@ -76,7 +76,11 @@ export class GmOverlayPanel {
   open(
     template: TemplateRef<unknown>,
     onOutsideClick: (event: MouseEvent) => void,
-    options: { minWidth?: number | string; origin?: HTMLElement } = {},
+    options: {
+      minWidth?: number | string;
+      maxWidth?: number | string;
+      origin?: HTMLElement;
+    } = {},
   ): void {
     if (this.overlayRef) {
       return;
@@ -96,6 +100,10 @@ export class GmOverlayPanel {
       // Follows the trigger while the page scrolls rather than detaching.
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
       minWidth: options.minWidth,
+      // Without this the pane sizes to its widest option instead of the
+      // trigger, so a long label pushes the panel wider than the field
+      // instead of wrapping onto another line.
+      maxWidth: options.maxWidth,
     });
 
     this.overlayRef.attach(new TemplatePortal(template, this.viewContainer));

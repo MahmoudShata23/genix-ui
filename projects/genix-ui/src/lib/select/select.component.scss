@@ -6,3 +6,16 @@
 
 @include dropdown.gm-dropdown-shell;
 
+/* Always rendered (see the template) with the same font-size/line-height/
+   margin as `.gm-field__error` and `.gm-field__hint`, so its box reserves
+   the message row's height whether or not there is a message — otherwise
+   the field grows (and pushes content below it down) the moment validation
+   fails. */
+.gm-field__message {
+  display: block;
+  min-height: 1.4em;
+  margin-top: var(--gm-space-1);
+  font-size: var(--gm-font-size-xs);
+  line-height: 1.4;
+}
+

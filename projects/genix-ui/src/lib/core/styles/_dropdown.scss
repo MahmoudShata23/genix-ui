@@ -113,13 +113,18 @@
 
   .gm-dropdown__panel {
     /* The overlay pane carries `min-width: <trigger width>`; without this the
-       panel shrink-wraps its options and renders narrower than the trigger. */
+       panel shrink-wraps its options and renders narrower than the trigger.
+       `max-width` pins it to that same width on the other side, so a long
+       option wraps onto another line instead of stretching the panel past
+       the trigger. Border, radius and shadow match the kit's `.gm-multi-menu`
+       popover. */
     box-sizing: border-box;
     min-width: 100%;
+    max-width: 100%;
     background: var(--gm-white);
-    border: 1px solid var(--gm-gray-200);
+    border: 1px solid var(--gm-gray-300);
     border-radius: var(--gm-radius-md);
-    box-shadow: var(--gm-shadow-lg);
+    box-shadow: var(--gm-shadow-md);
     overflow: hidden;
     font-family: var(--gm-font-family);
   }
@@ -155,8 +160,8 @@
     margin: 0;
     padding: var(--gm-space-1);
     list-style: none;
-    /* Roughly eight rows before the list scrolls. */
-    max-height: 16rem;
+    /* Matches the kit's `.gm-multi-menu` (240px) before the list scrolls. */
+    max-height: 15rem;
     overflow-y: auto;
   }
 
@@ -167,8 +172,17 @@
     padding: var(--gm-space-2) var(--gm-space-3);
     border-radius: var(--gm-radius-sm);
     color: var(--gm-gray-700);
-    font-size: var(--gm-font-size-base);
+    font-size: var(--gm-font-size-sm);
     cursor: pointer;
+
+    /* A flex row's text otherwise refuses to shrink below its content width,
+       which pushes the row (and the panel with it) wider instead of
+       wrapping a long label onto a second line. */
+    overflow-wrap: anywhere;
+
+    > *:last-child {
+      min-width: 0;
+    }
 
     /* Hover and keyboard highlight are the same state, so they share styling —
        `--active` is set by both pointer and arrow-key movement. */

@@ -16,6 +16,7 @@ import { GmOrderListItemDirective } from '../order-list/order-list-item.directiv
 import { GmOrderListComponent } from '../order-list/order-list.component';
 import { GmStepComponent } from '../stepper/step.component';
 import { GmStepperComponent } from '../stepper/stepper.component';
+import { GM_PANEL_BELOW } from './overlay-panel';
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -706,5 +707,34 @@ describe('gm-chart without an engine', () => {
     const fixture = TestBed.createComponent(ChartHost);
 
     expect(() => fixture.detectChanges()).toThrowError(/provideGmChart/);
+  });
+});
+
+describe('GM_PANEL_BELOW', () => {
+  // The strategy that consumes this list runs with withPush(false) and
+  // withFlexibleDimensions(false), so a position that overflows the viewport
+  // is never nudged or shrunk back in — the list itself has to carry a way
+  // out. A start-aligned-only list stranded the filter menu of a table's last
+  // column off the right edge.
+  it('offers an end-aligned fallback on each side of the trigger', () => {
+    const aligned = (overlayY: 'top' | 'bottom') =>
+      GM_PANEL_BELOW.filter((p) => p.overlayY === overlayY).map((p) => p.overlayX);
+
+    expect(aligned('top')).toEqual(['start', 'end']);
+    expect(aligned('bottom')).toEqual(['start', 'end']);
+  });
+
+  it('prefers opening below and start-aligned', () => {
+    expect(GM_PANEL_BELOW[0]).toEqual(
+      jasmine.objectContaining({ originY: 'bottom', overlayY: 'top', overlayX: 'start' }),
+    );
+  });
+
+  // An overlay whose edge is flush with the trigger reads as attached to it;
+  // the gap is what makes it read as a separate surface.
+  it('keeps every position offset clear of the trigger', () => {
+    for (const position of GM_PANEL_BELOW) {
+      expect(Math.abs(position.offsetY ?? 0)).toBe(4);
+    }
   });
 });

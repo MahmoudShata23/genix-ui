@@ -13,10 +13,27 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-/** Below the trigger, flipping above when there is no room. */
+/**
+ * Below the trigger, flipping above when there is no room beneath it and
+ * aligning to the trigger's far edge when there is no room beside it.
+ *
+ * Both axes need a fallback. A start-aligned panel grows towards the inline
+ * end, so a trigger in the last column of a wide table — the funnel on the
+ * rightmost header — would push its panel past the viewport with nothing to
+ * pull it back: the strategy runs with `withPush(false)` and
+ * `withFlexibleDimensions(false)`, so a position that overflows simply
+ * overflows. The end-aligned pairs are what let such a panel open inwards.
+ *
+ * Order is preference order — the CDK takes the first position that fits
+ * entirely, so a panel with room to spare still opens below and start-aligned.
+ * `start`/`end` resolve against the layout direction, so this flips the
+ * correct way under RTL without a second list.
+ */
 export const GM_PANEL_BELOW: ConnectedPosition[] = [
   { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 4 },
+  { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
   { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -4 },
+  { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
 ];
 
 /**

@@ -142,6 +142,8 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly overlayPanel = gmOverlayPanel();
   private readonly panel = viewChild.required<TemplateRef<unknown>>('panel');
+  private readonly triggerRef =
+    viewChild.required<ElementRef<HTMLElement>>('trigger');
 
   protected readonly open = signal(false);
 
@@ -411,7 +413,9 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
     this.focusedDate.set(start);
     this.viewMonth.set(start);
 
-    this.overlayPanel.open(this.panel(), () => this.close());
+    this.overlayPanel.open(this.panel(), () => this.close(), {
+      origin: this.triggerRef().nativeElement,
+    });
     this.open.set(true);
 
     if (this.showCalendar()) {

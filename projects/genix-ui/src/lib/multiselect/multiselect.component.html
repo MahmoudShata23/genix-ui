@@ -9,6 +9,7 @@
   }
 
   <button
+    #trigger
     type="button"
     class="gm-dropdown__trigger"
     role="combobox"
@@ -66,15 +67,18 @@
     </span>
   </button>
 
-  @if (errorText()) {
-    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
-      {{ errorText() }}
-    </small>
-  } @else if (showHint()) {
-    <small class="gm-field__hint" [attr.id]="hintElementId()">
-      {{ hint() }}
-    </small>
-  }
+  <!-- Always rendered, even with no message, so the field height stays fixed
+       when an error later appears — otherwise it pushes everything below it
+       down the moment validation fails. -->
+  <small
+    class="gm-field__message"
+    [class.gm-field__error]="!!errorText()"
+    [class.gm-field__hint]="!errorText() && showHint()"
+    [attr.id]="errorText() ? errorElementId() : showHint() ? hintElementId() : null"
+    [attr.role]="errorText() ? 'alert' : null"
+  >
+    {{ errorText() || (showHint() ? hint() : '') }}
+  </small>
 </div>
 
 <!-- Rendered into a CDK overlay, but created in this component's context so

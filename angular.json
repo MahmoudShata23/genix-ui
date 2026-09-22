@@ -37,6 +37,43 @@
             "tsConfig": "projects/genix-ui/tsconfig.spec.json",
             "inlineStyleLanguage": "scss"
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "genix-ui:storybook-build",
+            "tsConfig": "projects/genix-ui/tsconfig.storybook.json",
+            "compodoc": false,
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "genix-ui:storybook-build",
+            "tsConfig": "projects/genix-ui/tsconfig.storybook.json",
+            "compodoc": false,
+            "outputDir": "dist/storybook/genix-ui"
+          }
+        },
+        "storybook-build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/genix-ui-storybook-shell",
+            "index": "projects/genix-ui/.storybook-shell/index.html",
+            "main": "projects/genix-ui/.storybook-shell/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "projects/genix-ui/tsconfig.storybook.json",
+            "inlineStyleLanguage": "scss",
+            "styles": ["projects/genix-ui/styles/tokens.css"]
+          },
+          "configurations": {
+            "production": { "optimization": true },
+            "development": { "optimization": false, "sourceMap": true }
+          },
+          "defaultConfiguration": "development"
         }
       }
     },

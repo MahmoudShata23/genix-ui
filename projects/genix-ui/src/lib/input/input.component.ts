@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  booleanAttribute,
+  computed,
   input,
   numberAttribute,
 } from '@angular/core';
@@ -55,6 +57,34 @@ export class GmInputComponent extends GmFormFieldBase<string | number> {
 
   /** Icon class rendered inside the field, after the text. */
   readonly iconEnd = input<string>();
+
+  /**
+   * Swaps the trailing icon for a busy indicator — for a field whose value is
+   * being acted on, such as a debounced search box between the last keystroke
+   * and the request it triggers.
+   *
+   * The trailing slot rather than the leading one: a leading icon names what
+   * the field is for and should not move under the user, whereas the trailing
+   * slot is where a field already reports state.
+   *
+   * Drawn in CSS rather than set as an icon class, because the package bundles
+   * no icon font — a spinner the consumer cannot see is not a loading
+   * affordance.
+   */
+  readonly loading = input(false, { transform: booleanAttribute });
+
+  /** Names the wait for a screen reader; the spinner itself is a status role. */
+  readonly loadingLabel = input<string>('Loading');
+
+  readonly hideMessageRow = input(false, { transform: booleanAttribute });
+
+  /**
+   * Whether anything occupies the trailing slot. The padding that keeps the
+   * text clear of it has to follow the spinner too, not only `iconEnd`.
+   */
+  protected readonly hasIconEnd = computed(
+    () => this.loading() || !!this.iconEnd(),
+  );
 
   protected override generateId(): string {
     return gmUniqueId('gm-input');

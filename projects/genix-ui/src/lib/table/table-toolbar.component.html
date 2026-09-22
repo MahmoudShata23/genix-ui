@@ -19,6 +19,7 @@
         [placeholder]="columnChooserLabel()"
         [selectedItemsLabel]="selectedColumnsLabel()"
         [maxSelectedLabels]="1"
+        [hideMessageRow]="true"
         [disabled]="disabled()"
         [ngModel]="visibleFields()"
         [ngModelOptions]="{ standalone: true }"
@@ -27,6 +28,27 @@
     }
 
     <ng-content select="[gmTableToolbarEnd]" />
+
+    @if (showSearch()) {
+      <!-- The icon lives in the *end* slot so the spinner that replaces it
+           while a term settles appears where the icon was, rather than the
+           text shifting as a leading icon comes and goes. -->
+      <gm-input
+        class="gm-table-toolbar__search"
+        type="search"
+        size="small"
+        iconEnd="pi pi-search"
+        [loading]="searchPending()"
+        [loadingLabel]="searchLoadingLabel()"
+        [placeholder]="searchPlaceholder()"
+        [ariaLabel]="searchAriaLabel()"
+        [hideMessageRow]="true"
+        [disabled]="disabled()"
+        [ngModel]="searchTerm()"
+        [ngModelOptions]="{ standalone: true }"
+        (valueChange)="onSearchInput($event)"
+      />
+    }
   </div>
 
   <div class="gm-table-toolbar__actions">

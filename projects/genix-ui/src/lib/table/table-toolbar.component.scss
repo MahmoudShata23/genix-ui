@@ -42,6 +42,23 @@
   min-width: 12rem;
 }
 
+/* The basis is deliberately well under the width the box wants: it shares the
+   aside with the chooser and the clear-filters button, and a basis wide enough
+   to look right would push the total past the row and wrap the box onto a line
+   of its own — beside the button is where it belongs. It grows into whatever
+   space is actually left, and is the first thing to give way when there is
+   none, being the one control here that still works narrowed.
+
+   Flex: 0 1 auto to prevent unwanted growth while allowing shrinking; the
+   input's own max-width controls the max size. */
+.gm-table-toolbar__search {
+  flex: 0 1 auto;
+  min-width: 7rem;
+  max-width: 14rem;
+  /* Ensure vertical alignment with other toolbar items */
+  align-self: center;
+}
+
 /* ---- Action alignment --------------------------------------------------
    `auto` is resolved in CSS rather than TypeScript, because what it depends
    on is whether the *end slot* has content — and that is projected content

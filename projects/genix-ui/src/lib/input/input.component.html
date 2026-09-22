@@ -11,7 +11,7 @@
   <div
     class="gm-input"
     [class.gm-input--icon-start]="iconStart()"
-    [class.gm-input--icon-end]="iconEnd()"
+    [class.gm-input--icon-end]="hasIconEnd()"
   >
     @if (iconStart()) {
       <i
@@ -41,7 +41,13 @@
       (blur)="handleBlur()"
     />
 
-    @if (iconEnd()) {
+    @if (loading()) {
+      <span
+        class="gm-input__icon gm-input__icon--end gm-input__spinner"
+        role="status"
+        [attr.aria-label]="loadingLabel()"
+      ></span>
+    } @else if (iconEnd()) {
       <i
         class="gm-input__icon gm-input__icon--end"
         [class]="iconEnd()"
@@ -50,13 +56,15 @@
     }
   </div>
 
-  @if (errorText()) {
-    <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
-      {{ errorText() }}
-    </small>
-  } @else if (showHint()) {
-    <small class="gm-field__hint" [attr.id]="hintElementId()">
-      {{ hint() }}
-    </small>
+  @if (!hideMessageRow()) {
+    @if (errorText()) {
+      <small class="gm-field__error" [attr.id]="errorElementId()" role="alert">
+        {{ errorText() }}
+      </small>
+    } @else if (showHint()) {
+      <small class="gm-field__hint" [attr.id]="hintElementId()">
+        {{ hint() }}
+      </small>
+    }
   }
 </div>

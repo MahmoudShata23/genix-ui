@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   booleanAttribute,
   computed,
   input,
@@ -8,11 +9,15 @@ import {
   model,
   numberAttribute,
   output,
+  signal,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
+import { Subject, debounce, distinctUntilChanged, tap, timer } from "rxjs";
 
 import { GmButtonComponent } from "../button/button.component";
+import { GmInputComponent } from "../input/input.component";
 import { GmMultiselectComponent } from "../multiselect/multiselect.component";
 import { GmTooltipDirective } from "../tooltip/tooltip.directive";
 import type { GmSize } from "../core/types";
@@ -49,6 +54,15 @@ import type { GmTableColumn } from "./table.types";
  *
  * An action with `scope: 'selection'` appears only once rows are ticked, which
  * is how a bulk Delete is wired up — see `GmTableAction`.
+ *
+ * With `showSearch`, the aside also holds a search box. It debounces and
+ * de-duplicates the term itself and reports it on `searchChange`, so the
+ * receiving end must not debounce again:
+ *
+ * ```html
+ * <gm-table-toolbar showSearch (searchChange)="grid.setGlobalSearch($event, { debounce: false })" />
+ * <gm-table #grid ... />
+ * ```
  */
 @Component({
   selector: "gm-table-toolbar",
@@ -56,6 +70,7 @@ import type { GmTableColumn } from "./table.types";
   imports: [
     FormsModule,
     GmButtonComponent,
+    GmInputComponent,
     GmMultiselectComponent,
     GmTooltipDirective,
   ],
@@ -69,6 +84,7 @@ export class GmTableToolbarComponent<T> {
   // rendering a table outside a routed context is not forced to provide one.
   private readonly router = inject(Router, { optional: true });
   private readonly route = inject(ActivatedRoute, { optional: true });
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly actions = input<readonly GmTableAction<T>[]>([]);
 
@@ -118,6 +134,89 @@ export class GmTableToolbarComponent<T> {
   readonly minVisibleColumns = input(1, { transform: numberAttribute });
 
   readonly columnChooserLabel = input<string>("Columns");
+
+  // ── Global search ───────────────────────────────────────────────────────
+
+  /**
+   * Shows the search box. Opt-in: the term is only a report — nothing in the
+   * toolbar acts on it — so a bar that showed the box by default would put a
+   * dead control on every existing table until its host wired the output up.
+   */
+  readonly showSearch = input(true, { transform: booleanAttribute });
+
+  readonly searchPlaceholder = input<string>("Search");
+
+  /**
+   * The box carries no visible label, so it needs an accessible name of its
+   * own — the leading icon is decoration and is hidden from screen readers.
+   */
+  readonly searchAriaLabel = input<string>("Search");
+
+  /** Announced while a typed term is still settling. */
+  readonly searchLoadingLabel = input<string>("Searching");
+
+  /**
+   * What the box holds, two-way. Seeding it emits nothing on `searchChange`,
+   * so restoring a route or a saved view does not look like a keystroke.
+   *
+   * A `model` rather than a plain input because the box has to be clearable
+   * from outside *after* the user has typed. Under a one-way input the host's
+   * own signal goes stale the moment a key is pressed — it would still read
+   * `''` while the field showed a word — so asking it to clear would set `''`
+   * over `''`, change nothing, and leave the stale term on screen. Writing
+   * every keystroke back keeps the host's copy true, which is what makes
+   * `searchTerm.set('')` a real change.
+   */
+  readonly searchTerm = model<string>("");
+
+  /**
+   * Quiet period after the last keystroke before the term is reported, in ms.
+   * Set it to 0 to report every keystroke.
+   */
+  readonly searchDebounce = input(400, { transform: numberAttribute });
+
+  /**
+   * A settled search term. Already debounced and de-duplicated, so a handler
+   * can fetch on it directly — and, because the toolbar has done that work,
+   * it must not be fed to a second debounce downstream. Pair it with
+   * `gm-table`'s `setGlobalSearch(term, { debounce: false })`.
+   */
+  readonly searchChange = output<string>();
+
+  /** Keystrokes, before debouncing. */
+  private readonly search$ = new Subject<string>();
+
+  /**
+   * True from a keystroke until the term settles, which is what swaps the
+   * field's search icon for a spinner. It is not "a request is in flight" —
+   * the toolbar cannot know that — but it does cover the window in which the
+   * user has typed and nothing has happened yet, which is the wait that
+   * otherwise looks like a dropped keystroke.
+   */
+  protected readonly searchPending = signal(false);
+
+  constructor() {
+    this.search$
+      .pipe(
+        // `debounce` over `debounceTime`: the delay is an input, so it has to
+        // be read per keystroke rather than fixed when the pipe is built.
+        debounce(() => timer(this.searchDebounce())),
+        // Before distinctUntilChanged, so the spinner clears even when the
+        // term turns out to be a duplicate and nothing is emitted. After it,
+        // typing a character and deleting it would spin forever.
+        tap(() => this.searchPending.set(false)),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((term) => this.searchChange.emit(term));
+  }
+
+  protected onSearchInput(value: string | number | null): void {
+    const term = value === null ? "" : String(value);
+    this.searchTerm.set(term);
+    this.searchPending.set(true);
+    this.search$.next(term);
+  }
 
   /** `{0}` is replaced with the count, matching `gm-multiselect`. */
   readonly selectedColumnsLabel = input<string>("{0} items selected");

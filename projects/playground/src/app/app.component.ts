@@ -886,6 +886,7 @@ export class AppComponent {
       export: "Export",
       edit: "Edit",
       selectColumns: "Columns",
+      search: "Search providers",
       provider: "Provider",
       type: "Type",
       country: "Country",
@@ -1101,7 +1102,8 @@ export class AppComponent {
       pageSize: request.pageSize,
     }));
     this.lastConfigEvent.set(
-      `filterChange · ${request.filters?.length ?? 0} descriptor(s)`,
+      `filterChange · ${request.filters?.length ?? 0} descriptor(s)` +
+        (request.globalSearch ? ` · search "${request.globalSearch}"` : ""),
     );
   }
 
@@ -1120,6 +1122,18 @@ export class AppComponent {
       sort.orderBy
         ? `sortChange · ${sort.orderBy} ${sort.ascending ? "asc" : "desc"}`
         : "sortChange · unsorted",
+    );
+  }
+
+  /**
+   * The toolbar's raw term, report-only — `filterChange` above is what
+   * actually drives the fetch (via its `globalSearch` key), fired from the
+   * same keystroke. This is here only to show `searchChange` firing on its
+   * own, the way a host might use it to reflect the term in a URL.
+   */
+  protected onConfigSearch(term: string): void {
+    this.lastConfigEvent.set(
+      term ? `searchChange · "${term}"` : "searchChange · cleared",
     );
   }
 

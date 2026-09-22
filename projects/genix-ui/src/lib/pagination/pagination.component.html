@@ -47,7 +47,7 @@
 
       @for (slot of slots(); track $index) {
         <li>
-          @if (slot === 'ellipsis') {
+          @if (slot === "ellipsis") {
             <!-- Presentational: a gap is not a control. -->
             <span class="gm-pagination__gap" aria-hidden="true">…</span>
           } @else {
@@ -114,6 +114,7 @@
           [options]="pageSizeOptions()"
           [ngModel]="pageSize()"
           [ngModelOptions]="{ standalone: true }"
+          [hideMessageRow]="true"
           [disabled]="disabled()"
           (valueChange)="onPageSizeChange($event)"
           size="small"

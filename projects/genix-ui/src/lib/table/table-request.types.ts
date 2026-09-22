@@ -53,14 +53,23 @@ export interface GmFilterDescriptor {
  * The paging half of a list request, emitted with every filter and page
  * change so one event is one fetch.
  *
- * Deliberately only the three keys the table can know about — a feature spreads
- * it over whatever else its own request carries.
+ * Deliberately only the keys the table can know about — a feature spreads it
+ * over whatever else its own request carries.
  */
 export interface GmTableRequest {
   /** 1-based, matching the endpoints' `pageNumber`. */
   pageNumber: number;
   pageSize: number;
   filters?: GmFilterDescriptor[];
+  /**
+   * The toolbar's free-text term, when one is set.
+   *
+   * Separate from `filters` rather than a descriptor with no `propertyName`:
+   * a global search is not a comparison against one column, and the endpoints
+   * take it as its own parameter. Absent when empty, so a cleared box does not
+   * post `globalSearch: ''`.
+   */
+  globalSearch?: string;
 }
 
 /** A sort in the shape the list endpoints take. */

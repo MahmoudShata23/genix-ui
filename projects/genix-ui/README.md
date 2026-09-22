@@ -1,47 +1,38 @@
-# @mahmoudshata23/genix-ui
+# @globemed/genix-ui
 
 Angular 19 component library for GlobeMed apps. Native HTML first, Angular CDK
 only where the platform is insufficient, **no PrimeNG / Material dependency**.
 
-> **About the scope.** GitHub Packages requires the npm scope to equal the
-> account that owns the package, so this is published as `@mahmoudshata23/`
-> rather than `@globemed/`. It is only a registry constraint, not a rename you
-> have to adopt: install it under whatever name your project already imports
-> using an npm alias — see [below](#importing-it-as-globemedgenix-ui).
-
 ## Installing
 
 ```bash
-# 1. point the scope at GitHub Packages (safe to commit — no secret)
-echo "@mahmoudshata23:registry=https://npm.pkg.github.com" >> .npmrc
+# 1. point the scope at the GlobeMed Gitea registry (safe to commit — no secret)
+echo "@globemed:registry=http://192.168.237.68:8021/api/packages/GlobemedGroup/npm/" >> .npmrc
 
 # 2. authenticate in your USER-level ~/.npmrc, never in a tracked file:
-#    //npm.pkg.github.com/:_authToken=<PAT with read:packages>
+#    //192.168.237.68:8021/api/packages/GlobemedGroup/npm/:_authToken=<Gitea token with read:package>
 
 # 3. install, plus the CDK peer dependency
-npm i @mahmoudshata23/genix-ui @angular/cdk
+npm i @globemed/genix-ui @angular/cdk
 ```
 
 `@angular/cdk` is a peer dependency — the overlay-based components (select,
 multiselect, datepicker, tooltip) need it.
 
-### Importing it as `@globemed/genix-ui`
+### Migrating from `@mahmoudshata23/genix-ui`
 
-If your project already imports `@globemed/genix-ui` — as Genix Portal's does,
-in dozens of files — install it under that name with an npm alias instead of
-rewriting every import:
+Earlier versions were published to GitHub Packages, which requires the npm scope
+to equal the owning account — hence `@mahmoudshata23/genix-ui`, which consumers
+installed under an npm alias. The package now lives in GlobeMed Gitea and is
+natively scoped, so the alias is gone. In a consuming project:
 
-```bash
-npm i @globemed/genix-ui@npm:@mahmoudshata23/genix-ui@^0.3.0
+```diff
+- "@globemed/genix-ui": "npm:@mahmoudshata23/genix-ui@^0.10.0"
++ "@globemed/genix-ui": "^0.10.0"
 ```
 
-npm installs it to `node_modules/@globemed/genix-ui`, so imports, editor
-resolution and the build all behave as if the package were natively scoped that
-way, and `npm ls` still shows what is really installed underneath.
-
-This is the intended steady state, not a stopgap. If a `globemed` GitHub
-organisation is ever created the package can be natively scoped that way, and
-consumers just drop the alias — one line in `package.json`.
+and repoint the scope in `.npmrc`. Imports do not change — they already read
+`@globemed/genix-ui`.
 
 ## Styling contract
 
@@ -53,7 +44,7 @@ globally:
 ```jsonc
 // angular.json → projects.<app>.architect.build.options.styles
 "styles": [
-  "node_modules/@mahmoudshata23/genix-ui/styles/tokens.css",
+  "node_modules/@globemed/genix-ui/styles/tokens.css",
   "src/styles.scss"
 ]
 ```
@@ -62,7 +53,7 @@ globally:
 
 ```scss
 /* src/styles.scss */
-@use "@mahmoudshata23/genix-ui/styles/tokens.css";
+@use "@globemed/genix-ui/styles/tokens.css";
 ```
 
 Without it the components render unstyled — the compiled component CSS resolves
@@ -77,7 +68,7 @@ That font is not bundled either, so load it alongside the tokens:
 ```jsonc
 "styles": [
   "node_modules/primeicons/primeicons.css",
-  "node_modules/@mahmoudshata23/genix-ui/styles/tokens.css",
+  "node_modules/@globemed/genix-ui/styles/tokens.css",
   "src/styles.scss"
 ]
 ```
@@ -96,7 +87,7 @@ does not need this file.
 ## Usage
 
 ```ts
-import { GmButtonComponent, GmSelectComponent } from '@mahmoudshata23/genix-ui';
+import { GmButtonComponent, GmSelectComponent } from '@globemed/genix-ui';
 ```
 
 ```html

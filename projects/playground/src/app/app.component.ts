@@ -82,7 +82,7 @@ import {
   GmToastService,
   GmTooltipDirective,
   GmTooltipPosition,
-} from "@mahmoudshata23/genix-ui";
+} from "@globemed/genix-ui";
 
 import { PgDialogDemoComponent, ProviderDraft } from "./dialog-demo.component";
 
@@ -131,7 +131,7 @@ interface Section {
 /**
  * Kitchen sink for the published package.
  *
- * Everything below imports from `@mahmoudshata23/genix-ui`, which `tsconfig.json`
+ * Everything below imports from `@globemed/genix-ui`, which `tsconfig.json`
  * maps to `dist/genix-ui` — the build output, not `src`. So this page type-checks
  * against the generated `.d.ts` and renders from the FESM bundle, exactly as a
  * consumer would after `npm install`. If a component's public API or template

@@ -7,11 +7,11 @@
 
    In angular.json (architect > build > options > styles):
 
-       "node_modules/@mahmoudshata23/genix-ui/styles/tokens.css"
+       "node_modules/@globemed/genix-ui/styles/tokens.css"
 
    ...or from the application's global stylesheet:
 
-       @use "@mahmoudshata23/genix-ui/styles/tokens.css";
+       @use "@globemed/genix-ui/styles/tokens.css";
 
    To re-theme, redefine any token on `:root` *after* this file loads; the
    values here are the GlobeMed design-system kit defaults.

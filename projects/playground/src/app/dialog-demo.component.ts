@@ -5,7 +5,7 @@ import {
   GmDialogConfig,
   GmDialogRef,
   GmInputComponent,
-} from '@mahmoudshata23/genix-ui';
+} from '@globemed/genix-ui';
 
 /** What the opener hands in through `config.data`. */
 export interface ProviderDraft {

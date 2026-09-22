@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { provideGmChart } from '@mahmoudshata23/genix-ui';
+import { provideGmChart } from '@globemed/genix-ui';
 import Chart from 'chart.js/auto';
 
 import { AppComponent } from './app/app.component';

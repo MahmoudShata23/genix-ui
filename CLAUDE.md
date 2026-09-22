@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-An Angular 19 workspace whose only publishable artifact is `projects/genix-ui` — the `@mahmoudshata23/genix-ui` component library (prefix `gm-`). Native HTML first, Angular CDK only where the platform is insufficient, **no PrimeNG / Material dependency**. `projects/playground` is a kitchen-sink app that exists to consume the built package.
+An Angular 19 workspace whose only publishable artifact is `projects/genix-ui` — the `@globemed/genix-ui` component library (prefix `gm-`). Native HTML first, Angular CDK only where the platform is insufficient, **no PrimeNG / Material dependency**. `projects/playground` is a kitchen-sink app that exists to consume the built package.
 
 ## Commands
 
@@ -28,7 +28,7 @@ There is **no linter and no formatter** in this workspace — don't invent an `n
 
 ## The build-output boundary
 
-`tsconfig.json` maps `@mahmoudshata23/genix-ui` to `dist/genix-ui`, **not** to source. The playground therefore type-checks against the generated `.d.ts` and renders from the FESM bundle, exactly as a real consumer would.
+`tsconfig.json` maps `@globemed/genix-ui` to `dist/genix-ui`, **not** to source. The playground therefore type-checks against the generated `.d.ts` and renders from the FESM bundle, exactly as a real consumer would.
 
 Consequence: **`npm run build` must run before serving or building the playground.** After changing library source, rebuild — otherwise the playground is compiling against a stale public API. CI enforces this ordering (`build` → `test` → `ng build playground` → `npm publish --dry-run` → `npm pack`), so a public-API or template break fails there before it reaches the registry.
 
@@ -89,4 +89,4 @@ Jasmine + Karma, `*.spec.ts` beside the component. The convention is a **standal
 
 ## Releasing
 
-CI publishes on a **published GitHub Release**, not on a tag push. Bump `version` in `projects/genix-ui/package.json`, commit (`release: X.Y.Z`), push to `main`, then draft and publish a release tagged `vX.Y.Z`. The workflow fails if the tag and the manifest version disagree. Semver: PATCH for a fix, MINOR for a new component or backward-compatible input, MAJOR for a breaking API change. A registry never allows republishing a version.
+CI publishes to the `GlobemedGroup` organisation registry on GlobeMed Gitea (`http://192.168.237.68:8021/api/packages/GlobemedGroup/npm/`) on a **published Gitea Release**, not on a tag push, using the `PACKAGE_TOKEN` secret. Bump `version` in `projects/genix-ui/package.json`, commit (`release: X.Y.Z`), push to `main`, then draft and publish a release tagged `vX.Y.Z`. The workflow fails if the tag and the manifest version disagree. Semver: PATCH for a fix, MINOR for a new component or backward-compatible input, MAJOR for a breaking API change. A registry never allows republishing a version.

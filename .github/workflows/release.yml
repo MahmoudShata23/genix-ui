@@ -1,4 +1,6 @@
-# Publishes to GitHub Packages when a GitHub Release is published.
+# Publishes to the GlobemedGroup organisation npm registry on the GlobeMed
+# Gitea instance when a Gitea Release is published. Needs Gitea Actions enabled
+# with a registered runner.
 #
 # The release's tag is the trigger, but projects/genix-ui/package.json is the
 # source of truth for the version — the job refuses to publish if the two
@@ -9,7 +11,8 @@
 # triggers, creating a release from a new tag would fire twice and the second
 # run would fail on a version that already exists, turning a good release red.
 #
-# No PAT is needed: GITHUB_TOKEN carries packages:write for this repository.
+# Needs a repo or org secret named PACKAGE_TOKEN: a Gitea access token with
+# write:package. Gitea does not grant package-write to the automatic job token.
 name: Release
 
 on:
@@ -33,7 +36,7 @@ jobs:
           cache: npm
           # Writes the registry + NODE_AUTH_TOKEN mapping into the runner's
           # .npmrc. The repo's own .npmrc maps the scope; neither holds a token.
-          registry-url: https://npm.pkg.github.com
+          registry-url: http://192.168.237.68:8021/api/packages/GlobemedGroup/npm/
 
       - run: npm ci
 
@@ -73,9 +76,9 @@ jobs:
               || { echo "::error::$required missing from the tarball"; exit 1; }
           done
 
-      - name: Publish to GitHub Packages
+      - name: Publish to the Gitea package registry
         # Publishes the BUILT package, never the workspace root — the root
         # manifest is private and has no publishable output.
         run: npm publish ./dist/genix-ui
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.PACKAGE_TOKEN }}

@@ -1,6 +1,6 @@
 # Genix UI — workspace
 
-Development workspace for **`@mahmoudshata23/genix-ui`**, the Angular 19
+Development workspace for **`@globemed/genix-ui`**, the Angular 19
 component library used by Genix Portal and any other GlobeMed front end.
 Native HTML first, Angular CDK only where the platform is insufficient, **no
 PrimeNG / Material dependency**.
@@ -67,7 +67,7 @@ what you see is the ControlValueAccessor path rather than a static mock-up.
 It is the quickest way to eyeball a change, and the fastest way to review the
 API the way a consumer meets it.
 
-The playground deliberately resolves `@mahmoudshata23/genix-ui` to
+The playground deliberately resolves `@globemed/genix-ui` to
 `dist/genix-ui` (see `paths` in `tsconfig.json`), **not** to `src`. It therefore
 type-checks against the generated `.d.ts` and renders from the FESM bundle,
 which is what a real consumer gets. A public-API break fails the playground
@@ -75,8 +75,8 @@ build before anything reaches the registry.
 
 ## Release
 
-Versions are published to **GitHub Packages**, by CI, when a **GitHub Release**
-is published. Semver: PATCH for a fix, MINOR for a new component or a
+Versions are published to the **GlobeMed Gitea package registry**, by CI, when a
+**Gitea Release** is published. Semver: PATCH for a fix, MINOR for a new component or a
 backward-compatible input, MAJOR for a breaking API change.
 
 ```bash
@@ -86,22 +86,22 @@ git commit -am "release: 0.3.1"
 git push origin main
 ```
 
-Then, on GitHub: **Releases → Draft a new release**, tag `v0.3.1` (the tag is
-created when the release is published), target `main`, write the notes,
-**Publish release**.
+Then, in Gitea: **Releases → New Release**, tag `v0.3.1` (the tag is created
+when the release is published), target `main`, write the notes, **Publish
+Release**.
 
 `.github/workflows/release.yml` then builds, runs the specs, type-checks the
 built public API through the playground, validates the tarball, verifies the
 release tag matches `projects/genix-ui/package.json` — a mismatch fails the
 job rather than shipping the wrong version — and publishes `dist/genix-ui`
-with the workflow’s own `GITHUB_TOKEN`. No personal access token is stored in
-the repo.
+using the `PACKAGE_TOKEN` secret — a Gitea access token with `write:package`,
+stored as a repo or org secret, never in the repo itself.
 
 Pushing a tag on its own publishes nothing. That is deliberate: with both a
 tag trigger and a release trigger, cutting a release from a new tag would fire
 the job twice, and the second run would fail on a version that already exists.
 
-To publish by hand instead (needs a PAT with `write:packages` in your
+To publish by hand instead (needs a Gitea token with `write:package` in your
 **user-level** `~/.npmrc`):
 
 ```bash
@@ -113,25 +113,25 @@ A registry never lets a version be republished — always bump first.
 
 ## Where the package lives
 
-GitHub Packages, under the personal account that owns this repository. That is
-the permanent home — there is no company registry in the picture.
+The GlobeMed Gitea instance, in the `GlobemedGroup` organisation registry:
 
-The one consequence is the scope: GitHub requires the npm scope to equal the
-account that owns the package, so it is published as
-**`@mahmoudshata23/genix-ui`** rather than `@globemed/genix-ui`. Consuming
-projects do not have to live with that name — they install it under whatever
-name they already use, via an npm alias. That is what Genix Portal does; see
-"Importing it as `@globemed/genix-ui`" in
-[the package README](projects/genix-ui/README.md).
+    http://192.168.237.68:8021/api/packages/GlobemedGroup/npm/
 
-Because the package is private, every consumer needs two things:
+Gitea places no constraint on the npm scope, so the package is natively scoped
+**`@globemed/genix-ui`** — the name consuming projects already import. The npm
+alias that GitHub Packages forced is gone.
 
-1. `@mahmoudshata23:registry=https://npm.pkg.github.com` in the project's
-   `.npmrc`. Commit it — it is not a secret, and without it a fresh clone
-   cannot install.
-2. A GitHub PAT with `read:packages` in their **user-level** `~/.npmrc`, never
-   in a tracked file.
+Because the registry requires authentication, every consumer needs two things:
 
-If a `globemed` GitHub organisation is ever created, the package can move there
-and be natively scoped `@globemed/genix-ui`: change `name` here, change the
-`.npmrc` scope line, and consumers drop their alias. Nothing else moves.
+1. `@globemed:registry=http://192.168.237.68:8021/api/packages/GlobemedGroup/npm/`
+   in the project's `.npmrc`. Commit it — it is not a secret, and without it a
+   fresh clone cannot install.
+2. A Gitea access token with `read:package` in their **user-level** `~/.npmrc`,
+   never in a tracked file:
+
+   ```
+   //192.168.237.68:8021/api/packages/GlobemedGroup/npm/:_authToken=<token>
+   ```
+
+Generate one under Gitea → Settings → Applications → Access Tokens, scoped to
+`read:package` for consumers or `write:package` to publish.

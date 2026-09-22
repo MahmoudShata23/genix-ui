@@ -26,7 +26,7 @@
        same .d.ts / FESM bundle a `npm install` would hand a real application.
        Run `npm run build` before serving or building it. */
     "paths": {
-      "@mahmoudshata23/genix-ui": ["dist/genix-ui"]
+      "@globemed/genix-ui": ["dist/genix-ui"]
     }
   },
   "angularCompilerOptions": {

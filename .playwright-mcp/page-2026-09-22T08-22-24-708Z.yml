@@ -1,0 +1,1379 @@
+- generic [ref=f27e2]:
+  - banner [ref=f27e3]:
+    - heading "Genix UI" [level=1] [ref=f27e4]
+    - generic [ref=f27e5]: v0.6.0
+    - generic [ref=f27e7]:
+      - text: every component, resolved from
+      - code [ref=f27e8]: dist/genix-ui
+      - text: — the published build output
+  - generic [ref=f27e9]:
+    - navigation "Sections" [ref=f27e10]:
+      - list [ref=f27e11]:
+        - listitem [ref=f27e12]:
+          - link "Reactive form" [ref=f27e13] [cursor=pointer]:
+            - /url: "#form"
+        - listitem [ref=f27e14]:
+          - link "Button" [ref=f27e15] [cursor=pointer]:
+            - /url: "#button"
+        - listitem [ref=f27e16]:
+          - link "Input" [ref=f27e17] [cursor=pointer]:
+            - /url: "#input"
+        - listitem [ref=f27e18]:
+          - link "Textarea" [ref=f27e19] [cursor=pointer]:
+            - /url: "#textarea"
+        - listitem [ref=f27e20]:
+          - link "Checkbox & radio" [ref=f27e21] [cursor=pointer]:
+            - /url: "#choice"
+        - listitem [ref=f27e22]:
+          - link "Select & multiselect" [ref=f27e23] [cursor=pointer]:
+            - /url: "#dropdown"
+        - listitem [ref=f27e24]:
+          - link "Select templates & virtual scroll" [ref=f27e25] [cursor=pointer]:
+            - /url: "#select-advanced"
+        - listitem [ref=f27e26]:
+          - link "Multiselect limit & virtual scroll" [ref=f27e27] [cursor=pointer]:
+            - /url: "#multiselect-advanced"
+        - listitem [ref=f27e28]:
+          - link "Datepicker" [ref=f27e29] [cursor=pointer]:
+            - /url: "#datepicker"
+        - listitem [ref=f27e30]:
+          - link "Datepicker time & range" [ref=f27e31] [cursor=pointer]:
+            - /url: "#datepicker-advanced"
+        - listitem [ref=f27e32]:
+          - link "Card" [ref=f27e33] [cursor=pointer]:
+            - /url: "#card"
+        - listitem [ref=f27e34]:
+          - link "Badge, chip, spinner" [ref=f27e35] [cursor=pointer]:
+            - /url: "#badge"
+        - listitem [ref=f27e36]:
+          - link "Tooltip" [ref=f27e37] [cursor=pointer]:
+            - /url: "#tooltip"
+        - listitem [ref=f27e38]:
+          - link "Dialog" [ref=f27e39] [cursor=pointer]:
+            - /url: "#dialog"
+        - listitem [ref=f27e40]:
+          - link "Toast" [ref=f27e41] [cursor=pointer]:
+            - /url: "#toast"
+        - listitem [ref=f27e42]:
+          - link "Message" [ref=f27e43] [cursor=pointer]:
+            - /url: "#message"
+        - listitem [ref=f27e44]:
+          - link "Tabs" [ref=f27e45] [cursor=pointer]:
+            - /url: "#tabs"
+        - listitem [ref=f27e46]:
+          - link "Accordion" [ref=f27e47] [cursor=pointer]:
+            - /url: "#accordion"
+        - listitem [ref=f27e48]:
+          - link "Pagination" [ref=f27e49] [cursor=pointer]:
+            - /url: "#pagination"
+        - listitem [ref=f27e50]:
+          - link "Table" [ref=f27e51] [cursor=pointer]:
+            - /url: "#table"
+        - listitem [ref=f27e52]:
+          - link "Popover, menu, switch, number, select button, autocomplete" [ref=f27e53] [cursor=pointer]:
+            - /url: "#small"
+        - listitem [ref=f27e54]:
+          - link "File upload, stepper, order list, chart" [ref=f27e55] [cursor=pointer]:
+            - /url: "#long-tail"
+    - main [ref=f27e56]:
+      - generic [ref=f27e57]:
+        - heading "Reactive form" [level=2] [ref=f27e58]
+        - paragraph [ref=f27e59]:
+          - text: Every form control bound with
+          - code [ref=f27e60]: formControlName
+          - text: . Submit with the fields empty to see each control pick up its own invalid state from the control, not from a manually passed
+          - code [ref=f27e61]: error
+          - text: .
+        - generic [ref=f27e63]:
+          - generic [ref=f27e65]:
+            - heading "Provider registration" [level=3] [ref=f27e66]
+            - paragraph [ref=f27e67]: ControlValueAccessor end to end
+          - generic [ref=f27e68]:
+            - generic [ref=f27e69]:
+              - generic [ref=f27e71]:
+                - generic [ref=f27e72]: Full name *
+                - textbox "Full name" [ref=f27e74]:
+                  - /placeholder: Jane Doe
+                - generic [ref=f27e75]: At least 3 characters
+              - generic [ref=f27e77]:
+                - generic [ref=f27e78]: Email *
+                - textbox "Email" [ref=f27e80]:
+                  - /placeholder: jane@example.com
+              - generic [ref=f27e82]:
+                - generic [ref=f27e83]: Country *
+                - combobox "Country" [ref=f27e84] [cursor=pointer]:
+                  - generic [ref=f27e85]: Select a country
+              - generic [ref=f27e90]:
+                - generic [ref=f27e91]: Specialities
+                - combobox "Specialities" [ref=f27e92] [cursor=pointer]:
+                  - generic [ref=f27e93]: Select specialities
+              - generic [ref=f27e98]:
+                - generic [ref=f27e99]: Start date *
+                - button "Start date" [ref=f27e100] [cursor=pointer]:
+                  - generic [ref=f27e101]: dd/mm/yyyy
+            - generic [ref=f27e105]:
+              - generic [ref=f27e106]: Notes
+              - textbox "Notes" [ref=f27e107]:
+                - /placeholder: Anything worth recording
+              - generic [ref=f27e108]: Optional, 280 characters max
+            - group "Contract" [ref=f27e109]:
+              - generic [ref=f27e113] [cursor=pointer]:
+                - radio "Standard" [checked] [ref=f27e114]
+                - generic [ref=f27e115]: Standard
+              - generic [ref=f27e118] [cursor=pointer]:
+                - radio "Preferred" [ref=f27e119]
+                - generic [ref=f27e120]: Preferred
+              - generic [ref=f27e123] [cursor=pointer]:
+                - radio "Restricted" [ref=f27e124]
+                - generic [ref=f27e125]: Restricted
+            - generic [ref=f27e128] [cursor=pointer]:
+              - checkbox "I accept the terms" [ref=f27e129]
+              - generic [ref=f27e130]: I accept the terms *
+            - generic [ref=f27e131]:
+              - button "Submit" [ref=f27e133] [cursor=pointer]:
+                - generic [ref=f27e134]: 
+              - button "Reset" [ref=f27e137] [cursor=pointer]
+              - generic [ref=f27e139]: invalid
+      - generic [ref=f27e141]:
+        - heading "Button" [level=2] [ref=f27e142]
+        - generic [ref=f27e144]:
+          - heading "Severity × variant" [level=3] [ref=f27e147]
+          - generic [ref=f27e148]:
+            - generic [ref=f27e149]: filled
+            - button "primary" [ref=f27e151] [cursor=pointer]
+            - button "secondary" [ref=f27e154] [cursor=pointer]
+            - button "success" [ref=f27e157] [cursor=pointer]
+            - button "info" [ref=f27e160] [cursor=pointer]
+            - button "warning" [ref=f27e163] [cursor=pointer]
+            - button "danger" [ref=f27e166] [cursor=pointer]
+            - button "contrast" [ref=f27e169] [cursor=pointer]
+          - generic [ref=f27e171]:
+            - generic [ref=f27e172]: outlined
+            - button "primary" [ref=f27e174] [cursor=pointer]
+            - button "secondary" [ref=f27e177] [cursor=pointer]
+            - button "success" [ref=f27e180] [cursor=pointer]
+            - button "info" [ref=f27e183] [cursor=pointer]
+            - button "warning" [ref=f27e186] [cursor=pointer]
+            - button "danger" [ref=f27e189] [cursor=pointer]
+            - button "contrast" [ref=f27e192] [cursor=pointer]
+          - generic [ref=f27e194]:
+            - generic [ref=f27e195]: text
+            - button "primary" [ref=f27e197] [cursor=pointer]
+            - button "secondary" [ref=f27e200] [cursor=pointer]
+            - button "success" [ref=f27e203] [cursor=pointer]
+            - button "info" [ref=f27e206] [cursor=pointer]
+            - button "warning" [ref=f27e209] [cursor=pointer]
+            - button "danger" [ref=f27e212] [cursor=pointer]
+            - button "contrast" [ref=f27e215] [cursor=pointer]
+        - generic [ref=f27e218]:
+          - heading "Size, icon and state" [level=3] [ref=f27e221]
+          - generic [ref=f27e222]:
+            - generic [ref=f27e223]: sizes
+            - button "small" [ref=f27e225] [cursor=pointer]
+            - button "medium" [ref=f27e228] [cursor=pointer]
+            - button "large" [ref=f27e231] [cursor=pointer]
+          - generic [ref=f27e233]:
+            - generic [ref=f27e234]: icons
+            - button "Left icon" [ref=f27e236] [cursor=pointer]:
+              - generic [ref=f27e237]: 
+            - button "Right icon" [ref=f27e240] [cursor=pointer]:
+              - generic [ref=f27e242]: 
+            - button "Settings" [ref=f27e244] [cursor=pointer]:
+              - generic [ref=f27e245]: 
+            - button "Delete" [ref=f27e247] [cursor=pointer]:
+              - generic [ref=f27e248]: 
+          - generic [ref=f27e249]:
+            - generic [ref=f27e250]: state
+            - button "Loading" [disabled] [ref=f27e252]
+            - button "Disabled" [disabled] [ref=f27e256]
+            - button "Disabled outline" [disabled] [ref=f27e259]
+          - generic [ref=f27e261]:
+            - generic [ref=f27e262]: full width
+            - button "Full width" [ref=f27e264] [cursor=pointer]
+      - generic [ref=f27e266]:
+        - heading "Input" [level=2] [ref=f27e267]
+        - generic [ref=f27e269]:
+          - heading "Sizes and types" [level=3] [ref=f27e272]
+          - generic [ref=f27e273]:
+            - generic [ref=f27e275]:
+              - generic [ref=f27e276]: small
+              - textbox "small" [ref=f27e278]: Prefilled value
+            - generic [ref=f27e280]:
+              - generic [ref=f27e281]: medium
+              - textbox "medium" [ref=f27e283]: Prefilled value
+            - generic [ref=f27e285]:
+              - generic [ref=f27e286]: large
+              - textbox "large" [ref=f27e288]: Prefilled value
+            - generic [ref=f27e290]:
+              - generic [ref=f27e291]: Number
+              - spinbutton "Number" [ref=f27e293]: "42"
+              - generic [ref=f27e294]: Commits a number, not a string
+            - generic [ref=f27e296]:
+              - generic [ref=f27e297]: Password
+              - textbox "Password" [ref=f27e299]:
+                - /placeholder: ••••••••
+            - generic [ref=f27e301]:
+              - generic [ref=f27e302]: Search
+              - searchbox "Search" [ref=f27e304]
+            - generic [ref=f27e306]:
+              - generic [ref=f27e307]: Phone
+              - textbox "Phone" [ref=f27e309]:
+                - /placeholder: +961 …
+            - generic [ref=f27e311]:
+              - generic [ref=f27e312]: Website
+              - textbox "Website" [ref=f27e314]:
+                - /placeholder: https://
+        - generic [ref=f27e316]:
+          - heading "States" [level=3] [ref=f27e319]
+          - generic [ref=f27e320]:
+            - generic [ref=f27e322]:
+              - generic [ref=f27e323]: Required *
+              - textbox "Required" [ref=f27e325]:
+                - /placeholder: Marked and aria-required
+            - generic [ref=f27e327]:
+              - generic [ref=f27e328]: With hint
+              - textbox "With hint" [ref=f27e330]
+              - generic [ref=f27e331]: Helper text sits below the control
+            - generic [ref=f27e333]:
+              - generic [ref=f27e334]: With error
+              - textbox "With error" [invalid] [ref=f27e336]: Prefilled value
+              - alert [ref=f27e337]: This value is already taken
+            - generic [ref=f27e339]:
+              - generic [ref=f27e340]: Read-only
+              - textbox "Read-only" [ref=f27e342]: Prefilled value
+            - generic [ref=f27e344]:
+              - generic [ref=f27e345]: Disabled
+              - textbox "Disabled" [disabled] [ref=f27e347]: Cannot be edited
+            - generic [ref=f27e349]:
+              - generic [ref=f27e350]: Max length 10
+              - textbox "Max length 10" [ref=f27e352]:
+                - /placeholder: Stops at 10
+            - generic [ref=f27e354]:
+              - generic [ref=f27e355]: No label, aria only
+              - textbox "Search providers" [ref=f27e357]:
+                - /placeholder: Labelled by aria-label
+        - generic [ref=f27e359]:
+          - generic [ref=f27e361]:
+            - heading "Icon slots" [level=3] [ref=f27e362]
+            - paragraph [ref=f27e363]: Inside the border box; the side follows the writing direction
+          - generic [ref=f27e364]:
+            - generic [ref=f27e366]:
+              - generic [ref=f27e367]: Leading icon
+              - generic [ref=f27e368]:
+                - generic: 
+                - textbox "Leading icon" [ref=f27e369]:
+                  - /placeholder: Search providers
+            - generic [ref=f27e371]:
+              - generic [ref=f27e372]: Trailing icon
+              - generic [ref=f27e373]:
+                - textbox "Trailing icon" [ref=f27e374]:
+                  - /placeholder: Pick a date
+                - generic: 
+            - generic [ref=f27e376]:
+              - generic [ref=f27e377]: Both
+              - generic [ref=f27e378]:
+                - generic: 
+                - textbox "Both" [ref=f27e379]:
+                  - /placeholder: Assignee
+                - generic: 
+            - generic [ref=f27e381]:
+              - generic [ref=f27e382]: Leading icon, small
+              - generic [ref=f27e383]:
+                - generic: 
+                - textbox "Leading icon, small" [ref=f27e384]:
+                  - /placeholder: Search
+            - generic [ref=f27e386]:
+              - generic [ref=f27e387]: Leading icon, medium
+              - generic [ref=f27e388]:
+                - generic: 
+                - textbox "Leading icon, medium" [ref=f27e389]:
+                  - /placeholder: Search
+            - generic [ref=f27e391]:
+              - generic [ref=f27e392]: Leading icon, large
+              - generic [ref=f27e393]:
+                - generic: 
+                - textbox "Leading icon, large" [ref=f27e394]:
+                  - /placeholder: Search
+            - generic [ref=f27e396]:
+              - generic [ref=f27e397]: Icon with error
+              - generic [ref=f27e398]:
+                - generic: 
+                - textbox "Icon with error" [invalid] [ref=f27e399]
+              - alert [ref=f27e400]: No match for that term
+      - generic [ref=f27e401]:
+        - heading "Textarea" [level=2] [ref=f27e402]
+        - generic [ref=f27e404]:
+          - heading "Rows, resize and states" [level=3] [ref=f27e407]
+          - generic [ref=f27e408]:
+            - generic [ref=f27e410]:
+              - generic [ref=f27e411]: Default (3 rows)
+              - textbox "Default (3 rows)" [ref=f27e412]: Multi-line content. Second line.
+            - generic [ref=f27e414]:
+              - generic [ref=f27e415]: 6 rows
+              - textbox "6 rows" [ref=f27e416]:
+                - /placeholder: Taller
+            - generic [ref=f27e418]:
+              - generic [ref=f27e419]: No resize
+              - textbox "No resize" [ref=f27e420]:
+                - /placeholder: "resize: none"
+            - generic [ref=f27e422]:
+              - generic [ref=f27e423]: Both axes
+              - textbox "Both axes" [ref=f27e424]:
+                - /placeholder: "resize: both"
+            - generic [ref=f27e426]:
+              - generic [ref=f27e427]: With error
+              - textbox "With error" [invalid] [ref=f27e428]
+              - alert [ref=f27e429]: Notes are required
+            - generic [ref=f27e431]:
+              - generic [ref=f27e432]: Read-only
+              - textbox "Read-only" [ref=f27e433]: Multi-line content. Second line.
+      - generic [ref=f27e434]:
+        - heading "Checkbox & radio" [level=2] [ref=f27e435]
+        - generic [ref=f27e437]:
+          - heading "Checkbox" [level=3] [ref=f27e440]
+          - generic [ref=f27e441]:
+            - generic [ref=f27e444] [cursor=pointer]:
+              - checkbox "Bound and checked" [checked] [ref=f27e445]
+              - generic [ref=f27e446]: Bound and checked
+            - generic [ref=f27e449] [cursor=pointer]:
+              - checkbox "Unchecked" [ref=f27e450]
+              - generic [ref=f27e451]: Unchecked
+            - generic [ref=f27e454] [cursor=pointer]:
+              - checkbox "Indeterminate" [checked=mixed] [ref=f27e455]
+              - generic [ref=f27e456]: Indeterminate
+            - generic [ref=f27e459] [cursor=pointer]:
+              - checkbox "Required" [ref=f27e460]
+              - generic [ref=f27e461]: Required *
+            - generic [ref=f27e463]:
+              - generic [ref=f27e464] [cursor=pointer]:
+                - checkbox "With hint" [ref=f27e465]
+                - generic [ref=f27e466]: With hint
+              - generic [ref=f27e467]: Explains the consequence
+            - generic [ref=f27e469]:
+              - generic [ref=f27e470] [cursor=pointer]:
+                - checkbox "With error" [invalid] [ref=f27e471]
+                - generic [ref=f27e472]: With error
+              - alert [ref=f27e473]: You must accept this
+            - generic [ref=f27e476]:
+              - checkbox "Disabled" [disabled] [ref=f27e477]
+              - generic [ref=f27e478]: Disabled
+            - generic [ref=f27e481]:
+              - checkbox "Read-only" [checked] [ref=f27e482]
+              - generic [ref=f27e483]: Read-only
+        - generic [ref=f27e485]:
+          - generic [ref=f27e487]:
+            - heading "Radio group" [level=3] [ref=f27e488]
+            - paragraph [ref=f27e489]: One form control, three instances sharing a name
+          - generic [ref=f27e490]:
+            - generic [ref=f27e493] [cursor=pointer]:
+              - radio "Standard" [checked] [ref=f27e494]
+              - generic [ref=f27e495]: Standard
+            - generic [ref=f27e498] [cursor=pointer]:
+              - radio "Preferred" [ref=f27e499]
+              - generic [ref=f27e500]: Preferred
+            - generic [ref=f27e503] [cursor=pointer]:
+              - radio "Restricted" [ref=f27e504]
+              - generic [ref=f27e505]: Restricted
+          - paragraph [ref=f27e506]:
+            - text: "Selected:"
+            - code [ref=f27e507]: standard
+          - generic [ref=f27e511]:
+            - radio "Disabled option" [disabled] [ref=f27e512]
+            - generic [ref=f27e513]: Disabled option
+      - generic [ref=f27e514]:
+        - heading "Select & multiselect" [level=2] [ref=f27e515]
+        - paragraph [ref=f27e516]: These render through the CDK overlay, which is the part most likely to break once the library is bundled — so they are worth opening.
+        - generic [ref=f27e518]:
+          - heading "Select" [level=3] [ref=f27e521]
+          - generic [ref=f27e522]:
+            - generic [ref=f27e524]:
+              - generic [ref=f27e525]: Object options
+              - combobox "Object options" [ref=f27e526] [cursor=pointer]:
+                - generic [ref=f27e527]: Lebanon
+            - generic [ref=f27e532]:
+              - generic [ref=f27e533]: Primitive options
+              - combobox "Primitive options" [ref=f27e534] [cursor=pointer]:
+                - generic [ref=f27e535]: No optionLabel needed
+            - generic [ref=f27e540]:
+              - generic [ref=f27e541]: Filterable + clearable
+              - combobox "Filterable + clearable" [ref=f27e542] [cursor=pointer]:
+                - generic [ref=f27e543]: Type to filter
+            - generic [ref=f27e548]:
+              - generic [ref=f27e549]: Loading
+              - combobox "Loading" [ref=f27e550] [cursor=pointer]:
+                - generic [ref=f27e551]: Fetching…
+                - status "Loading options" [ref=f27e553]
+            - generic [ref=f27e557]:
+              - generic [ref=f27e558]: Empty
+              - combobox "Empty" [ref=f27e559] [cursor=pointer]:
+                - generic [ref=f27e560]: Nothing to pick
+            - generic [ref=f27e565]:
+              - generic [ref=f27e566]: With error
+              - combobox "With error" [invalid] [ref=f27e567] [cursor=pointer]
+              - alert [ref=f27e570]: Pick a speciality
+            - generic [ref=f27e572]:
+              - generic [ref=f27e573]: Disabled
+              - combobox "Disabled" [disabled] [ref=f27e574]:
+                - generic [ref=f27e575]: Unavailable
+        - generic [ref=f27e580]:
+          - heading "Multiselect" [level=3] [ref=f27e583]
+          - generic [ref=f27e584]:
+            - generic [ref=f27e586]:
+              - generic [ref=f27e587]: Menu display
+              - combobox "Menu display" [ref=f27e588] [cursor=pointer]:
+                - generic [ref=f27e589]: Lebanon, United Arab Emirates
+            - generic [ref=f27e594]:
+              - generic [ref=f27e595]: Chip display
+              - combobox "Chip display" [ref=f27e596] [cursor=pointer]:
+                - generic [ref=f27e599]:
+                  - generic [ref=f27e600]: Saudi Arabia
+                  - button "Remove Saudi Arabia" [ref=f27e601]
+                - button "Clear selection" [ref=f27e604]
+            - generic [ref=f27e609]:
+              - generic [ref=f27e610]: No toggle-all
+              - combobox "No toggle-all" [ref=f27e611] [cursor=pointer]:
+                - generic [ref=f27e612]: Select specialities
+            - generic [ref=f27e617]:
+              - generic [ref=f27e618]: Collapses after 2
+              - combobox "Collapses after 2" [ref=f27e619] [cursor=pointer]:
+                - generic [ref=f27e620]: Select specialities
+          - paragraph [ref=f27e624]:
+            - text: "Menu control value:"
+            - code [ref=f27e625]: LB,AE
+      - generic [ref=f27e626]:
+        - heading "Select — templates & virtual scroll" [level=2] [ref=f27e627]
+        - paragraph [ref=f27e628]:
+          - code [ref=f27e629]: gmSelectOption
+          - text: re-renders each row and
+          - code [ref=f27e630]: gmSelectValue
+          - text: "re-renders the trigger. Both change presentation only: selection still resolves through"
+          - code [ref=f27e631]: optionValue
+          - text: ", so the control below holds an id."
+        - generic [ref=f27e633]:
+          - heading "Custom option and value templates" [level=3] [ref=f27e636]
+          - generic [ref=f27e637]:
+            - generic [ref=f27e639]:
+              - generic [ref=f27e640]: Assignee
+              - combobox "Assignee" [ref=f27e641] [cursor=pointer]:
+                - generic [ref=f27e642]:
+                  - strong [ref=f27e643]: Karim Fouad
+                  - text: — Network
+                - button "Clear selection" [ref=f27e645]
+            - paragraph [ref=f27e649]:
+              - text: "Control value:"
+              - code [ref=f27e650]: "2"
+        - generic [ref=f27e652]:
+          - generic [ref=f27e654]:
+            - heading "Virtual scroll" [level=3] [ref=f27e655]
+            - paragraph [ref=f27e656]: 5,000 options — only the rows in view are in the DOM
+          - generic [ref=f27e657]:
+            - generic [ref=f27e659]:
+              - generic [ref=f27e660]: City
+              - combobox "City" [ref=f27e661] [cursor=pointer]:
+                - generic [ref=f27e662]: Select a city
+            - paragraph [ref=f27e666]:
+              - text: "Filtering virtualises the filtered result; arrow keys, Home and End scroll the highlighted row into view. Control value:"
+              - code [ref=f27e667]: "null"
+      - generic [ref=f27e668]:
+        - heading "Multiselect — limit & virtual scroll" [level=2] [ref=f27e669]
+        - paragraph [ref=f27e670]:
+          - code [ref=f27e671]: selectionLimit
+          - text: "blocks additions only: a selection already made stays valid and can always be removed, and select-all fills the remaining slots rather than overshooting."
+        - generic [ref=f27e673]:
+          - generic [ref=f27e675]:
+            - heading "selectionLimit" [level=3] [ref=f27e676]
+            - paragraph [ref=f27e677]: Two at most — try a third
+          - generic [ref=f27e678]:
+            - generic [ref=f27e680]:
+              - generic [ref=f27e681]: Roles
+              - combobox "Roles" [ref=f27e682] [cursor=pointer]:
+                - generic [ref=f27e685]:
+                  - generic [ref=f27e686]: Admin
+                  - button "Remove Admin" [ref=f27e687]
+                - button "Clear selection" [ref=f27e690]
+            - paragraph [ref=f27e694]:
+              - text: "Control value:"
+              - code [ref=f27e695]: "1"
+        - generic [ref=f27e697]:
+          - generic [ref=f27e699]:
+            - heading "Virtual scroll" [level=3] [ref=f27e700]
+            - paragraph [ref=f27e701]: 5,000 options, the same CDK scroller gm-select uses
+          - generic [ref=f27e702]:
+            - generic [ref=f27e704]:
+              - generic [ref=f27e705]: Cities
+              - combobox "Cities" [ref=f27e706] [cursor=pointer]:
+                - generic [ref=f27e707]: Select cities
+            - paragraph [ref=f27e711]:
+              - text: "Filtering virtualises the filtered list; arrows, Home and End scroll the highlighted row into view. Control value:"
+              - code
+      - generic [ref=f27e712]:
+        - heading "Datepicker" [level=2] [ref=f27e713]
+        - generic [ref=f27e715]:
+          - heading "Formats, bounds and button bar" [level=3] [ref=f27e718]
+          - generic [ref=f27e719]:
+            - generic [ref=f27e721]:
+              - generic [ref=f27e722]: Default (dd/MM/yyyy)
+              - button "Default (dd/MM/yyyy)" [ref=f27e723] [cursor=pointer]:
+                - generic [ref=f27e724]: 22/09/2026
+            - generic [ref=f27e728]:
+              - generic [ref=f27e729]: ISO format
+              - button "ISO format" [ref=f27e730] [cursor=pointer]:
+                - generic [ref=f27e731]: yyyy-mm-dd
+            - generic [ref=f27e735]:
+              - generic [ref=f27e736]: This month only
+              - button "This month only" [ref=f27e737] [cursor=pointer]
+              - generic [ref=f27e740]: Days outside the current month are disabled
+            - generic [ref=f27e742]:
+              - generic [ref=f27e743]: Clearable + button bar
+              - button "Clearable + button bar" [ref=f27e744] [cursor=pointer]
+            - generic [ref=f27e748]:
+              - generic [ref=f27e749]: Week starts Monday
+              - button "Week starts Monday" [ref=f27e750] [cursor=pointer]
+            - generic [ref=f27e754]:
+              - generic [ref=f27e755]: With error
+              - button "With error" [ref=f27e756] [cursor=pointer]
+              - alert [ref=f27e759]: A start date is required
+            - generic [ref=f27e761]:
+              - generic [ref=f27e762]: Disabled
+              - button "Disabled" [disabled] [ref=f27e763]:
+                - generic [ref=f27e764]: Unavailable
+          - paragraph [ref=f27e767]:
+            - text: "Bound value:"
+            - code [ref=f27e768]: Tue Sep 22 2026 11:22:23 GMT+0300 (Eastern European Summer Time)
+      - generic [ref=f27e769]:
+        - heading "Datepicker — time & range" [level=2] [ref=f27e770]
+        - paragraph [ref=f27e771]:
+          - text: "Every value is built from explicit local parts, so nothing shifts timezone: a single date is a"
+          - code [ref=f27e772]: Date
+          - text: ", and a range is a"
+          - code [ref=f27e773]: "[start, end]"
+          - text: tuple.
+        - generic [ref=f27e775]:
+          - generic [ref=f27e777]:
+            - heading "Date + time" [level=3] [ref=f27e778]
+            - paragraph [ref=f27e779]: Picking a day keeps the time, and vice versa
+          - generic [ref=f27e780]:
+            - generic [ref=f27e782]:
+              - generic [ref=f27e783]: Appointment (24h)
+              - button "Appointment (24h)" [ref=f27e784] [cursor=pointer]:
+                - generic [ref=f27e785]: 08/09/2026 14:30
+                - button "Clear date" [ref=f27e787]
+            - generic [ref=f27e791]:
+              - generic [ref=f27e792]: Slot (30-minute steps)
+              - button "Slot (30-minute steps)" [ref=f27e793] [cursor=pointer]:
+                - generic [ref=f27e794]: 08/09/2026 14:30
+              - generic [ref=f27e797]: stepMinute narrows the minute list rather than sizing a spinner
+            - generic [ref=f27e799]:
+              - generic [ref=f27e800]: Meeting (12h)
+              - button "Meeting (12h)" [ref=f27e801] [cursor=pointer]
+          - paragraph [ref=f27e804]:
+            - text: "Appointment:"
+            - code [ref=f27e805]: Tue Sep 08 2026 14:30:00 GMT+0300 (Eastern European Summer Time)
+        - generic [ref=f27e807]:
+          - generic [ref=f27e809]:
+            - heading "Time only" [level=3] [ref=f27e810]
+            - paragraph [ref=f27e811]: No calendar — the same hour/minute controls
+          - generic [ref=f27e812]:
+            - generic [ref=f27e814]:
+              - generic [ref=f27e815]: Opens at
+              - button "Opens at" [ref=f27e816] [cursor=pointer]
+            - paragraph [ref=f27e819]:
+              - text: "Value:"
+              - code [ref=f27e820]: "null"
+        - generic [ref=f27e822]:
+          - generic [ref=f27e824]:
+            - heading "Range" [level=3] [ref=f27e825]
+            - paragraph [ref=f27e826]: First click starts, second click ends
+          - generic [ref=f27e827]:
+            - generic [ref=f27e829]:
+              - generic [ref=f27e830]: Reporting period
+              - button "Reporting period" [ref=f27e831] [cursor=pointer]
+            - paragraph [ref=f27e834]:
+              - text: "Clicking before the start swaps the two rather than making an invalid range. Value:"
+              - code [ref=f27e835]: "null"
+      - generic [ref=f27e836]:
+        - heading "Popover, menu, switch, number, select button, autocomplete" [level=2] [ref=f27e837]
+        - generic [ref=f27e839]:
+          - generic [ref=f27e841]:
+            - heading "Popover & menu" [level=3] [ref=f27e842]
+            - paragraph [ref=f27e843]: Both anchored by the shared overlay engine
+          - generic [ref=f27e844]:
+            - button "Open popover" [ref=f27e846] [cursor=pointer]
+            - button "Actions" [ref=f27e849] [cursor=pointer]
+          - paragraph [ref=f27e851]:
+            - text: "Last command:"
+            - code [ref=f27e852]: nothing yet
+        - generic [ref=f27e854]:
+          - generic [ref=f27e856]:
+            - heading "Toggle switch & number" [level=3] [ref=f27e857]
+            - paragraph [ref=f27e858]: Native checkbox and native number input
+          - generic [ref=f27e859]:
+            - generic [ref=f27e862] [cursor=pointer]:
+              - switch "Email notifications" [checked] [ref=f27e863]
+              - generic [ref=f27e866]: Email notifications
+            - generic [ref=f27e869]:
+              - switch "Disabled switch" [disabled] [ref=f27e870]
+              - generic [ref=f27e873]: Disabled switch
+            - generic [ref=f27e875]:
+              - generic [ref=f27e876]: Coverage
+              - generic [ref=f27e877]:
+                - spinbutton "Coverage" [ref=f27e878]: "80"
+                - generic [ref=f27e879]: "%"
+              - generic [ref=f27e880]: Clamped to 0–100 when you leave the field
+            - generic [ref=f27e882]:
+              - generic [ref=f27e883]: Premium
+              - generic [ref=f27e884]:
+                - generic [ref=f27e885]: EGP
+                - spinbutton "Premium" [ref=f27e886]
+          - paragraph [ref=f27e887]:
+            - text: "Values:"
+            - code [ref=f27e888]: "true"
+            - text: /
+            - code [ref=f27e889]: "80"
+            - text: /
+            - code [ref=f27e890]: "null"
+        - generic [ref=f27e892]:
+          - generic [ref=f27e894]:
+            - heading "Select button" [level=3] [ref=f27e895]
+            - paragraph [ref=f27e896]: A radiogroup — one tab stop, arrows move and select
+          - generic [ref=f27e897]:
+            - generic [ref=f27e899]:
+              - generic [ref=f27e900]: Status
+              - radiogroup "Status" [ref=f27e901]:
+                - radio "Draft" [checked] [ref=f27e902] [cursor=pointer]
+                - radio "Submitted" [ref=f27e903] [cursor=pointer]
+                - radio "Void" [disabled] [ref=f27e904]
+                - radio "Settled" [ref=f27e905] [cursor=pointer]
+            - paragraph [ref=f27e906]:
+              - text: "Value:"
+              - code [ref=f27e907]: draft
+        - generic [ref=f27e909]:
+          - generic [ref=f27e911]:
+            - heading "Autocomplete" [level=3] [ref=f27e912]
+            - paragraph [ref=f27e913]: The component never fetches — it emits a term
+          - generic [ref=f27e914]:
+            - generic [ref=f27e916]:
+              - generic [ref=f27e917]: Assignee
+              - combobox "Assignee" [ref=f27e919]
+            - paragraph [ref=f27e920]:
+              - text: Typing emits
+              - code [ref=f27e921]: search
+              - text: "; this page answers it from a local list. Value:"
+              - code [ref=f27e922]: "null"
+      - generic [ref=f27e923]:
+        - heading "Card" [level=2] [ref=f27e924]
+        - generic [ref=f27e925]:
+          - generic [ref=f27e927]:
+            - generic [ref=f27e929]:
+              - heading "Elevated" [level=3] [ref=f27e930]
+              - paragraph [ref=f27e931]: The default variant
+            - paragraph [ref=f27e932]: Body content sits in the default slot.
+          - generic [ref=f27e934]:
+            - generic [ref=f27e936]:
+              - heading "Flat" [level=3] [ref=f27e937]
+              - paragraph [ref=f27e938]: No shadow
+            - paragraph [ref=f27e939]: Use inside an already-elevated surface.
+          - generic [ref=f27e941]:
+            - generic [ref=f27e942]:
+              - generic [ref=f27e943]:
+                - heading "With actions" [level=3] [ref=f27e944]
+                - paragraph [ref=f27e945]: Projected into [gmCardActions]
+              - generic [ref=f27e946]:
+                - button "Edit" [ref=f27e948] [cursor=pointer]:
+                  - generic [ref=f27e949]: 
+                - button "Delete" [ref=f27e951] [cursor=pointer]:
+                  - generic [ref=f27e952]: 
+            - paragraph [ref=f27e953]: Actions render on the header row, opposite the title.
+          - generic [ref=f27e955] [cursor=pointer]:
+            - generic [ref=f27e957]:
+              - heading "Interactive" [level=3] [ref=f27e958]
+              - paragraph [ref=f27e959]: Hover and focus affordances
+            - paragraph [ref=f27e960]: Signals the whole card is clickable.
+          - generic [ref=f27e961]: padding="none" — content bleeds to the edge
+          - paragraph [ref=f27e966]: "No header at all: header markup is skipped entirely."
+      - generic [ref=f27e967]:
+        - heading "Badge, chip, spinner" [level=2] [ref=f27e968]
+        - generic [ref=f27e970]:
+          - heading "Badge" [level=3] [ref=f27e973]
+          - generic [ref=f27e974]:
+            - generic [ref=f27e975]: severity
+            - generic [ref=f27e976]: primary
+            - generic [ref=f27e978]: secondary
+            - generic [ref=f27e980]: success
+            - generic [ref=f27e982]: info
+            - generic [ref=f27e984]: warning
+            - generic [ref=f27e986]: danger
+            - generic [ref=f27e988]: contrast
+          - generic [ref=f27e990]:
+            - generic [ref=f27e991]: size
+            - generic [ref=f27e992]: "8"
+            - generic [ref=f27e994]: "8"
+            - generic [ref=f27e996]: "8"
+          - generic [ref=f27e998]:
+            - generic [ref=f27e999]: rounded
+            - generic [ref=f27e1000]: "24"
+            - generic [ref=f27e1002]: Active
+            - generic "99 or more unread" [ref=f27e1005]: 99+
+        - generic [ref=f27e1007]:
+          - heading "Chip" [level=3] [ref=f27e1010]
+          - generic [ref=f27e1011]:
+            - generic [ref=f27e1012]: severity
+            - generic [ref=f27e1013]: primary
+            - generic [ref=f27e1016]: secondary
+            - generic [ref=f27e1019]: success
+            - generic [ref=f27e1022]: info
+            - generic [ref=f27e1025]: warning
+            - generic [ref=f27e1028]: danger
+            - generic [ref=f27e1031]: contrast
+          - generic [ref=f27e1034]:
+            - generic [ref=f27e1035]: variants
+            - generic [ref=f27e1037]:
+              - generic [ref=f27e1038]: 
+              - generic [ref=f27e1039]: With icon
+            - generic [ref=f27e1041]:
+              - generic [ref=f27e1042]: Removable
+              - button "Remove Cardiology" [ref=f27e1043] [cursor=pointer]
+            - generic [ref=f27e1045]: Disabled
+        - generic [ref=f27e1049]:
+          - heading "Spinner" [level=3] [ref=f27e1052]
+          - generic [ref=f27e1053]:
+            - generic [ref=f27e1054]: size
+            - status "Loading (small)" [ref=f27e1055]
+            - status "Loading (medium)" [ref=f27e1057]
+            - status "Loading (large)" [ref=f27e1059]
+      - generic [ref=f27e1061]:
+        - heading "Tooltip" [level=2] [ref=f27e1062]
+        - generic [ref=f27e1064]:
+          - generic [ref=f27e1066]:
+            - heading "Positions" [level=3] [ref=f27e1067]
+            - paragraph [ref=f27e1068]: Also overlay-driven — hover or focus each target
+          - generic [ref=f27e1069]:
+            - button "top" [ref=f27e1071] [cursor=pointer]
+            - button "bottom" [ref=f27e1074] [cursor=pointer]
+            - button "left" [ref=f27e1077] [cursor=pointer]
+            - button "right" [ref=f27e1080] [cursor=pointer]
+            - generic [ref=f27e1082]: plain span
+            - button "Tooltip suppressed" [ref=f27e1084] [cursor=pointer]
+            - button "Empty content" [ref=f27e1087] [cursor=pointer]
+      - generic [ref=f27e1089]:
+        - heading "Dialog" [level=2] [ref=f27e1090]
+        - paragraph [ref=f27e1091]:
+          - text: "Opened from a service, not from markup: the content component is instantiated into a CDK overlay with its own"
+          - code [ref=f27e1092]: GmDialogRef
+          - text: and
+          - code [ref=f27e1093]: GmDialogConfig
+          - text: ", and hands its result back through"
+          - code [ref=f27e1094]: onClose
+          - text: .
+        - generic [ref=f27e1096]:
+          - generic [ref=f27e1098]:
+            - heading "Open" [level=3] [ref=f27e1099]
+            - paragraph [ref=f27e1100]: Escape, the backdrop and the close button all dismiss
+          - generic [ref=f27e1101]:
+            - button "Edit provider" [ref=f27e1103] [cursor=pointer]
+            - button "Undismissable" [ref=f27e1106] [cursor=pointer]
+          - paragraph [ref=f27e1108]:
+            - text: "Last result:"
+            - code [ref=f27e1109]: nothing yet
+      - generic [ref=f27e1110]:
+        - heading "Toast" [level=2] [ref=f27e1111]
+        - paragraph [ref=f27e1112]:
+          - text: Nothing on this page renders the toast host — injecting
+          - code [ref=f27e1113]: GmToastService
+          - text: is the whole integration. The first notification creates the stack, and it is torn down again when the last one goes.
+        - generic [ref=f27e1115]:
+          - generic [ref=f27e1117]:
+            - heading "Severities" [level=3] [ref=f27e1118]
+            - paragraph [ref=f27e1119]: Auto-dismiss after 5s; the close button is keyboard reachable
+          - generic [ref=f27e1120]:
+            - button "Success" [ref=f27e1122] [cursor=pointer]
+            - button "Info" [ref=f27e1125] [cursor=pointer]
+            - button "Warning" [ref=f27e1128] [cursor=pointer]
+            - button "Error" [ref=f27e1131] [cursor=pointer]
+          - generic [ref=f27e1133]:
+            - button "With summary" [ref=f27e1135] [cursor=pointer]
+            - button "Sticky error" [ref=f27e1138] [cursor=pointer]
+            - button "Burst of five" [ref=f27e1141] [cursor=pointer]
+            - button "Clear all" [ref=f27e1144] [cursor=pointer]
+      - generic [ref=f27e1146]:
+        - heading "Message" [level=2] [ref=f27e1147]
+        - paragraph [ref=f27e1148]:
+          - text: Inline and persistent, unlike a toast — for a condition the user needs to keep seeing. Warnings and errors take
+          - code [ref=f27e1149]: role="alert"
+          - text: ; anything else is announced politely.
+        - generic [ref=f27e1151]:
+          - heading "Severities" [level=3] [ref=f27e1154]
+          - generic [ref=f27e1155]:
+            - status [ref=f27e1157]:
+              - generic [ref=f27e1158]: primary message
+            - status [ref=f27e1160]:
+              - generic [ref=f27e1161]: secondary message
+            - status [ref=f27e1163]:
+              - generic [ref=f27e1164]: success message
+            - status [ref=f27e1166]:
+              - generic [ref=f27e1167]: info message
+            - alert [ref=f27e1169]:
+              - generic [ref=f27e1170]: warning message
+            - alert [ref=f27e1172]:
+              - generic [ref=f27e1173]: danger message
+            - status [ref=f27e1175]:
+              - generic [ref=f27e1176]: contrast message
+        - generic [ref=f27e1178]:
+          - heading "With icons, and with projected content" [level=3] [ref=f27e1181]
+          - generic [ref=f27e1182]:
+            - status [ref=f27e1184]:
+              - generic [ref=f27e1185]: 
+              - generic [ref=f27e1186]: This identification is in use by an active policy.
+            - alert [ref=f27e1188]:
+              - generic [ref=f27e1189]: 
+              - generic [ref=f27e1190]: This mapping version is locked and cannot be edited.
+            - alert [ref=f27e1192]:
+              - generic [ref=f27e1193]: 
+              - generic [ref=f27e1194]: Saving failed. Check the highlighted fields.
+            - status [ref=f27e1196]:
+              - generic [ref=f27e1197]: 
+              - generic [ref=f27e1198]:
+                - text: Projected content, so it can hold markup and
+                - link "links" [ref=f27e1199] [cursor=pointer]:
+                  - /url: "#message"
+                - text: .
+      - generic [ref=f27e1200]:
+        - heading "Tabs" [level=2] [ref=f27e1201]
+        - paragraph [ref=f27e1202]: Arrow keys, Home and End move between tabs; activation follows focus. A panel is created when its tab becomes active and destroyed when it leaves.
+        - generic [ref=f27e1204]:
+          - generic [ref=f27e1205]:
+            - tablist [ref=f27e1206]:
+              - tab "Summary" [selected] [ref=f27e1207] [cursor=pointer]
+              - tab "Rich header 3" [ref=f27e1208] [cursor=pointer]:
+                - text: Rich header
+                - generic [ref=f27e1209]: "3"
+              - tab "Nested content" [ref=f27e1211] [cursor=pointer]
+              - tab "Disabled" [disabled] [ref=f27e1212]
+            - tabpanel "Summary" [ref=f27e1214]:
+              - paragraph [ref=f27e1215]: Plain string label.
+          - paragraph [ref=f27e1216]:
+            - text: "Active tab:"
+            - code [ref=f27e1217]: summary
+      - generic [ref=f27e1218]:
+        - heading "Accordion" [level=2] [ref=f27e1219]
+        - generic [ref=f27e1221]:
+          - generic [ref=f27e1223]:
+            - heading "Single" [level=3] [ref=f27e1224]
+            - paragraph [ref=f27e1225]: Re-clicking the open panel closes it
+          - generic [ref=f27e1226]:
+            - generic [ref=f27e1227]:
+              - heading [level=3] [ref=f27e1228]:
+                - button "What is in the package?" [expanded] [ref=f27e1229] [cursor=pointer]
+              - region "What is in the package?" [ref=f27e1232]: Eighteen standalone components, no PrimeNG or Material dependency.
+            - heading [level=3] [ref=f27e1234]:
+              - button "How is it installed?" [ref=f27e1235] [cursor=pointer]
+            - heading [level=3] [ref=f27e1239]:
+              - button "Disabled panel" [disabled] [ref=f27e1240]
+        - generic [ref=f27e1244]:
+          - generic [ref=f27e1246]:
+            - heading "Multiple" [level=3] [ref=f27e1247]
+            - paragraph [ref=f27e1248]: Two panels open at once
+          - generic [ref=f27e1249]:
+            - generic [ref=f27e1250]:
+              - heading [level=3] [ref=f27e1251]:
+                - button "Design tokens" [expanded] [ref=f27e1252] [cursor=pointer]
+              - region "Design tokens" [ref=f27e1255]:
+                - generic [ref=f27e1256]:
+                  - text: Shipped as
+                  - code [ref=f27e1257]: styles/tokens.css
+                  - text: ; every component reads only
+                  - code [ref=f27e1258]: "--gm-*"
+                  - text: .
+            - generic [ref=f27e1259]:
+              - heading [level=3] [ref=f27e1260]:
+                - button "Peer dependencies" [expanded] [ref=f27e1261] [cursor=pointer]
+              - region "Peer dependencies" [ref=f27e1264]: Angular common, core, forms and the CDK.
+            - heading [level=3] [ref=f27e1266]:
+              - button "Releasing" [ref=f27e1267] [cursor=pointer]
+      - generic [ref=f27e1270]:
+        - heading "Pagination" [level=2] [ref=f27e1271]
+        - generic [ref=f27e1273]:
+          - generic [ref=f27e1275]:
+            - heading "43 records" [level=3] [ref=f27e1276]
+            - paragraph [ref=f27e1277]: Deliberately a partial last page
+          - list [ref=f27e1278]:
+            - listitem [ref=f27e1279]: Record 1
+            - listitem [ref=f27e1280]: Record 2
+            - listitem [ref=f27e1281]: Record 3
+            - listitem [ref=f27e1282]: Record 4
+            - listitem [ref=f27e1283]: Record 5
+            - listitem [ref=f27e1284]: Record 6
+            - listitem [ref=f27e1285]: Record 7
+            - listitem [ref=f27e1286]: Record 8
+            - listitem [ref=f27e1287]: Record 9
+            - listitem [ref=f27e1288]: Record 10
+          - navigation "Pagination" [ref=f27e1290]:
+            - generic [ref=f27e1291]: Showing 1 to 10 of 43
+            - generic [ref=f27e1292]:
+              - list [ref=f27e1293]:
+                - listitem [ref=f27e1294]:
+                  - button "First page" [disabled] [ref=f27e1295]
+                - listitem [ref=f27e1298]:
+                  - button "Previous page" [disabled] [ref=f27e1299]
+                - listitem [ref=f27e1302]:
+                  - button "Page 1" [ref=f27e1303] [cursor=pointer]: "1"
+                - listitem [ref=f27e1304]:
+                  - button "Page 2" [ref=f27e1305] [cursor=pointer]: "2"
+                - listitem [ref=f27e1306]:
+                  - button "Page 3" [ref=f27e1307] [cursor=pointer]: "3"
+                - listitem [ref=f27e1308]:
+                  - button "Page 4" [ref=f27e1309] [cursor=pointer]: "4"
+                - listitem [ref=f27e1310]:
+                  - button "Page 5" [ref=f27e1311] [cursor=pointer]: "5"
+                - listitem [ref=f27e1312]:
+                  - button "Next page" [ref=f27e1313] [cursor=pointer]
+                - listitem [ref=f27e1316]:
+                  - button "Last page" [ref=f27e1317] [cursor=pointer]
+              - combobox "Items per page" [ref=f27e1323] [cursor=pointer]:
+                - generic [ref=f27e1324]: "10"
+          - paragraph [ref=f27e1328]:
+            - text: page
+            - code [ref=f27e1329]: "1"
+            - text: ", pageSize"
+            - code [ref=f27e1330]: "10"
+        - generic [ref=f27e1332]:
+          - heading "Variants" [level=3] [ref=f27e1335]
+          - generic [ref=f27e1336]:
+            - navigation "Pagination" [ref=f27e1338]:
+              - list [ref=f27e1340]:
+                - listitem [ref=f27e1341]:
+                  - button "First page" [disabled] [ref=f27e1342]
+                - listitem [ref=f27e1345]:
+                  - button "Previous page" [disabled] [ref=f27e1346]
+                - listitem [ref=f27e1349]:
+                  - button "Next page" [disabled] [ref=f27e1350]
+                - listitem [ref=f27e1353]:
+                  - button "Last page" [disabled] [ref=f27e1354]
+            - navigation "Pagination" [ref=f27e1358]:
+              - list [ref=f27e1360]:
+                - listitem [ref=f27e1361]:
+                  - button "First page" [ref=f27e1362] [cursor=pointer]
+                - listitem [ref=f27e1365]:
+                  - button "Previous page" [ref=f27e1366] [cursor=pointer]
+                - listitem [ref=f27e1369]:
+                  - button "Page 1" [ref=f27e1370] [cursor=pointer]: "1"
+                - listitem [ref=f27e1371]:
+                  - button "Page 2" [ref=f27e1372] [cursor=pointer]: "2"
+                - listitem [ref=f27e1373]:
+                  - button "Page 3" [ref=f27e1374] [cursor=pointer]: "3"
+                - listitem [ref=f27e1375]:
+                  - button "Page 4" [ref=f27e1376] [cursor=pointer]: "4"
+                - listitem [ref=f27e1377]:
+                  - button "Page 5" [ref=f27e1378] [cursor=pointer]: "5"
+                - listitem [ref=f27e1379]:
+                  - button "Page 6" [ref=f27e1380] [cursor=pointer]: "6"
+                - listitem [ref=f27e1381]:
+                  - button "Page 7" [ref=f27e1382] [cursor=pointer]: "7"
+                - listitem [ref=f27e1383]:
+                  - generic [ref=f27e1384]: …
+                - listitem [ref=f27e1385]:
+                  - button "Page 50" [ref=f27e1386] [cursor=pointer]: "50"
+                - listitem [ref=f27e1387]:
+                  - button "Next page" [ref=f27e1388] [cursor=pointer]
+                - listitem [ref=f27e1391]:
+                  - button "Last page" [ref=f27e1392] [cursor=pointer]
+            - navigation "Pagination" [ref=f27e1396]:
+              - list [ref=f27e1398]:
+                - listitem [ref=f27e1399]:
+                  - button "First page" [disabled] [ref=f27e1400]
+                - listitem [ref=f27e1403]:
+                  - button "Previous page" [disabled] [ref=f27e1404]
+                - listitem [ref=f27e1407]:
+                  - button "Page 1" [disabled] [ref=f27e1408]: "1"
+                - listitem [ref=f27e1409]:
+                  - button "Page 2" [disabled] [ref=f27e1410]: "2"
+                - listitem [ref=f27e1411]:
+                  - button "Page 3" [disabled] [ref=f27e1412]: "3"
+                - listitem [ref=f27e1413]:
+                  - button "Page 4" [disabled] [ref=f27e1414]: "4"
+                - listitem [ref=f27e1415]:
+                  - button "Page 5" [disabled] [ref=f27e1416]: "5"
+                - listitem [ref=f27e1417]:
+                  - generic [ref=f27e1418]: …
+                - listitem [ref=f27e1419]:
+                  - button "Page 8" [disabled] [ref=f27e1420]: "8"
+                - listitem [ref=f27e1421]:
+                  - button "Next page" [disabled] [ref=f27e1422]
+                - listitem [ref=f27e1425]:
+                  - button "Last page" [disabled] [ref=f27e1426]
+      - generic [ref=f27e1429]:
+        - heading "Table" [level=2] [ref=f27e1430]
+        - paragraph [ref=f27e1431]: "Config-driven table with sorting, filtering, selection, and a toolbar with actions. Use the dropdown menu to toggle table options: pin actions, show/hide column chooser, enable column reordering, and lock inactive rows."
+        - generic [ref=f27e1432]:
+          - heading "Providers" [level=3] [ref=f27e1433]
+          - button "Table options" [ref=f27e1436] [cursor=pointer]:
+            - generic [ref=f27e1437]: 
+        - paragraph [ref=f27e1439]:
+          - text: Everything above is the column API. Hand the same component a
+          - code [ref=f27e1440]: tableConfig
+          - text: and it mounts its own toolbar, actions column, selection column and paginator, and reports sort, filter and page as list-API requests — one object instead of a card, a toolbar, a template per renderer and a paginator.
+        - paragraph [ref=f27e1441]:
+          - text: "This grid does everything the two above it do, and every switch is a key in that object rather than an input:"
+          - code [ref=f27e1442]: rowSelectable
+          - text: locks the inactive rows,
+          - code [ref=f27e1443]: showColumnChooser
+          - text: offers the chooser,
+          - code [ref=f27e1444]: reorderableColumns
+          - text: lets headers be dragged (the table keeps the new order itself), and
+          - code [ref=f27e1445]: actionsPosition
+          - text: "moves the pinned actions edge to edge. Per column:"
+          - code [ref=f27e1446]: frozen
+          - text: pins
+          - emphasis [ref=f27e1447]: Provider
+          - text: ","
+          - code [ref=f27e1448]: "toggleable: false"
+          - text: keeps it out of the chooser,
+          - code [ref=f27e1449]: align
+          - text: puts
+          - emphasis [ref=f27e1450]: Score
+          - text: on the right,
+          - code [ref=f27e1451]: truncateAt
+          - text: moves the rest of
+          - emphasis [ref=f27e1452]: Notes
+          - text: into a tooltip,
+          - code [ref=f27e1453]: cellType
+          - text: draws
+          - emphasis [ref=f27e1454]: Status
+          - text: as a badge and
+          - emphasis [ref=f27e1455]: Tier
+          - text: as a dot, and
+          - code [ref=f27e1456]: "exportable: false"
+          - text: leaves
+          - emphasis [ref=f27e1457]: Notes
+          - text: out of the CSV the toolbar's Export writes.
+        - paragraph [ref=f27e1458]:
+          - code [ref=f27e1459]: displayActionsInModals
+          - text: is on here, so
+          - emphasis [ref=f27e1460]: Add
+          - text: reports
+          - code [ref=f27e1461]: addClicked
+          - text: below instead of routing to
+          - code [ref=f27e1462]: create
+          - text: — which is what a screen that creates in a dialog wants. Leave it off and the toolbar owns the button and navigates.
+        - generic [ref=f27e1463]:
+          - generic [ref=f27e1465]:
+            - generic [ref=f27e1466]:
+              - combobox "Columns" [ref=f27e1469] [cursor=pointer]:
+                - generic [ref=f27e1470]: 7 items selected
+              - button "Clear" [disabled] [ref=f27e1475]:
+                - generic [ref=f27e1476]: 
+              - generic [ref=f27e1479]:
+                - searchbox "Search providers" [ref=f27e1480]
+                - generic: 
+            - generic [ref=f27e1481]:
+              - button "Add provider" [ref=f27e1483] [cursor=pointer]:
+                - generic [ref=f27e1484]: 
+              - button "Export" [ref=f27e1487] [cursor=pointer]:
+                - generic [ref=f27e1488]: 
+          - table [ref=f27e1491]:
+            - caption [ref=f27e1492]: Contracted providers, as one config object
+            - rowgroup [ref=f27e1493]:
+              - row [ref=f27e1494]:
+                - columnheader [ref=f27e1495]:
+                  - checkbox "Select all rows" [ref=f27e1499] [cursor=pointer]
+                - columnheader "Actions" [ref=f27e1500]
+                - columnheader "Provider" [ref=f27e1503]
+                - columnheader [ref=f27e1506]:
+                  - generic [ref=f27e1507]:
+                    - button "Type" [ref=f27e1508] [cursor=pointer]
+                    - 'button "Filter: Type" [ref=f27e1512] [cursor=pointer]'
+                - columnheader [ref=f27e1514]:
+                  - generic [ref=f27e1515]:
+                    - button "Country" [ref=f27e1516] [cursor=pointer]
+                    - 'button "Filter: Country" [ref=f27e1520] [cursor=pointer]'
+                - columnheader [ref=f27e1522]:
+                  - generic [ref=f27e1523]:
+                    - button "Score" [ref=f27e1524] [cursor=pointer]
+                    - 'button "Filter: Score" [ref=f27e1528] [cursor=pointer]'
+                - columnheader [ref=f27e1530]:
+                  - generic [ref=f27e1531]:
+                    - button "Status" [ref=f27e1532] [cursor=pointer]
+                    - 'button "Filter: Status" [ref=f27e1536] [cursor=pointer]'
+                - columnheader [ref=f27e1538]:
+                  - generic [ref=f27e1539]:
+                    - button "Active" [ref=f27e1540] [cursor=pointer]
+                    - 'button "Filter: Active" [ref=f27e1544] [cursor=pointer]'
+                - columnheader "Tier" [ref=f27e1546]
+                - 'columnheader "Notes Filter: Notes" [ref=f27e1549]':
+                  - generic [ref=f27e1550]:
+                    - generic [ref=f27e1551]: Notes
+                    - 'button "Filter: Notes" [ref=f27e1553] [cursor=pointer]'
+            - rowgroup [ref=f27e1555]:
+              - row [ref=f27e1556]:
+                - cell [ref=f27e1557]:
+                  - checkbox "Select row 1" [ref=f27e1561] [cursor=pointer]
+                - cell [ref=f27e1562]:
+                  - generic [ref=f27e1564]:
+                    - button "Edit" [ref=f27e1566] [cursor=pointer]:
+                      - generic [ref=f27e1567]: 
+                    - button "Delete" [ref=f27e1569] [cursor=pointer]:
+                      - generic [ref=f27e1570]: 
+                - cell [ref=f27e1571]:
+                  - link "Beirut Medical Center" [ref=f27e1573] [cursor=pointer]:
+                    - /url: "#"
+                - cell "Hospital" [ref=f27e1574]
+                - cell "Lebanon" [ref=f27e1577]
+                - cell "92" [ref=f27e1580]
+                - cell "Active" [ref=f27e1583]
+                - cell "Yes" [ref=f27e1587]:
+                  - generic "Yes" [ref=f27e1589]
+                - cell [ref=f27e1590]
+                - cell "Tertiary referral centre…" [ref=f27e1593]
+              - row [ref=f27e1596]:
+                - cell [ref=f27e1597]:
+                  - checkbox "Select row 2" [ref=f27e1601] [cursor=pointer]
+                - cell [ref=f27e1602]:
+                  - generic [ref=f27e1604]:
+                    - button "Edit" [ref=f27e1606] [cursor=pointer]:
+                      - generic [ref=f27e1607]: 
+                    - button "Delete" [ref=f27e1609] [cursor=pointer]:
+                      - generic [ref=f27e1610]: 
+                - cell [ref=f27e1611]:
+                  - link "Al Noor Clinic" [ref=f27e1613] [cursor=pointer]:
+                    - /url: "#"
+                - cell "Clinic" [ref=f27e1614]
+                - cell "UAE" [ref=f27e1617]
+                - cell "78" [ref=f27e1620]
+                - cell "Active" [ref=f27e1623]
+                - cell "Yes" [ref=f27e1627]:
+                  - generic "Yes" [ref=f27e1629]
+                - cell [ref=f27e1630]
+                - cell "Primary care network, 6…" [ref=f27e1633]
+              - row [ref=f27e1636]:
+                - cell [ref=f27e1637]:
+                  - checkbox "Select row 3" [disabled] [ref=f27e1641]
+                - cell [ref=f27e1642]:
+                  - button "Edit" [ref=f27e1646] [cursor=pointer]:
+                    - generic [ref=f27e1647]: 
+                - cell [ref=f27e1649]:
+                  - link "Cedars Diagnostics" [ref=f27e1651] [cursor=pointer]:
+                    - /url: "#"
+                - cell "Laboratory" [ref=f27e1652]
+                - cell "Lebanon" [ref=f27e1655]
+                - cell "64" [ref=f27e1658]
+                - cell "Draft" [ref=f27e1661]
+                - cell "No" [ref=f27e1665]:
+                  - generic "No" [ref=f27e1667]
+                - cell [ref=f27e1668]
+                - cell "Laboratory only — no ima…" [ref=f27e1671]
+              - row [ref=f27e1674]:
+                - cell [ref=f27e1675]:
+                  - checkbox "Select row 4" [ref=f27e1679] [cursor=pointer]
+                - cell [ref=f27e1680]:
+                  - generic [ref=f27e1682]:
+                    - button "Edit" [ref=f27e1684] [cursor=pointer]:
+                      - generic [ref=f27e1685]: 
+                    - button "Delete" [ref=f27e1687] [cursor=pointer]:
+                      - generic [ref=f27e1688]: 
+                - cell [ref=f27e1689]:
+                  - link "Gulf Specialist Hospital" [ref=f27e1691] [cursor=pointer]:
+                    - /url: "#"
+                - cell "Hospital" [ref=f27e1692]
+                - cell "Saudi Arabia" [ref=f27e1695]
+                - cell "88" [ref=f27e1698]
+                - cell "Active" [ref=f27e1701]
+                - cell "Yes" [ref=f27e1705]:
+                  - generic "Yes" [ref=f27e1707]
+                - cell [ref=f27e1708]
+                - cell "Full service. Renegotiat…" [ref=f27e1711]
+              - row [ref=f27e1714]:
+                - cell [ref=f27e1715]:
+                  - checkbox "Select row 5" [disabled] [ref=f27e1719]
+                - cell [ref=f27e1720]:
+                  - button "Edit" [ref=f27e1724] [cursor=pointer]:
+                    - generic [ref=f27e1725]: 
+                - cell [ref=f27e1727]:
+                  - link "Nile Family Practice" [ref=f27e1729] [cursor=pointer]:
+                    - /url: "#"
+                - cell "Clinic" [ref=f27e1730]
+                - cell "Egypt" [ref=f27e1733]
+                - cell "51" [ref=f27e1736]
+                - cell "Pending" [ref=f27e1739]
+                - cell "No" [ref=f27e1743]:
+                  - generic "No" [ref=f27e1745]
+                - cell [ref=f27e1746]
+                - cell "Family practice. Paediat…" [ref=f27e1749]
+          - navigation "Pagination" [ref=f27e1753]:
+            - generic [ref=f27e1754]: Showing 1 to 5 of 8
+            - generic [ref=f27e1755]:
+              - list [ref=f27e1756]:
+                - listitem [ref=f27e1757]:
+                  - button "First page" [disabled] [ref=f27e1758]
+                - listitem [ref=f27e1761]:
+                  - button "Previous page" [disabled] [ref=f27e1762]
+                - listitem [ref=f27e1765]:
+                  - button "Page 1" [ref=f27e1766] [cursor=pointer]: "1"
+                - listitem [ref=f27e1767]:
+                  - button "Page 2" [ref=f27e1768] [cursor=pointer]: "2"
+                - listitem [ref=f27e1769]:
+                  - button "Next page" [ref=f27e1770] [cursor=pointer]
+                - listitem [ref=f27e1773]:
+                  - button "Last page" [ref=f27e1774] [cursor=pointer]
+              - combobox "Items per page" [ref=f27e1780] [cursor=pointer]:
+                - generic [ref=f27e1781]: "5"
+        - paragraph [ref=f27e1785]:
+          - text: "Selected:"
+          - code [ref=f27e1786]: "0"
+          - text: · tick two rows to reveal
+          - code [ref=f27e1787]: Delete
+          - text: ·
+          - code [ref=f27e1788]: Inactive
+          - text: rows cannot be ticked ·
+          - code [ref=f27e1789]: Inactive
+          - text: "rows keep the Delete slot but lose the button · last event:"
+          - code [ref=f27e1790]: nothing yet
+      - generic [ref=f27e1791]:
+        - heading "File upload, stepper, order list, chart" [level=2] [ref=f27e1792]
+        - generic [ref=f27e1794]:
+          - generic [ref=f27e1796]:
+            - heading "File upload" [level=3] [ref=f27e1797]
+            - paragraph [ref=f27e1798]: Selects files and emits them — the page owns the request
+          - generic [ref=f27e1799]:
+            - generic [ref=f27e1800]: Claim attachments
+            - group "Claim attachments" [ref=f27e1801]:
+              - button [ref=f27e1802]
+              - generic [ref=f27e1803]: 
+              - button "Choose files" [ref=f27e1805] [cursor=pointer]:
+                - generic [ref=f27e1806]: 
+              - paragraph [ref=f27e1808]: or drop files here
+            - paragraph [ref=f27e1809]: PDF or images, up to 2 MB each
+          - paragraph [ref=f27e1810]:
+            - text: This page is holding
+            - code [ref=f27e1811]: "0"
+            - text: file(s)
+        - generic [ref=f27e1813]:
+          - generic [ref=f27e1815]:
+            - heading "Stepper" [level=3] [ref=f27e1816]
+            - paragraph [ref=f27e1817]: Movement only — the page decides whether Next is allowed
+          - generic [ref=f27e1818]:
+            - list [ref=f27e1819]:
+              - listitem [ref=f27e1820]:
+                - button "Details" [ref=f27e1821] [cursor=pointer]:
+                  - generic [ref=f27e1822]: "1"
+              - listitem [ref=f27e1825]:
+                - button "Documents" [ref=f27e1826] [cursor=pointer]:
+                  - generic [ref=f27e1827]: "2"
+              - listitem [ref=f27e1830]:
+                - button "Review" [ref=f27e1831] [cursor=pointer]:
+                  - generic [ref=f27e1832]: "3"
+            - group "Details" [ref=f27e1835]:
+              - paragraph [ref=f27e1836]: Who the policy is for.
+            - generic [ref=f27e1837]:
+              - button "Back" [disabled] [ref=f27e1839]
+              - button "Next" [ref=f27e1842] [cursor=pointer]
+          - generic [ref=f27e1844]:
+            - button "Block Next" [ref=f27e1846] [cursor=pointer]
+            - button "Complete Review" [ref=f27e1849] [cursor=pointer]
+        - generic [ref=f27e1852]:
+          - generic [ref=f27e1854]:
+            - heading "Order list" [level=3] [ref=f27e1855]
+            - paragraph [ref=f27e1856]: Drag by the grip, or move a row with its buttons
+          - generic [ref=f27e1857]:
+            - generic [ref=f27e1858]:
+              - generic [ref=f27e1859]: Benefit priority
+              - list "Benefit priority" [ref=f27e1860]:
+                - listitem [ref=f27e1861]:
+                  - generic [ref=f27e1862]:
+                    - generic [ref=f27e1863]: 
+                    - generic [ref=f27e1864]: Inpatient
+                  - generic [ref=f27e1865]:
+                    - button "Move Inpatient up" [disabled] [ref=f27e1867]:
+                      - generic [ref=f27e1868]: 
+                    - button "Move Inpatient down" [ref=f27e1870] [cursor=pointer]:
+                      - generic [ref=f27e1871]: 
+                - listitem [ref=f27e1872]:
+                  - generic [ref=f27e1873]:
+                    - generic [ref=f27e1874]: 
+                    - generic [ref=f27e1875]: Outpatient
+                  - generic [ref=f27e1876]:
+                    - button "Move Outpatient up" [ref=f27e1878] [cursor=pointer]:
+                      - generic [ref=f27e1879]: 
+                    - button "Move Outpatient down" [ref=f27e1881] [cursor=pointer]:
+                      - generic [ref=f27e1882]: 
+                - listitem [ref=f27e1883]:
+                  - generic [ref=f27e1884]:
+                    - generic [ref=f27e1885]: 
+                    - generic [ref=f27e1886]: Dental
+                  - generic [ref=f27e1887]:
+                    - button "Move Dental up" [ref=f27e1889] [cursor=pointer]:
+                      - generic [ref=f27e1890]: 
+                    - button "Move Dental down" [ref=f27e1892] [cursor=pointer]:
+                      - generic [ref=f27e1893]: 
+                - listitem [ref=f27e1894]:
+                  - generic [ref=f27e1895]:
+                    - generic [ref=f27e1896]: 
+                    - generic [ref=f27e1897]: Optical
+                  - generic [ref=f27e1898]:
+                    - button "Move Optical up" [ref=f27e1900] [cursor=pointer]:
+                      - generic [ref=f27e1901]: 
+                    - button "Move Optical down" [disabled] [ref=f27e1903]:
+                      - generic [ref=f27e1904]: 
+            - generic [ref=f27e1905]:
+              - generic [ref=f27e1906]: Custom rows
+              - list "Custom rows" [ref=f27e1907]:
+                - listitem [ref=f27e1908]:
+                  - generic [ref=f27e1909]:
+                    - generic [ref=f27e1910]: 
+                    - generic [ref=f27e1911]:
+                      - strong [ref=f27e1912]: 1. Inpatient
+                      - text: Full
+                  - generic [ref=f27e1913]:
+                    - button "Move [object Object] up" [disabled] [ref=f27e1915]:
+                      - generic [ref=f27e1916]: 
+                    - button "Move [object Object] down" [ref=f27e1918] [cursor=pointer]:
+                      - generic [ref=f27e1919]: 
+                - listitem [ref=f27e1920]:
+                  - generic [ref=f27e1921]:
+                    - generic [ref=f27e1922]: 
+                    - generic [ref=f27e1923]:
+                      - strong [ref=f27e1924]: 2. Outpatient
+                      - text: 80%
+                  - generic [ref=f27e1925]:
+                    - button "Move [object Object] up" [ref=f27e1927] [cursor=pointer]:
+                      - generic [ref=f27e1928]: 
+                    - button "Move [object Object] down" [ref=f27e1930] [cursor=pointer]:
+                      - generic [ref=f27e1931]: 
+                - listitem [ref=f27e1932]:
+                  - generic [ref=f27e1933]:
+                    - generic [ref=f27e1934]: 
+                    - generic [ref=f27e1935]:
+                      - strong [ref=f27e1936]: 3. Dental
+                      - text: 50%
+                  - generic [ref=f27e1937]:
+                    - button "Move [object Object] up" [ref=f27e1939] [cursor=pointer]:
+                      - generic [ref=f27e1940]: 
+                    - button "Move [object Object] down" [ref=f27e1942] [cursor=pointer]:
+                      - generic [ref=f27e1943]: 
+                - listitem [ref=f27e1944]:
+                  - generic [ref=f27e1945]:
+                    - generic [ref=f27e1946]: 
+                    - generic [ref=f27e1947]:
+                      - strong [ref=f27e1948]: 4. Optical
+                      - text: Capped
+                  - generic [ref=f27e1949]:
+                    - button "Move [object Object] up" [ref=f27e1951] [cursor=pointer]:
+                      - generic [ref=f27e1952]: 
+                    - button "Move [object Object] down" [disabled] [ref=f27e1954]:
+                      - generic [ref=f27e1955]: 
+          - paragraph [ref=f27e1956]:
+            - text: "Order:"
+            - code [ref=f27e1957]: Inpatient → Outpatient → Dental → Optical
+        - generic [ref=f27e1959]:
+          - generic [ref=f27e1961]:
+            - heading "Chart" [level=3] [ref=f27e1962]
+            - paragraph [ref=f27e1963]: A thin wrapper — Chart.js comes from the app's providers
+          - generic [ref=f27e1964]:
+            - button "bar" [ref=f27e1966] [cursor=pointer]
+            - button "line" [ref=f27e1969] [cursor=pointer]
+            - button "doughnut" [ref=f27e1972] [cursor=pointer]
+            - button "New data" [ref=f27e1975] [cursor=pointer]
+          - img "Claims per month" [ref=f27e1979]
+          - paragraph [ref=f27e1980]:
+            - text: Colours are read from the
+            - code [ref=f27e1981]: "--gm-*"
+            - text: tokens by this page, not by the component.

@@ -68,3 +68,33 @@
 :host(.gm-field-host--invalid) .gm-input__icon {
   color: var(--gm-danger);
 }
+
+/* Drawn here rather than delegated to an icon class: the package bundles no
+   icon font, so a glyph-based spinner would be invisible for a consumer who
+   has not loaded one — and this is the only cue that a search is in flight.
+   A ring with one transparent quadrant reads as spinning; a full ring does
+   not, however fast it turns. */
+.gm-input__spinner {
+  width: 1em;
+  height: 1em;
+  box-sizing: border-box;
+  border: 2px solid var(--gm-gray-300);
+  border-top-color: var(--gm-primary);
+  border-radius: var(--gm-radius-full, 50%);
+  animation: gm-input-spin 0.6s linear infinite;
+}
+
+@keyframes gm-input-spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* The base rule centres the icon with translateY(-50%), which the animation's
+   own transform would drop — so the keyframe restates it, and the static
+   frame needs the rotation origin to match. */
+@media (prefers-reduced-motion: reduce) {
+  .gm-input__spinner {
+    animation-duration: 2.4s;
+  }
+}

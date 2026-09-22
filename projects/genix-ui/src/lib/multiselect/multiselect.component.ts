@@ -97,6 +97,8 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
    */
   readonly selectionLimit = input(undefined, { transform: optionalCount });
 
+  readonly hideMessageRow = input(false, { transform: booleanAttribute });
+
   /**
    * The value as a plain array. `writeValue` may hand us null (a reset control)
    * or a single value, so this normalises before anything reads it — the reason

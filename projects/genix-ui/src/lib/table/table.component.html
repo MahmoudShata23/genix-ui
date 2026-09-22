@@ -10,9 +10,16 @@
     [showColumnChooser]="columnChooserVisible()"
     [minVisibleColumns]="minVisibleColumns()"
     [columnChooserLabel]="translate()('selectColumns')"
+    [showSearch]="searchVisible()"
+    [searchPlaceholder]="searchPlaceholder()"
+    [searchAriaLabel]="searchPlaceholder()"
+    [searchLoadingLabel]="translate()('searching')"
+    [searchTerm]="globalSearch()"
+    [searchDebounce]="filterDebounce()"
     [disabled]="loading()"
     (visibleFieldsChange)="onVisibleFieldsChange($event)"
     (columnChooserRejected)="columnChooserRejected.emit($event)"
+    (searchChange)="onToolbarSearch($event)"
   >
     <gm-button
       gmTableToolbarEnd

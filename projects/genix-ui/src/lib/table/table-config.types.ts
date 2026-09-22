@@ -45,6 +45,19 @@ export interface TableModel<T> {
   showColumnChooser?: boolean;
 
   /**
+   * Offers a global search box in the toolbar. Defaults to **false**, unlike
+   * the other toolbar switches: the term is reported on `filterChange` as
+   * `globalSearch` and, under the default `filterMode: 'server'`, only the
+   * host's endpoint can act on it. Defaulting it on would put a box that
+   * appears broken on every existing grid. Set `filterMode: 'client'` and the
+   * table matches the term itself.
+   */
+  showSearch?: boolean;
+
+  /** Placeholder for the search box. Defaults to the `search` label key. */
+  searchPlaceholder?: string;
+
+  /**
    * Lets the user drag header cells to reorder the columns. Config mode applies
    * the new order itself — the config object is never rewritten — and still
    * reports it on `columnReorder`. Defaults to false.

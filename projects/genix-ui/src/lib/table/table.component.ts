@@ -243,6 +243,16 @@ export class GmTableComponent<T> {
 
   readonly pageChange = output<GmTableRequest>();
 
+  /**
+   * The toolbar's settled search term, report-only — like `columnReorder`,
+   * the table has already acted on it (folded into `filterChange` as
+   * `globalSearch`, and matched locally under `filterMode: 'client'`), so a
+   * consumer must not treat this as a second fetch trigger. It exists for a
+   * host that wants the raw term itself: to reflect it in a URL, log it,
+   * drive something the request payload does not need.
+   */
+  readonly searchChange = output<string>();
+
   /** The rejected change's floor, for a consumer that wants to explain it. */
   readonly columnChooserRejected = output<number>();
 
@@ -253,9 +263,9 @@ export class GmTableComponent<T> {
     () => this.configMode() && this.tableConfig()?.showToolbar !== false,
   );
 
-  protected readonly configColumnsSource = computed<
-    readonly TableColumn<T>[]
-  >(() => this.tableConfig()?.columns ?? []);
+  protected readonly configColumnsSource = computed<readonly TableColumn<T>[]>(
+    () => this.tableConfig()?.columns ?? [],
+  );
 
   /** Config columns mapped onto the table's own column model. */
   protected readonly configDataColumns = computed<GmConfigColumn<T>[]>(() => {
@@ -508,6 +518,7 @@ export class GmTableComponent<T> {
   /** Reports the live filters as descriptors, back at the first page. */
   private emitConfigFilters(): void {
     this.currentPage.set(1);
+    const term = this.activeGlobalSearch().trim();
     this.filterChange.emit({
       filters: gmToFilterDescriptors(
         this.activeFilters(),
@@ -515,6 +526,8 @@ export class GmTableComponent<T> {
       ),
       pageNumber: 1,
       pageSize: this.currentPageSize(),
+      // Omitted rather than sent empty, so a cleared box posts no key at all.
+      ...(term ? { globalSearch: term } : {}),
     });
   }
 
@@ -522,6 +535,24 @@ export class GmTableComponent<T> {
   protected readonly columnChooserVisible = computed(
     () => this.tableConfig()?.showColumnChooser !== false,
   );
+
+  /** The toolbar's search box — opt-in; see `GmTableConfig.showSearch`. */
+  protected readonly searchVisible = computed(
+    () => this.tableConfig()?.showSearch !== false,
+  );
+
+  protected readonly searchPlaceholder = computed(
+    () => this.tableConfig()?.searchPlaceholder ?? this.translate()("search"),
+  );
+
+  /**
+   * A settled term from the toolbar's own box. Already debounced there, so it
+   * is applied without a second delay.
+   */
+  protected onToolbarSearch(term: string): void {
+    this.setGlobalSearch(term, { debounce: false });
+    this.searchChange.emit(term);
+  }
 
   protected onVisibleFieldsChange(fields: string[]): void {
     // A column the chooser never offered is not in the control's value, so it
@@ -533,9 +564,7 @@ export class GmTableComponent<T> {
   }
 
   /** The config column a rendered column came from, for the cell renderer. */
-  protected configColumnOf(
-    column: GmTableColumn<T>,
-  ): TableColumn<T> | null {
+  protected configColumnOf(column: GmTableColumn<T>): TableColumn<T> | null {
     return (column as GmConfigColumn<T>).source ?? null;
   }
 
@@ -1614,8 +1643,13 @@ export class GmTableComponent<T> {
    * A user keystroke in the consumer's search box. Debounced with the same
    * `filterDebounce` the column filters use, then folded into the one query
    * event — so a search is not a second request path.
+   *
+   * Pass `{ debounce: false }` for a term that has *already* settled — what
+   * `gm-table-toolbar`'s `searchChange` reports, since that box debounces in
+   * the field. Leaving it on would make the two delays add up, so the term
+   * would land long after the user stopped typing.
    */
-  setGlobalSearch(term: string): void {
+  setGlobalSearch(term: string, options: { debounce?: boolean } = {}): void {
     if (this.globalSearchTimer !== undefined) {
       clearTimeout(this.globalSearchTimer);
       this.globalSearchTimer = undefined;
@@ -1624,9 +1658,12 @@ export class GmTableComponent<T> {
     const apply = () => {
       this.userGlobalSearch.set(term);
       this.emitQueryFromFirstPage();
+      if (this.configMode()) {
+        this.emitConfigFilters();
+      }
     };
 
-    if (this.filterDebounce() > 0) {
+    if (options.debounce !== false && this.filterDebounce() > 0) {
       this.globalSearchTimer = setTimeout(() => {
         this.globalSearchTimer = undefined;
         apply();

@@ -142,7 +142,7 @@ export class GmTableToolbarComponent<T> {
    * toolbar acts on it — so a bar that showed the box by default would put a
    * dead control on every existing table until its host wired the output up.
    */
-  readonly showSearch = input(true, { transform: booleanAttribute });
+  readonly showSearch = input(false, { transform: booleanAttribute });
 
   readonly searchPlaceholder = input<string>("Search");
 

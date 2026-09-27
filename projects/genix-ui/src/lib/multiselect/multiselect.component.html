@@ -33,13 +33,22 @@
     } @else if (display() === 'chip') {
       <span class="gm-multiselect__chips">
         @for (option of selectedOptions(); track $index) {
-          <gm-chip
-            severity="primary"
-            [label]="labelOf(option)"
-            [removable]="!readOnly() && !isDisabled()"
-            [removeAriaLabel]="'Remove ' + labelOf(option)"
-            (remove)="removeValue(option)"
-          />
+          @if (iconFor(option); as icon) {
+            <gm-chip
+              [severity]="severityFor(option)"
+              [icon]="icon"
+              [label]="labelOf(option)"
+              [removable]="false"
+            />
+          } @else {
+            <gm-chip
+              [severity]="severityFor(option)"
+              [label]="labelOf(option)"
+              [removable]="!readOnly() && !isDisabled()"
+              [removeAriaLabel]="'Remove ' + labelOf(option)"
+              (remove)="removeValue(option)"
+            />
+          }
         }
       </span>
     } @else {
@@ -100,6 +109,10 @@
           (input)="onFilterInput($event)"
         />
       </div>
+    }
+
+    @if (headerTemplate(); as header) {
+      <ng-container [ngTemplateOutlet]="header.template" />
     }
 
     @if (showToggleAll() && visibleOptions().length) {

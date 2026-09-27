@@ -9,6 +9,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  contentChild,
   input,
   numberAttribute,
 } from '@angular/core';
@@ -17,6 +18,8 @@ import { GmDropdownBase, type GmDropdownOption } from '../core/dropdown-base';
 import { gmUniqueId } from '../core/unique-id';
 import { GmChipComponent } from '../chip/chip.component';
 import { GmSpinnerComponent } from '../spinner/spinner.component';
+import type { GmSeverity } from '../core/types';
+import { GmMultiselectHeaderDirective } from './multiselect-header.directive';
 
 /** How the current selection is summarised on the trigger. */
 export type GmMultiselectDisplay = 'menu' | 'chip';
@@ -98,6 +101,27 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
   readonly selectionLimit = input(undefined, { transform: optionalCount });
 
   readonly hideMessageRow = input(false, { transform: booleanAttribute });
+
+  /**
+   * Per-chip icon class, e.g. for marking a locked/mandatory selection —
+   * `(option) => isLocked(option) ? 'pi pi-lock' : undefined`. Rendered
+   * instead of the chip's own dismiss button when it returns a value, so a
+   * locked chip cannot be removed and reads as locked rather than removable.
+   */
+  readonly chipIcon = input<(option: GmDropdownOption) => string | undefined>();
+
+  /** Per-option severity for the `chip` display. Defaults to `primary`. */
+  readonly chipSeverity = input<(option: GmDropdownOption) => GmSeverity>();
+
+  protected readonly headerTemplate = contentChild(GmMultiselectHeaderDirective);
+
+  protected iconFor(option: GmDropdownOption): string | undefined {
+    return this.chipIcon()?.(option);
+  }
+
+  protected severityFor(option: GmDropdownOption): GmSeverity {
+    return this.chipSeverity()?.(option) ?? 'primary';
+  }
 
   /**
    * The value as a plain array. `writeValue` may hand us null (a reset control)

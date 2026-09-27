@@ -64,6 +64,34 @@
   }
 }
 
+.gm-menu__item--danger {
+  color: var(--gm-danger);
+
+  &:hover:not(:disabled) {
+    background: var(--gm-danger-light);
+    color: var(--gm-danger);
+  }
+
+  &:focus-visible {
+    background: var(--gm-danger-light);
+    color: var(--gm-danger);
+  }
+}
+
+.gm-menu__item--success {
+  color: var(--gm-success);
+
+  &:hover:not(:disabled) {
+    background: var(--gm-success-light);
+    color: var(--gm-success);
+  }
+
+  &:focus-visible {
+    background: var(--gm-success-light);
+    color: var(--gm-success);
+  }
+}
+
 .gm-menu__icon {
   flex: 0 0 auto;
   font-size: var(--gm-font-size-sm);

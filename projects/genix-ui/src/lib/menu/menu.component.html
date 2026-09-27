@@ -16,7 +16,7 @@
                come from the platform. -->
           <button
             type="button"
-            class="gm-menu__item"
+            [class]="item.severity ? 'gm-menu__item gm-menu__item--' + item.severity : 'gm-menu__item'"
             role="menuitem"
             tabindex="-1"
             [disabled]="item.disabled"

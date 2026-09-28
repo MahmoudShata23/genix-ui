@@ -18,6 +18,7 @@ export * from './lib/radio';
 export * from './lib/card';
 export * from './lib/badge';
 export * from './lib/chip';
+export * from './lib/divider';
 export * from './lib/spinner';
 export * from './lib/tooltip';
 export * from './lib/dialog';

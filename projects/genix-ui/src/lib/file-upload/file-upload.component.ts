@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   booleanAttribute,
+  effect,
   input,
   output,
   signal,
@@ -91,6 +92,16 @@ export class GmFileUploadComponent {
 
   readonly ariaLabel = input<string>();
 
+  /**
+   * Seeds the selection once, e.g. files already attached in an edit/resubmit
+   * flow. Only applied on the first non-empty value it receives — after that,
+   * `selected` is owned by user interaction (`ingest`/`remove`/`clear`), not by
+   * this input, so a later change here is not re-applied. Fires `filesSelected`
+   * the same as any other change, so a caller only listening on that output
+   * still sees the seeded selection.
+   */
+  readonly initialFiles = input<readonly File[]>([]);
+
   /** The complete selection after every change. */
   readonly filesSelected = output<File[]>();
 
@@ -115,6 +126,20 @@ export class GmFileUploadComponent {
   protected readonly inputId = gmUniqueId('gm-file-upload');
 
   protected readonly labelId = `${this.inputId}-label`;
+
+  private seededInitialFiles = false;
+
+  constructor() {
+    effect(() => {
+      const initial = this.initialFiles();
+      if (this.seededInitialFiles || !initial.length) {
+        return;
+      }
+      this.seededInitialFiles = true;
+      this.selected.set(this.multiple() ? [...initial] : [initial[initial.length - 1]]);
+      this.emitSelection();
+    });
+  }
 
   /** Opens the file dialog. The input itself is hidden from the tab order. */
   protected browse(): void {

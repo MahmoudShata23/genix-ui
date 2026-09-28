@@ -1,3 +1,5 @@
+import type { GmSeverity } from '../core/types';
+
 /**
  * One entry in a `gm-menu`.
  *
@@ -17,6 +19,9 @@ export interface GmMenuItem {
 
   /** A horizontal rule instead of an entry. Everything else is ignored. */
   separator?: boolean;
+
+  /** Tints the entry to match a semantic action, e.g. a destructive delete. */
+  severity?: GmSeverity;
 
   /** Run when the entry is activated. Receives the item itself. */
   command?: (item: GmMenuItem) => void;

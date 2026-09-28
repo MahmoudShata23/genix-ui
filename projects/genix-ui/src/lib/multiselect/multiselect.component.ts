@@ -17,6 +17,7 @@ import { GmDropdownBase, type GmDropdownOption } from '../core/dropdown-base';
 import { gmUniqueId } from '../core/unique-id';
 import { GmChipComponent } from '../chip/chip.component';
 import { GmSpinnerComponent } from '../spinner/spinner.component';
+import { GmTooltipDirective } from '../tooltip/tooltip.directive';
 
 /** How the current selection is summarised on the trigger. */
 export type GmMultiselectDisplay = 'menu' | 'chip';
@@ -57,6 +58,7 @@ function optionalCount(
   imports: [
     GmChipComponent,
     GmSpinnerComponent,
+    GmTooltipDirective,
     NgTemplateOutlet,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
@@ -97,8 +99,6 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
    */
   readonly selectionLimit = input(undefined, { transform: optionalCount });
 
-  readonly hideMessageRow = input(false, { transform: booleanAttribute });
-
   /**
    * The value as a plain array. `writeValue` may hand us null (a reset control)
    * or a single value, so this normalises before anything reads it — the reason
@@ -131,6 +131,36 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
       ? labels.join(', ')
       : this.selectedItemsLabel().replace('{0}', String(labels.length));
   });
+
+  /**
+   * Whether the closed trigger's own text/chips already show every selected
+   * label. Past `maxSelectedLabels`, `menu` display collapses to a count and
+   * `chip` display collapses the rest into a "+N" badge — either way the full
+   * list is no longer visible at a glance, so it needs a tooltip instead.
+   */
+  protected readonly hasHiddenSelections = computed(
+    () => this.selectedLabels().length > this.maxSelectedLabels(),
+  );
+
+  /** Full selection, comma-joined — the tooltip content for a closed trigger
+   * that is not showing every label. */
+  protected readonly allSelectedLabelsText = computed(() =>
+    this.selectedLabels().join(', '),
+  );
+
+  /**
+   * Chips actually drawn in `display="chip"` mode. Capped at the same
+   * `maxSelectedLabels` threshold `menu` display uses for its count summary,
+   * so the trigger never grows without bound as the selection does — the rest
+   * collapse into one "+N" badge (`overflowChipCount`).
+   */
+  protected readonly visibleChipOptions = computed(() =>
+    this.selectedOptions().slice(0, this.maxSelectedLabels()),
+  );
+
+  protected readonly overflowChipCount = computed(
+    () => this.selectedOptions().length - this.visibleChipOptions().length,
+  );
 
   protected readonly hasValue = computed(
     () => this.selectedValues().length > 0,

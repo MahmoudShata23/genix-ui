@@ -106,3 +106,31 @@ describe('gm-table config mode search', () => {
     expect(host.searchTerms).toEqual(['beir']);
   }));
 });
+
+@Component({
+  standalone: true,
+  imports: [GmTableComponent],
+  template: `<gm-table [records]="records" [tableConfig]="tableConfig" />`,
+})
+class DefaultHostComponent {
+  readonly records: Row[] = ROWS;
+
+  // No `showSearch` at all — the point of this fixture.
+  readonly tableConfig: TableModel<Row> = {
+    columns: [{ field: 'name', header: 'name' }],
+  };
+}
+
+describe('gm-table config mode search — default', () => {
+  it('renders no search box when the config omits showSearch', async () => {
+    await TestBed.configureTestingModule({
+      imports: [DefaultHostComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(DefaultHostComponent);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.gm-table-toolbar__search input'),
+    ).toBeNull();
+  });
+});

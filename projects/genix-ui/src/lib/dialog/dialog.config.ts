@@ -1,3 +1,5 @@
+import { Injectable } from '@angular/core';
+
 /**
  * Everything a dialog needs to know about itself.
  *
@@ -11,6 +13,10 @@
  * instance it provides, so the container and the content both read settled
  * values rather than re-deriving `?? true` in each place.
  *
+ * Root-provided with an empty instance so a component shared between a screen
+ * and a dialog can inject this unconditionally — outside a dialog it just
+ * reads an all-`undefined` config instead of a `NullInjectorError`.
+ *
  * ```ts
  * const ref = dialogService.open(EditUserComponent, {
  *   header: 'Edit User',
@@ -22,6 +28,7 @@
  * @template D Type of `data`. Defaults to `any` so `config.data` stays as
  *   permissive as the PrimeNG original when a caller does not name a type.
  */
+@Injectable({ providedIn: 'root' })
 export class GmDialogConfig<D = any> {
   /** Payload handed to the opened component. Read as `config.data`. */
   data?: D;

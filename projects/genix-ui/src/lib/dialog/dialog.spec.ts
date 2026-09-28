@@ -283,3 +283,30 @@ describe('GmDialogService', () => {
     expect(query('.content')).not.toBeNull();
   });
 });
+
+/**
+ * `ContentComponent` above constructor-injects `GmDialogRef` and
+ * `GmDialogConfig` the way a PrimeNG-migrated component does. Some of those
+ * components are also rendered as a normal routed screen, outside any dialog —
+ * this must not throw a `NullInjectorError` there.
+ */
+describe('GmDialogRef and GmDialogConfig outside a dialog', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+  });
+
+  it('resolve to harmless root defaults instead of throwing', () => {
+    expect(() => TestBed.inject(GmDialogRef)).not.toThrow();
+    expect(() => TestBed.inject(GmDialogConfig)).not.toThrow();
+
+    expect(TestBed.inject(GmDialogRef).isClosed).toBeFalse();
+    expect(TestBed.inject(GmDialogConfig).data).toBeUndefined();
+  });
+
+  it('makes close() on the root-provided ref a no-op', () => {
+    const ref = TestBed.inject(GmDialogRef);
+
+    expect(() => ref.close()).not.toThrow();
+    expect(ref.isClosed).toBeTrue();
+  });
+});

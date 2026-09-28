@@ -256,12 +256,117 @@
   text-align: center;
 }
 
-.gm-table__state gm-spinner {
+/* The status announcement is for assistive technology only — its row must not
+   take up any visible space next to the skeleton rows that follow it. */
+.gm-table__sr-only-row > td {
+  padding: 0;
+  border: 0;
+}
+
+/* Placeholder rows shown in place of the real ones while `loading` is on.
+   `aria-hidden` on the row: the announcement is the sr-only status text
+   above, not these decorative bars. */
+.gm-table__row--skeleton {
+  pointer-events: none;
+}
+
+.gm-table__skeleton-bar {
+  display: block;
+  width: 80%;
+  height: 0.85em;
+  border-radius: var(--gm-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--gm-gray-100) 25%,
+    var(--gm-gray-200) 37%,
+    var(--gm-gray-100) 63%
+  );
+  background-size: 400% 100%;
+  animation: gm-table-skeleton-shimmer 1.4s ease infinite;
+}
+
+.gm-table__skeleton-bar--select {
+  width: 1rem;
+  height: 1rem;
+}
+
+@keyframes gm-table-skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* ==========================================================================
+   Row expansion
+   --------------------------------------------------------------------------
+   A chevron toggle column, and the full-width row it opens underneath — the
+   same shape `gm-tree`'s toggle uses, so the two controls feel like one
+   family.
+   ========================================================================== */
+
+.gm-table__th--expand,
+.gm-table__td--expand {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.gm-table__expand-toggle {
+  appearance: none;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gm-radius-full);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--gm-gray-100);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+}
+
+.gm-table__expand-chevron {
+  width: 0.4rem;
+  height: 0.4rem;
+  border: solid var(--gm-gray-500);
+  border-width: 0 2px 2px 0;
+  transform: rotate(-45deg);
+  transition: transform var(--gm-transition-fast);
+}
+
+.gm-table__expand-chevron--expanded {
+  transform: rotate(45deg);
+}
+
+.gm-table__expansion-row {
+  --gm-table-row-bg: var(--gm-gray-50);
+}
+
+.gm-table__expansion-cell {
+  padding: var(--gm-space-4);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gm-table__row {
+    transition: none;
+  }
+
+  .gm-table__skeleton-bar {
+    animation: none;
+  }
+
+  .gm-table__expand-chevron {
     transition: none;
   }
 }

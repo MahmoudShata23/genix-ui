@@ -102,6 +102,7 @@ class HostComponent {
     showColumnChooser: this.chooser(),
     reorderableColumns: this.reorder(),
     actionsPosition: this.actionsEdge(),
+    actionsFrozen: true,
   }));
 }
 

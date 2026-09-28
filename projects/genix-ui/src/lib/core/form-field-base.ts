@@ -63,6 +63,13 @@ export abstract class GmFormFieldBase<T>
   /** Accessible name. Only needed when there is no `label`. */
   readonly ariaLabel = input<string>();
 
+  /**
+   * Hides the hint/error row entirely — for compact contexts (e.g. a toolbar
+   * filter) where a message is never expected and its reserved space would
+   * just be dead air.
+   */
+  readonly hideMessageRow = input(false, { transform: booleanAttribute });
+
   /** Emitted on every keystroke, for use without a form control. */
   readonly valueChange = output<T | null>();
 
@@ -141,6 +148,26 @@ export abstract class GmFormFieldBase<T>
 
   protected readonly hintElementId = this.hintId;
   protected readonly errorElementId = this.errorId;
+
+  /**
+   * Text for the single message slot: the error when present, else the hint.
+   * Kept as one slot rather than swapping elements so the row never grows or
+   * shrinks when validation state changes.
+   */
+  protected readonly messageText = computed(() => {
+    const error = this.errorText();
+    if (error) {
+      return error;
+    }
+    return this.showHint() ? this.hint() ?? '' : '';
+  });
+
+  protected readonly messageElementId = computed(() => {
+    if (this.errorText()) {
+      return this.errorElementId();
+    }
+    return this.showHint() ? this.hintElementId() : null;
+  });
 
   private onChange: (value: T | null) => void = () => {};
   private onTouched: () => void = () => {};

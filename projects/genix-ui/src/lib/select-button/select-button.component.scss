@@ -103,6 +103,20 @@
   color: var(--gm-danger);
 }
 
+/* Always rendered (see the template), so this row's height never changes
+   with validation state — otherwise the field grows, and pushes whatever is
+   below it down, the moment an error first appears. Declared after
+   `.gm-field__hint`/`.gm-field__error` so its sizing wins on the element that
+   also carries one of those two classes for color. */
+.gm-field__message {
+  display: block;
+  min-height: 1.5em;
+  margin-block-start: var(--gm-space-1);
+  font-family: var(--gm-font-family);
+  font-size: var(--gm-font-size-sm);
+  line-height: 1.5;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gm-select-button__option {
     transition: none;

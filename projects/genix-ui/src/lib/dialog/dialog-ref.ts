@@ -1,4 +1,5 @@
 import { OverlayRef } from '@angular/cdk/overlay';
+import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 /**
@@ -14,9 +15,15 @@ import { Observable, Subject } from 'rxjs';
  * save() { this.ref.close(this.form.value); }
  * ```
  *
+ * Root-provided with a harmless default (no `overlayRef`, never closed) so a
+ * component that is shared between a screen and a dialog can inject this
+ * unconditionally: outside a dialog it just gets an inert ref instead of a
+ * `NullInjectorError`, and `close()` on it is a no-op.
+ *
  * @template R Type of the result passed to `close()`.
  * @template D Type of `data`, mirrored from the config for convenience.
  */
+@Injectable({ providedIn: 'root', useFactory: () => new GmDialogRef() })
 export class GmDialogRef<R = any, D = any> {
   private readonly closeStream = new Subject<R | undefined>();
   private closed = false;
@@ -28,7 +35,7 @@ export class GmDialogRef<R = any, D = any> {
   readonly onClose: Observable<R | undefined> = this.closeStream.asObservable();
 
   constructor(
-    private readonly overlayRef: OverlayRef,
+    private readonly overlayRef?: OverlayRef,
     /** The same object as `config.data`, for content that reads it off the ref. */
     readonly data?: D,
   ) {}
@@ -56,7 +63,7 @@ export class GmDialogRef<R = any, D = any> {
       return;
     }
     this.closed = true;
-    this.overlayRef.dispose();
+    this.overlayRef?.dispose();
     this.closeStream.next(result);
     this.closeStream.complete();
   }

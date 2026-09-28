@@ -31,8 +31,11 @@
     @if (!hasValue()) {
       <span class="gm-dropdown__placeholder">{{ placeholder() }}</span>
     } @else if (display() === 'chip') {
-      <span class="gm-multiselect__chips">
-        @for (option of selectedOptions(); track $index) {
+      <span
+        class="gm-multiselect__chips"
+        [gmTooltip]="hasHiddenSelections() ? allSelectedLabelsText() : null"
+      >
+        @for (option of visibleChipOptions(); track $index) {
           <gm-chip
             severity="primary"
             [label]="labelOf(option)"
@@ -41,9 +44,19 @@
             (remove)="removeValue(option)"
           />
         }
+        @if (overflowChipCount() > 0) {
+          <gm-chip
+            severity="secondary"
+            [label]="'+' + overflowChipCount()"
+            [ariaLabel]="overflowChipCount() + ' more selected'"
+          />
+        }
       </span>
     } @else {
-      <span class="gm-dropdown__value">{{ summary() }}</span>
+      <span
+        class="gm-dropdown__value"
+        [gmTooltip]="hasHiddenSelections() ? allSelectedLabelsText() : null"
+      >{{ summary() }}</span>
     }
 
     <span class="gm-dropdown__actions">
@@ -76,10 +89,10 @@
       class="gm-field__message"
       [class.gm-field__error]="!!errorText()"
       [class.gm-field__hint]="!errorText() && showHint()"
-      [attr.id]="errorText() ? errorElementId() : showHint() ? hintElementId() : null"
+      [attr.id]="messageElementId()"
       [attr.role]="errorText() ? 'alert' : null"
     >
-      {{ errorText() || (showHint() ? hint() : '') }}
+      {{ messageText() }}
     </small>
   }
 </div>

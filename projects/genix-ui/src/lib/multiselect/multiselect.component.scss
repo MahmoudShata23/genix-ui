@@ -6,25 +6,24 @@
 
 @include dropdown.gm-dropdown-shell;
 
-/* Always rendered (see the template) with the same font-size/line-height/
-   margin as `.gm-field__error` and `.gm-field__hint`, so its box reserves
-   the message row's height whether or not there is a message — otherwise
-   the field grows (and pushes content below it down) the moment validation
-   fails. */
-.gm-field__message {
-  display: block;
-  min-height: 1.4em;
-  margin-top: var(--gm-space-1);
-  font-size: var(--gm-font-size-xs);
-  line-height: 1.4;
-}
-
-/* Chips wrap inside the trigger, which therefore cannot stay a single line. */
+/* Chips wrap inside the trigger, which therefore cannot stay a single line.
+   Without a height of their own, `gm-chip`'s default vertical padding stacks
+   on top of the trigger's, so a chip row ends up taller than a plain-text
+   row of the same field. Pinning the chip to the field's own line-height
+   (via the custom properties `gm-chip` exposes for this) keeps every
+   multiselect the same height, chips or not. */
 .gm-multiselect__chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--gm-space-1);
   min-width: 0;
+
+  gm-chip {
+    --gm-chip-height: calc(1.5 * var(--gm-field-font-size));
+    --gm-chip-padding-y: 0px;
+    --gm-chip-padding-x: var(--gm-space-2);
+  }
 }
 
 :host(.gm-multiselect-host) .gm-dropdown__trigger {

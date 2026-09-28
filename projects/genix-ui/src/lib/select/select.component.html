@@ -73,10 +73,10 @@
       class="gm-field__message"
       [class.gm-field__error]="!!errorText()"
       [class.gm-field__hint]="!errorText() && showHint()"
-      [attr.id]="errorText() ? errorElementId() : showHint() ? hintElementId() : null"
+      [attr.id]="messageElementId()"
       [attr.role]="errorText() ? 'alert' : null"
     >
-      {{ errorText() || (showHint() ? hint() : '') }}
+      {{ messageText() }}
     </small>
   }
 </div>

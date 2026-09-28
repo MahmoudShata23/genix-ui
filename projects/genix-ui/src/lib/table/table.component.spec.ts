@@ -23,6 +23,7 @@ interface User {
       [data]="users()"
       [columns]="columns"
       [loading]="loading()"
+      [skeletonRows]="skeletonRows()"
       [selectionMode]="mode()"
       [(selection)]="selected"
       [sortMode]="sortMode()"
@@ -43,6 +44,7 @@ class HostComponent {
     { id: 3, name: 'Bea', age: 30 },
   ]);
   readonly loading = signal(false);
+  readonly skeletonRows = signal(5);
   readonly mode = signal<'single' | 'multiple' | null>(null);
   readonly sortMode = signal<'client' | 'server'>('client');
   selected: User[] = [];
@@ -291,11 +293,33 @@ describe('gm-table', () => {
 
   // ── loading / empty ───────────────────────────────────────────────────
 
-  it('shows the spinner while loading and no empty state', () => {
+  it('shows skeleton placeholder rows while loading, and no empty state', () => {
     host.loading.set(true);
     fixture.detectChanges();
-    expect(q('gm-spinner')).toBeTruthy();
+    expect(qa('.gm-table__row--skeleton').length).toBe(5);
     expect(fixture.nativeElement.textContent).not.toContain('No records found');
+  });
+
+  it('draws as many placeholder rows as skeletonRows says', () => {
+    host.skeletonRows.set(2);
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(qa('.gm-table__row--skeleton').length).toBe(2);
+  });
+
+  it('announces the loading state to assistive technology without an extra visible row', () => {
+    host.loading.set(true);
+    fixture.detectChanges();
+
+    const status = q('.gm-table__sr-only-row [role="status"]') as HTMLElement;
+    expect(status.textContent?.trim()).toBe('Loading records');
+    expect(status.getAttribute('aria-live')).toBe('polite');
+    // The skeleton rows are decorative; only the status text is announced.
+    expect(
+      qa('.gm-table__row--skeleton').every(
+        (row) => row.getAttribute('aria-hidden') === 'true',
+      ),
+    ).toBeTrue();
   });
 
   it('keeps the header visible while loading', () => {
@@ -308,7 +332,7 @@ describe('gm-table', () => {
     host.users.set([]);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No records found');
-    expect(q('gm-spinner')).toBeNull();
+    expect(q('.gm-table__row--skeleton')).toBeNull();
 
     host.loading.set(true);
     fixture.detectChanges();

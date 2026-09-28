@@ -108,6 +108,21 @@ describe('gm-input / gm-textarea reactive forms integration', () => {
     expect(input().getAttribute('aria-describedby')).toBe(error.id);
   });
 
+  it('always renders the message row, even with no error or hint, so the field height stays fixed once one appears', () => {
+    const message = fixture.nativeElement.querySelector(
+      'gm-input .gm-field__message',
+    ) as HTMLElement;
+    expect(message).not.toBeNull();
+    expect(message.textContent?.trim()).toBe('');
+
+    host.errorText = 'Name is required';
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('gm-input .gm-field__message'),
+    ).toBe(message);
+  });
+
   it('tracks the filled state', () => {
     const hostEl = fixture.nativeElement.querySelector('gm-input');
     expect(hostEl.classList).not.toContain('gm-field-host--filled');
@@ -123,6 +138,33 @@ describe('gm-input / gm-textarea reactive forms integration', () => {
     host.notes.setValue('written back');
     fixture.detectChanges();
     expect(textarea().value).toBe('written back');
+  });
+
+  it('also reserves the message row for gm-textarea', () => {
+    expect(
+      fixture.nativeElement.querySelector('gm-textarea .gm-field__message'),
+    ).not.toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [GmInputComponent],
+  template: `<gm-input label="Compact" [hideMessageRow]="true" />`,
+})
+class HiddenMessageRowHostComponent {}
+
+describe('gm-input hideMessageRow', () => {
+  it('omits the message row entirely', async () => {
+    await TestBed.configureTestingModule({
+      imports: [HiddenMessageRowHostComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(HiddenMessageRowHostComponent);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.gm-field__message'),
+    ).toBeNull();
   });
 });
 

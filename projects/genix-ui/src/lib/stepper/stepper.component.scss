@@ -15,9 +15,10 @@
 .gm-stepper__header {
   display: flex;
   align-items: center;
+  justify-content: center;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: var(--gm-space-6) var(--gm-space-4);
 }
 
 .gm-stepper__step {
@@ -40,9 +41,9 @@
 
   display: flex;
   align-items: center;
-  gap: var(--gm-space-2);
+  gap: var(--gm-space-3);
 
-  padding: var(--gm-space-2);
+  padding: var(--gm-space-2) var(--gm-space-3);
   border-radius: var(--gm-radius-md);
 
   color: var(--gm-gray-500);
@@ -51,10 +52,11 @@
   font-weight: var(--gm-font-weight-medium);
   cursor: pointer;
 
-  transition: color var(--gm-transition-fast);
+  transition: color var(--gm-transition-fast), background var(--gm-transition-fast);
 
   &:hover:not(:disabled) {
     color: var(--gm-primary);
+    background: var(--gm-gray-50);
   }
 
   &:focus-visible {
@@ -74,25 +76,50 @@
   justify-content: center;
   flex: none;
 
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 36px;
+  height: 36px;
 
-  border: 1px solid var(--gm-gray-300);
+  border: 2px solid var(--gm-gray-300);
   border-radius: var(--gm-radius-full);
   background: var(--gm-white);
 
-  font-size: var(--gm-font-size-xs);
-  font-weight: var(--gm-font-weight-semibold);
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-bold);
   line-height: 1;
+  color: var(--gm-gray-400);
 
-  transition: background-color var(--gm-transition-fast),
-    border-color var(--gm-transition-fast), color var(--gm-transition-fast);
+  transition: all var(--gm-transition-base);
+}
+
+/* A count like "2/5" is wider than a single digit — shrink to fit the same
+   36px circle rather than growing the circle just for this one step. */
+.gm-stepper__marker--text {
+  font-size: var(--gm-font-size-xs);
+  letter-spacing: -0.02em;
+}
+
+.gm-stepper__info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-align: left;
 }
 
 .gm-stepper__label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: var(--gm-font-weight-semibold);
+}
+
+.gm-stepper__sublabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 1px;
+  font-size: var(--gm-font-size-xs);
+  font-weight: var(--gm-font-weight-medium);
+  color: var(--gm-gray-400);
 }
 
 .gm-stepper__step--active {
@@ -104,6 +131,7 @@
     border-color: var(--gm-primary);
     background: var(--gm-primary);
     color: var(--gm-white);
+    box-shadow: 0 0 0 4px rgba(11, 110, 168, 0.15);
   }
 }
 
@@ -117,8 +145,9 @@
 
 .gm-stepper__separator {
   flex: 1 1 auto;
-  min-width: var(--gm-space-4);
-  height: 1px;
+  min-width: 40px;
+  max-width: 80px;
+  height: 2px;
   margin: 0 var(--gm-space-2);
   background: var(--gm-gray-200);
 }
@@ -137,7 +166,7 @@
 
 /* Narrow viewports: the labels are what has to go, not the markers. */
 @media (max-width: 40rem) {
-  .gm-stepper__label {
+  .gm-stepper__info {
     display: none;
   }
 }

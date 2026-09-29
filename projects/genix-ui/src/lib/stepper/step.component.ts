@@ -40,8 +40,19 @@ function optionalBoolean(
 export class GmStepComponent {
   readonly label = input<string>();
 
+  /** Secondary line rendered under `label` in the stepper header. */
+  readonly sublabel = input<string>();
+
   /** Icon class for the marker, in place of the step number. */
   readonly icon = input<string>();
+
+  /**
+   * Text shown in the marker instead of the step number (e.g. "2/5"), for a
+   * step whose "done-ness" is itself a count rather than a single pass/fail —
+   * a review/summary step aggregating several others. Ignored once the step
+   * is `completed`, which still shows the usual checkmark.
+   */
+  readonly markerText = input<string>();
 
   readonly disabled = input(false, { transform: booleanAttribute });
 

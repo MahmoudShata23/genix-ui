@@ -19,16 +19,27 @@
         [disabled]="step.disabled()"
         (click)="select(step)"
       >
-        <span class="gm-stepper__marker" aria-hidden="true">
+        <span
+          class="gm-stepper__marker"
+          [class.gm-stepper__marker--text]="!step.isCompleted() && !!step.markerText()"
+          aria-hidden="true"
+        >
           @if (step.isCompleted()) {
             <i class="pi pi-check"></i>
+          } @else if (step.markerText()) {
+            {{ step.markerText() }}
           } @else if (step.icon()) {
             <i [class]="step.icon()"></i>
           } @else {
             {{ index + 1 }}
           }
         </span>
-        <span class="gm-stepper__label">{{ step.label() }}</span>
+        <span class="gm-stepper__info">
+          <span class="gm-stepper__label">{{ step.label() }}</span>
+          @if (step.sublabel()) {
+            <span class="gm-stepper__sublabel">{{ step.sublabel() }}</span>
+          }
+        </span>
       </button>
 
       @if (!last) {

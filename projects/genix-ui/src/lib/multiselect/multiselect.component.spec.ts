@@ -33,6 +33,7 @@ interface Role {
       [options]="['Alpha', 'Beta', 'Gamma']"
       placeholder="Tags"
       [showToggleAll]="false"
+      [maxSelectedLabels]="2"
     />
   `,
 })
@@ -215,6 +216,62 @@ describe('gm-multiselect', () => {
     expect(host.tags.value).toEqual(['Gamma']);
     // Dismissing a chip must not open the panel.
     expect(panel()).toBeNull();
+  });
+
+  it('collapses extra selections into a "+N" badge past maxSelectedLabels', () => {
+    host.tags.setValue(['Alpha', 'Beta', 'Gamma']);
+    fixture.detectChanges();
+
+    const chips = Array.from(
+      fixture.nativeElement.querySelectorAll('.chips gm-chip'),
+    ) as HTMLElement[];
+    expect(chips.length).toBe(3);
+    expect(chips[0].textContent).toContain('Alpha');
+    expect(chips[1].textContent).toContain('Beta');
+    // The badge is not removable: no gm-chip__remove button inside it.
+    expect(chips[2].textContent).toContain('+1');
+    expect(chips[2].querySelector('.gm-chip__remove')).toBeNull();
+  });
+
+  it('shows the full selection in a tooltip once chips overflow', () => {
+    host.tags.setValue(['Alpha', 'Beta', 'Gamma']);
+    fixture.detectChanges();
+
+    const chipsRow = fixture.nativeElement.querySelector(
+      '.chips .gm-multiselect__chips',
+    ) as HTMLElement;
+    chipsRow.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+
+    const bubble = document.querySelector('.cdk-overlay-container gm-tooltip');
+    expect(bubble!.textContent!.trim()).toBe('Alpha, Beta, Gamma');
+  });
+
+  it('shows no tooltip while every selection already fits on the trigger', () => {
+    host.tags.setValue(['Alpha']);
+    fixture.detectChanges();
+
+    const chipsRow = fixture.nativeElement.querySelector(
+      '.chips .gm-multiselect__chips',
+    ) as HTMLElement;
+    chipsRow.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+
+    expect(document.querySelector('.cdk-overlay-container gm-tooltip')).toBeNull();
+  });
+
+  it('shows the full selection in a tooltip once the trigger collapses to a count', () => {
+    host.roles.setValue([1, 2, 3]);
+    fixture.detectChanges();
+
+    const value = fixture.nativeElement.querySelector(
+      '.objects .gm-dropdown__value',
+    ) as HTMLElement;
+    value.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+
+    const bubble = document.querySelector('.cdk-overlay-container gm-tooltip');
+    expect(bubble!.textContent!.trim()).toBe('Admin, User, Auditor');
   });
 
   // ── select all ────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ export * from './lib/core/overlay-panel';
 export * from './lib/core/option-reader';
 export * from './lib/button';
 export * from './lib/input';
+export * from './lib/search';
 export * from './lib/textarea';
 export * from './lib/checkbox';
 export * from './lib/radio';

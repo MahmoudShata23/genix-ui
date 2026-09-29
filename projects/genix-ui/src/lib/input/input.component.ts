@@ -76,8 +76,6 @@ export class GmInputComponent extends GmFormFieldBase<string | number> {
   /** Names the wait for a screen reader; the spinner itself is a status role. */
   readonly loadingLabel = input<string>('Loading');
 
-  readonly hideMessageRow = input(false, { transform: booleanAttribute });
-
   /**
    * Whether anything occupies the trailing slot. The padding that keeps the
    * text clear of it has to follow the spinner too, not only `iconEnd`.

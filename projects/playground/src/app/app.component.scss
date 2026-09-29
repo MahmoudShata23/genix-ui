@@ -328,3 +328,21 @@ code {
 .pg-question-tree {
   --gm-tree-border: none;
 }
+/* A row's line items, inside `gmTableRowExpansion` — deliberately plain,
+   since it is nested inside the parent table's own styling. */
+.pg-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--gm-font-size-sm);
+
+  th,
+  td {
+    padding: var(--gm-space-1) var(--gm-space-2);
+    text-align: start;
+  }
+
+  th {
+    color: var(--gm-gray-500);
+    font-weight: var(--gm-font-weight-medium);
+  }
+}

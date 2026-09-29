@@ -58,8 +58,6 @@ import { GmSelectValueDirective } from './select-value.directive';
   },
 })
 export class GmSelectComponent extends GmDropdownBase<unknown> {
-  readonly hideMessageRow = input(false, { transform: booleanAttribute });
-
   protected readonly optionTemplate = contentChild(GmSelectOptionDirective);
 
   protected readonly valueTemplate = contentChild(GmSelectValueDirective);

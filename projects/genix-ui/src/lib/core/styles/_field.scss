@@ -127,4 +127,18 @@
     color: var(--gm-gray-500);
     margin-top: var(--gm-space-1);
   }
+
+  /* The single message slot every field template renders (see e.g.
+     `gm-input`'s template): always present, even with no message, so this
+     row's height never changes with validation state — otherwise the field
+     grows, and pushes whatever is below it down, the moment an error first
+     appears. Declared after `.gm-field__error`/`.gm-field__hint` so its sizing
+     wins on the element that also carries one of those two classes for color. */
+  .gm-field__message {
+    display: block;
+    min-height: 1.4em;
+    margin-top: var(--gm-space-1);
+    font-size: var(--gm-font-size-xs);
+    line-height: 1.4;
+  }
 }

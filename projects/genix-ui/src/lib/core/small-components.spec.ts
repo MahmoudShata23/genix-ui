@@ -426,6 +426,10 @@ describe('small components', () => {
 
       expect(input().disabled).toBeTrue();
     });
+
+    it('always renders the message row, so the field height stays fixed once an error appears', () => {
+      expect(el('.amount .gm-field__message')).not.toBeNull();
+    });
   });
 
   // ── gm-select-button ──────────────────────────────────────────────────────
@@ -549,6 +553,10 @@ describe('small components', () => {
       expect(templated()[1].querySelector('.opt-icon--on')).not.toBeNull();
       expect(templated()[0].querySelector('.opt-icon--on')).toBeNull();
     });
+
+    it('always renders the message row, so the field height stays fixed once an error appears', () => {
+      expect(el('.status .gm-field__message')).not.toBeNull();
+    });
   });
 
   // ── gm-autocomplete ───────────────────────────────────────────────────────
@@ -562,6 +570,10 @@ describe('small components', () => {
       expect(input().getAttribute('aria-autocomplete')).toBe('list');
       expect(input().getAttribute('aria-expanded')).toBe('false');
       expect(input().placeholder).toBe('Search users');
+    });
+
+    it('always renders the message row, so the field height stays fixed once an error appears', () => {
+      expect(el('.user .gm-field__message')).not.toBeNull();
     });
 
     it('emits search as the user types, and never fetches itself', () => {

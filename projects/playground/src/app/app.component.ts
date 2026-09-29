@@ -44,6 +44,7 @@ import {
   GmPaginationComponent,
   GmPopoverComponent,
   GmRadioComponent,
+  GmSearchComponent,
   GmSelectButtonComponent,
   GmSelectComponent,
   GmSelectOptionDirective,
@@ -69,6 +70,8 @@ import {
   GmTableColumn,
   GmTableComponent,
   GmTableFilter,
+  GmTableRowExpansionDirective,
+  GmTableToolbarAlign,
   TableModel,
   GmTableQueryEvent,
   GmTableRequest,
@@ -125,6 +128,25 @@ interface Benefit {
   readonly cover: string;
 }
 
+interface OrderItem {
+  readonly name: string;
+  readonly qty: number;
+  readonly price: number;
+}
+
+interface Order {
+  readonly id: number;
+  readonly customer: string;
+  readonly total: number;
+  readonly items: readonly OrderItem[];
+}
+
+interface LinkCandidate {
+  readonly id: number;
+  readonly name: string;
+  readonly country: string;
+}
+
 interface Section {
   readonly id: string;
   readonly label: string;
@@ -174,6 +196,7 @@ interface Section {
     GmPaginationComponent,
     GmPopoverComponent,
     GmRadioComponent,
+    GmSearchComponent,
     GmSelectButtonComponent,
     GmSelectComponent,
     GmSelectOptionDirective,
@@ -191,6 +214,7 @@ interface Section {
     GmTreeComponent,
     GmTreeIconDirective,
     GmTreeNodeDirective,
+    PgDialogDemoComponent,
   ],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.scss",
@@ -204,6 +228,7 @@ export class AppComponent {
     { id: "button", label: "Button" },
     { id: "input", label: "Input" },
     { id: "textarea", label: "Textarea" },
+    { id: "search", label: "Search" },
     { id: "choice", label: "Checkbox & radio" },
     { id: "dropdown", label: "Select & multiselect" },
     { id: "select-advanced", label: "Select templates & virtual scroll" },
@@ -326,6 +351,40 @@ export class AppComponent {
   protected readonly demoTextarea = new FormControl(
     "Multi-line content.\nSecond line.",
   );
+
+  // ── Section: search ──────────────────────────────────────────────────────
+
+  protected readonly demoSearch = new FormControl("");
+  protected readonly searchResults = signal<readonly Person[]>([]);
+  protected readonly searchIsLoading = signal(false);
+
+  protected readonly searchResultNames = computed(() => {
+    const names = this.searchResults().map((person) => person.name);
+    return names.length ? names.join(", ") : "none yet";
+  });
+
+  /**
+   * What a real page would send to its own service on the debounced `search`
+   * output; here it filters `people` in place, with a short artificial delay
+   * so the trailing spinner is actually visible.
+   */
+  protected runSearch(term: string): void {
+    if (!term) {
+      this.searchResults.set([]);
+      this.searchIsLoading.set(false);
+      return;
+    }
+    this.searchIsLoading.set(true);
+    setTimeout(() => {
+      this.searchResults.set(
+        this.people.filter((person) =>
+          person.name.toLowerCase().includes(term.toLowerCase()),
+        ),
+      );
+      this.searchIsLoading.set(false);
+    }, 300);
+  }
+
   protected readonly demoCheckbox = new FormControl(true);
   protected readonly demoRadio = new FormControl("standard");
   protected readonly demoSelect = new FormControl<string | null>("LB");
@@ -874,6 +933,23 @@ export class AppComponent {
       icon: "pi pi-lock",
       command: () => this.configLockInactive.set(!this.configLockInactive()),
     },
+    {
+      label:
+        this.configActionsAlign() === "end"
+          ? "Auto-align toolbar buttons"
+          : "Push toolbar buttons right",
+      icon: "pi pi-arrow-right",
+      command: () =>
+        this.configActionsAlign.set(
+          this.configActionsAlign() === "end" ? "auto" : "end",
+        ),
+    },
+    {
+      label: this.configLoading() ? "Loading…" : "Simulate loading",
+      icon: "pi pi-refresh",
+      command: () => this.simulateConfigLoad(),
+      disabled: this.configLoading(),
+    },
   ]);
 
   /**
@@ -913,9 +989,25 @@ export class AppComponent {
    * nothing here reaches for a table input.
    */
   protected readonly configColumnChooser = signal(true);
-  protected readonly configActionsEdge = signal<"start" | "end">("start");
+  protected readonly configActionsEdge = signal<"start" | "end">("end");
   protected readonly configReorder = signal(false);
   protected readonly configLockInactive = signal(true);
+
+  /** Which edge the toolbar's own add/bulk buttons sit on — `TableModel.actionsAlign`. */
+  protected readonly configActionsAlign = signal<GmTableToolbarAlign>("auto");
+
+  /**
+   * `loading`/`skeletonRows` are inputs on `gm-table` itself, not keys in
+   * `tableConfig` — bound straight onto the element below, not through
+   * `providerConfig`.
+   */
+  protected readonly configLoading = signal(false);
+
+  /** Flips loading on briefly so the skeleton rows are actually visible. */
+  protected simulateConfigLoad(): void {
+    this.configLoading.set(true);
+    setTimeout(() => this.configLoading.set(false), 1500);
+  }
 
   private readonly configQuery = signal<{
     filters: readonly GmFilterDescriptor[];
@@ -1047,6 +1139,7 @@ export class AppComponent {
     showColumnChooser: this.configColumnChooser(),
     reorderableColumns: this.configReorder(),
     actionsPosition: this.configActionsEdge(),
+    actionsAlign: this.configActionsAlign(),
   }));
 
   private exportConfigGrid(): void {
@@ -1138,6 +1231,66 @@ export class AppComponent {
     this.lastConfigEvent.set(
       term ? `searchChange · "${term}"` : "searchChange · cleared",
     );
+  }
+
+  // ── Section: table, expandable rows ─────────────────────────────────────
+
+  protected readonly orders: readonly Order[] = [
+    {
+      id: 1,
+      customer: "Nile Diagnostics",
+      total: 450,
+      items: [
+        { name: "CBC panel", qty: 2, price: 150 },
+        { name: "Lipid profile", qty: 1, price: 150 },
+      ],
+    },
+    {
+      id: 2,
+      customer: "Cairo Medical Center",
+      total: 900,
+      items: [{ name: "MRI scan", qty: 1, price: 900 }],
+    },
+    { id: 3, customer: "Alex Care Clinic", total: 0, items: [] },
+  ];
+
+  protected readonly orderColumns: readonly GmTableColumn<Order>[] = [
+    { field: "customer", header: "Customer" },
+    { field: "total", header: "Total", align: "end" },
+  ];
+
+  /** Rows with nothing to show underneath get no toggle at all. */
+  protected readonly orderExpandable = (order: Order): boolean =>
+    order.items.length > 0;
+
+  // ── Section: table, selection without bulk actions ──────────────────────
+
+  protected readonly linkCandidates: readonly LinkCandidate[] = [
+    { id: 1, name: "Beirut Medical Center", country: "Lebanon" },
+    { id: 2, name: "Al Noor Clinic", country: "UAE" },
+    { id: 3, name: "Cedars Diagnostics", country: "Lebanon" },
+  ];
+
+  protected readonly linkTableConfig: TableModel<LinkCandidate> = {
+    columns: [
+      { field: "name", header: "name" },
+      { field: "country", header: "country" },
+    ],
+    // No bulk action of its own — this table's "Add" lives outside it.
+    bulkActions: [],
+    keepCheckboxWithoutBulkActions: true,
+  };
+
+  protected readonly linkSelection = signal<LinkCandidate[]>([]);
+  protected readonly linkedProviders = signal<readonly LinkCandidate[]>([]);
+
+  protected readonly linkedNames = computed(() => {
+    const names = this.linkedProviders().map((provider) => provider.name);
+    return names.length ? names.join(", ") : "none yet";
+  });
+
+  protected addSelectedLinks(): void {
+    this.linkedProviders.set(this.linkSelection());
   }
 
   // ── Dialog ──────────────────────────────────────────────────────────────
@@ -1279,6 +1432,10 @@ export class AppComponent {
 
   protected readonly limitedRoles = new FormControl<number[] | null>([1]);
 
+  protected readonly overflowRoles = new FormControl<number[] | null>([
+    1, 2, 3, 4,
+  ]);
+
   protected readonly pickedCities = new FormControl<number[] | null>([]);
 
   // ── Datepicker time & range ─────────────────────────────────────────────
@@ -1359,35 +1516,36 @@ export class AppComponent {
    * an answer can lead to a sub-question. `styleClass` marks question rows so
    * the page can embolden them.
    */
-  protected readonly questionTree: GmTreeNode<{ kind: "question" | "answer" }>[] =
-    [
-      {
-        key: "q1",
-        label: "Untitled question",
-        data: { kind: "question" },
-        styleClass: "pg-question",
-        children: [
-          {
-            key: "a1",
-            label: "21 to 4132",
-            data: { kind: "answer" },
-            children: [
-              {
-                key: "q2",
-                label: "Untitled question",
-                data: { kind: "question" },
-                styleClass: "pg-question",
-                children: [
-                  { key: "a2", label: "From to To", data: { kind: "answer" } },
-                  { key: "a3", label: "From 5 to 10", data: { kind: "answer" } },
-                ],
-              },
-            ],
-          },
-          { key: "a4", label: "From to To", data: { kind: "answer" } },
-        ],
-      },
-    ];
+  protected readonly questionTree: GmTreeNode<{
+    kind: "question" | "answer";
+  }>[] = [
+    {
+      key: "q1",
+      label: "Untitled question",
+      data: { kind: "question" },
+      styleClass: "pg-question",
+      children: [
+        {
+          key: "a1",
+          label: "21 to 4132",
+          data: { kind: "answer" },
+          children: [
+            {
+              key: "q2",
+              label: "Untitled question",
+              data: { kind: "question" },
+              styleClass: "pg-question",
+              children: [
+                { key: "a2", label: "From to To", data: { kind: "answer" } },
+                { key: "a3", label: "From 5 to 10", data: { kind: "answer" } },
+              ],
+            },
+          ],
+        },
+        { key: "a4", label: "From to To", data: { kind: "answer" } },
+      ],
+    },
+  ];
 
   /** The node the editor pane would be showing. */
   protected readonly questionNode = new FormControl<unknown>("q2");
@@ -1512,7 +1670,10 @@ export class AppComponent {
   }
 
   /** A new array each time — the tree reads `nodes` as an immutable input. */
-  private replaceRegion(key: string | undefined, patch: Partial<GmTreeNode>): void {
+  private replaceRegion(
+    key: string | undefined,
+    patch: Partial<GmTreeNode>,
+  ): void {
     this.regionTree.update((nodes) =>
       nodes.map((node) => (node.key === key ? { ...node, ...patch } : node)),
     );

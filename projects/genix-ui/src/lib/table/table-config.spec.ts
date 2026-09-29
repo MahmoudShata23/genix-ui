@@ -182,17 +182,17 @@ describe('gm-table config mode', () => {
 
   // ── structure ─────────────────────────────────────────────────────────
 
-  it('renders the selection column, the actions column, then the config columns', () => {
-    // Selection + actions + six config columns.
+  it('renders the selection column, the config columns, then the actions column', () => {
+    // Selection + six config columns + actions.
     expect(qa('thead th').length).toBe(8);
     expect(headerLabels()).toEqual([
-      'ACTIONS',
       'NAME',
       'CODE',
       'SCORE',
       'STATUS',
       'TAGS',
       'LOCKED',
+      'ACTIONS',
     ]);
   });
 
@@ -325,7 +325,7 @@ describe('gm-table config mode', () => {
     });
     // Config mode is server-side: the rows arrive ordered.
     expect(
-      bodyRows().map((r) => r.querySelectorAll('td')[2].textContent!.trim()),
+      bodyRows().map((r) => r.querySelectorAll('td')[1].textContent!.trim()),
     ).toEqual(['Beirut Clinic', 'Amman Centre']);
   });
 
@@ -395,5 +395,78 @@ describe('gm-table config mode', () => {
       pageNumber: 2,
       pageSize: 10,
     });
+  });
+});
+
+// ── checkbox / toolbar layout overrides ─────────────────────────────────────
+
+@Component({
+  standalone: true,
+  imports: [GmTableComponent],
+  template: `<gm-table [records]="records" [tableConfig]="tableConfig" />`,
+})
+class PopupHostComponent {
+  readonly records: Provider[] = ROWS;
+
+  /**
+   * No bulk actions of its own: a popup's own "Add" button, outside the
+   * table, reads the ticked rows instead — the checkboxes must survive that.
+   */
+  readonly tableConfig: TableModel<Provider> = {
+    columns: [{ field: 'name', header: 'name' }],
+    bulkActions: [],
+    keepCheckboxWithoutBulkActions: true,
+  };
+}
+
+describe('gm-table config mode — checkboxes without a bulk action', () => {
+  it('keeps the selection checkboxes even though there is no bulk action to use them', async () => {
+    await TestBed.configureTestingModule({
+      imports: [PopupHostComponent],
+      providers: [provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(PopupHostComponent);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelectorAll('tbody input[type="checkbox"]')
+        .length,
+    ).toBe(ROWS.length);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [GmTableComponent],
+  template: `<gm-table [records]="records" [tableConfig]="tableConfig" />`,
+})
+class AlignedToolbarHostComponent {
+  readonly records: Provider[] = ROWS;
+
+  readonly tableConfig: TableModel<Provider> = {
+    columns: [{ field: 'name', header: 'name' }],
+    bulkActions: [
+      {
+        type: GmTableActionType.DOWNLOAD,
+        command: () => {},
+        scope: GmTableBulkActionScope.GLOBAL,
+      },
+    ],
+    actionsAlign: 'end',
+  };
+}
+
+describe('gm-table config mode — toolbar action alignment', () => {
+  it('moves the toolbar actions to the end edge when actionsAlign is set', async () => {
+    await TestBed.configureTestingModule({
+      imports: [AlignedToolbarHostComponent],
+      providers: [provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(AlignedToolbarHostComponent);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.gm-table-toolbar--align-end'),
+    ).not.toBeNull();
   });
 });

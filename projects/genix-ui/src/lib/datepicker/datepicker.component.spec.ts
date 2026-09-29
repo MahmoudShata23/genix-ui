@@ -325,4 +325,18 @@ describe('gm-datepicker', () => {
     expect(hostEl.classList).toContain('gm-datepicker-host--invalid');
     expect(trigger().getAttribute('aria-invalid')).toBe('true');
   });
+
+  it('always renders the message row, even before the control is touched', () => {
+    const message = fixture.nativeElement.querySelector(
+      '.main .gm-field__message',
+    ) as HTMLElement;
+    expect(message).not.toBeNull();
+    expect(message.textContent?.trim()).toBe('');
+
+    host.date.markAsTouched();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('.main .gm-field__message'),
+    ).toBe(message);
+  });
 });

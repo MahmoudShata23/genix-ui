@@ -16,6 +16,7 @@
     [searchLoadingLabel]="translate()('searching')"
     [searchTerm]="globalSearch()"
     [searchDebounce]="filterDebounce()"
+    [actionsAlign]="tableConfig()?.actionsAlign ?? 'auto'"
     [disabled]="loading()"
     (visibleFieldsChange)="onVisibleFieldsChange($event)"
     (columnChooserRejected)="columnChooserRejected.emit($event)"
@@ -69,6 +70,12 @@
         [cdkDropListSortPredicate]="sameBand"
         (cdkDropListDropped)="onColumnDrop($event)"
       >
+        @if (expandableTable()) {
+          <th class="gm-table__th gm-table__th--expand" scope="col">
+            <span class="gm-table__sr-only">Toggle row details</span>
+          </th>
+        }
+
         @if (resolvedSelectionMode()) {
           <th
             #selectHeaderCell
@@ -171,11 +178,46 @@
       <!-- Exactly one of loading / empty / rows renders, so the states can
            never contradict each other. -->
       @if (loading()) {
-        <tr>
-          <td class="gm-table__state" [attr.colspan]="columnCount()">
-            <gm-spinner ariaLabel="Loading records" />
+        <tr class="gm-table__sr-only-row">
+          <td [attr.colspan]="columnCount()">
+            <span class="gm-table__sr-only" role="status" aria-live="polite">{{
+              loadingLabel()
+            }}</span>
           </td>
         </tr>
+        @for (i of skeletonRowIndexes(); track i) {
+          <tr class="gm-table__row gm-table__row--skeleton" aria-hidden="true">
+            @if (expandableTable()) {
+              <td class="gm-table__td gm-table__td--expand">
+                <span class="gm-table__skeleton-bar gm-table__skeleton-bar--select"></span>
+              </td>
+            }
+            @if (resolvedSelectionMode()) {
+              <td
+                class="gm-table__td gm-table__td--select"
+                [class.gm-table__cell--frozen]="selectionFrozen()"
+                [class.gm-table__cell--frozen-start]="selectionFrozen()"
+                [style.inset-inline-start]="selectionFrozen() ? '0px' : null"
+              >
+                <span class="gm-table__skeleton-bar gm-table__skeleton-bar--select"></span>
+              </td>
+            }
+            @for (column of renderColumns(); track column.header) {
+              <td
+                class="gm-table__td"
+                [class.gm-table__cell--frozen]="column.frozen"
+                [class.gm-table__cell--frozen-start]="isFrozenStart(column)"
+                [class.gm-table__cell--frozen-end]="isFrozenEnd(column)"
+                [class.gm-table__cell--frozen-edge-start]="isFrozenStartEdge(column)"
+                [class.gm-table__cell--frozen-edge-end]="isFrozenEndEdge(column)"
+                [style.inset-inline-start]="frozenInsetStart(column)"
+                [style.inset-inline-end]="frozenInsetEnd(column)"
+              >
+                <span class="gm-table__skeleton-bar"></span>
+              </td>
+            }
+          </tr>
+        }
       } @else if (isEmpty()) {
         <tr>
           <td class="gm-table__state" [attr.colspan]="columnCount()">
@@ -197,6 +239,25 @@
               resolvedSelectionMode() && !isRowSelectable(row, i)
             "
           >
+            @if (expandableTable()) {
+              <td class="gm-table__td gm-table__td--expand">
+                @if (isRowExpandable(row, i)) {
+                  <button
+                    type="button"
+                    class="gm-table__expand-toggle"
+                    [attr.aria-expanded]="isRowExpanded(row)"
+                    [attr.aria-label]="isRowExpanded(row) ? 'Collapse row' : 'Expand row'"
+                    (click)="toggleRowExpansion(row)"
+                  >
+                    <span
+                      class="gm-table__expand-chevron"
+                      [class.gm-table__expand-chevron--expanded]="isRowExpanded(row)"
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                }
+              </td>
+            }
             @if (resolvedSelectionMode()) {
               <td
                 class="gm-table__td gm-table__td--select"
@@ -281,6 +342,16 @@
               </td>
             }
           </tr>
+          @if (expandableTable() && isRowExpanded(row)) {
+            <tr class="gm-table__row gm-table__expansion-row">
+              <td class="gm-table__td gm-table__expansion-cell" [attr.colspan]="columnCount()">
+                <ng-container
+                  [ngTemplateOutlet]="rowExpansionTemplate()!"
+                  [ngTemplateOutletContext]="{ $implicit: row, row: row, index: i }"
+                />
+              </td>
+            </tr>
+          }
         }
       }
     </tbody>

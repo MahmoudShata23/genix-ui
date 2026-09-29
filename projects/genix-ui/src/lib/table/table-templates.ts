@@ -37,6 +37,28 @@ export class GmTableEmptyDirective {
 }
 
 /**
+ * Marks a template as a row's expanded content — the child data shown in a
+ * full-width row underneath it once the user opens its toggle.
+ *
+ * ```html
+ * <ng-template gmTableRowExpansion let-row>
+ *   <gm-table [data]="row.lineItems" [columns]="lineItemColumns" />
+ * </ng-template>
+ * ```
+ *
+ * Providing this template is what turns the toggle column on at all — there
+ * is no separate `expandable` switch to keep in sync with it. Gate which rows
+ * actually get a toggle with `gm-table`'s `rowExpandable` input.
+ */
+@Directive({
+  selector: '[gmTableRowExpansion]',
+  standalone: true,
+})
+export class GmTableRowExpansionDirective {
+  readonly template = inject(TemplateRef);
+}
+
+/**
  * Marks a template as the filter control for one column, for filters the
  * built-in types cannot express.
  *

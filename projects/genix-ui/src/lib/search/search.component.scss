@@ -1,0 +1,146 @@
+/* ==========================================================================
+   gm-search
+   --------------------------------------------------------------------------
+   The field reuses the field shell wholesale, so the border, radius, padding,
+   focus ring and error treatment match `gm-input` exactly. The magnifier and
+   the trailing spinner/clear button are its own chrome, positioned the same
+   way `gm-input`'s icon slots are.
+   ========================================================================== */
+
+@use '../core/styles/field' as field;
+
+:host {
+  display: block;
+}
+
+@include field.gm-field-shell('.gm-field__control');
+
+.gm-search {
+  --gm-search-icon-inset: var(--gm-space-3);
+
+  /* Not a flex row: the icon and actions are absolutely positioned, so
+     `align-items` would not centre an out-of-flow child. */
+  position: relative;
+  display: block;
+}
+
+:host(.gm-field-host--small) .gm-search {
+  --gm-search-icon-inset: var(--gm-space-2);
+}
+
+:host(.gm-field-host--large) .gm-search {
+  --gm-search-icon-inset: var(--gm-space-4);
+}
+
+.gm-search .gm-field__control {
+  /* 1em for the glyph plus a gap, on both sides, on top of the field's own
+     padding — the magnifier is always there, and so is the actions slot. */
+  padding-inline-start: calc(var(--gm-field-padding-x) * 2 + 1em);
+  padding-inline-end: calc(var(--gm-field-padding-x) * 2 + 1em);
+}
+
+.gm-search__icon--start {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: var(--gm-search-icon-inset);
+  transform: translateY(-50%);
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+  /* Clicks fall through to the input, so the icon never steals focus. */
+  pointer-events: none;
+}
+
+:host(.gm-field-host--invalid) .gm-search__icon--start {
+  color: var(--gm-danger);
+}
+
+.gm-search__actions {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: var(--gm-search-icon-inset);
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+}
+
+.gm-search__clear {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gm-radius-full);
+  background: transparent;
+  color: var(--gm-gray-500);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--gm-gray-100);
+    color: var(--gm-gray-700);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Two strokes crossed — no icon font needed for an affordance this simple. */
+.gm-search__clear-icon {
+  position: relative;
+  width: 0.625rem;
+  height: 0.625rem;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(-45deg);
+  }
+}
+
+/* Drawn in CSS rather than set as an icon class, because the package bundles
+   no icon font — a spinner the consumer cannot see is not a loading
+   affordance. A ring with one transparent quadrant reads as spinning; a full
+   ring does not, however fast it turns. */
+.gm-search__spinner {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  box-sizing: border-box;
+  border: 2px solid var(--gm-gray-300);
+  border-top-color: var(--gm-primary);
+  border-radius: var(--gm-radius-full, 50%);
+  animation: gm-search-spin 0.6s linear infinite;
+}
+
+@keyframes gm-search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-search__spinner {
+    animation-duration: 2.4s;
+  }
+}

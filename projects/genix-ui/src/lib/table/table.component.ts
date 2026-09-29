@@ -32,7 +32,6 @@ import { GmButtonComponent } from "../button/button.component";
 import { GmCheckboxComponent } from "../checkbox/checkbox.component";
 import { GmPaginationComponent } from "../pagination/pagination.component";
 import { GmRadioComponent } from "../radio/radio.component";
-import { GmSpinnerComponent } from "../spinner/spinner.component";
 import { GmTooltipDirective } from "../tooltip/tooltip.directive";
 import { gmUniqueId } from "../core/unique-id";
 import { gmBuildCsv } from "./table-export";
@@ -58,6 +57,7 @@ import {
   GmTableEmptyDirective,
   GmTableFilterDirective,
   GmTableHeaderDirective,
+  GmTableRowExpansionDirective,
 } from "./table-templates";
 import { GM_TABLE_FILTER_LABELS } from "./table-filter.types";
 import type {
@@ -118,7 +118,6 @@ import type { GmPageChangeEvent } from "../pagination/pagination.types";
     GmCheckboxComponent,
     GmPaginationComponent,
     GmRadioComponent,
-    GmSpinnerComponent,
     GmTableConfigCellComponent,
     GmTableFilterMenuComponent,
     GmTableRowActionsComponent,
@@ -325,7 +324,11 @@ export class GmTableComponent<T> {
       .map((action) => action.type);
   });
 
-  /** The utility column holding the row actions. Pinned, so it survives a scroll. */
+  /**
+   * The utility column holding the row actions. Sits at the end edge and
+   * scrolls with the rest of the row by default; `actionsPosition`/
+   * `actionsFrozen` opt into the old pinned-start layout.
+   */
   private readonly actionsColumn = computed<GmConfigColumn<T> | null>(() => {
     const count = this.visibleActionTypes().length;
     if (count === 0) {
@@ -334,8 +337,8 @@ export class GmTableComponent<T> {
     const config = this.tableConfig();
     return {
       header: this.translate()(config?.actionsHeader ?? "actions"),
-      frozen: config?.actionsFrozen !== false,
-      frozenPosition: config?.actionsPosition ?? "start",
+      frozen: config?.actionsFrozen === true,
+      frozenPosition: config?.actionsPosition ?? "end",
       // One small icon button per action, plus the cell's own padding.
       width: `${count * 2.5 + 1.5}rem`,
       align: "center",
@@ -414,9 +417,9 @@ export class GmTableComponent<T> {
       }
       // Position, not `frozen`, decides which end it sits at: an unpinned
       // actions column still has to follow `actionsPosition`.
-      return this.tableConfig()?.actionsPosition === "end"
-        ? [...data, actions]
-        : [actions, ...data];
+      return this.tableConfig()?.actionsPosition === "start"
+        ? [actions, ...data]
+        : [...data, actions];
     },
   );
 
@@ -424,13 +427,18 @@ export class GmTableComponent<T> {
     this.configMode() ? this.records() : this.data(),
   );
 
-  /** Hidden when the input says so, or when no bulk action could use it. */
+  /**
+   * Hidden when the input says so, or when no bulk action could use it —
+   * unless `keepCheckboxWithoutBulkActions` says to keep it anyway, for a
+   * table whose selection a button outside it (e.g. a popup's "Add") reads.
+   */
   protected readonly checkboxVisible = computed(
     () =>
       this.showCheckbox() &&
-      (this.tableConfig()?.bulkActions ?? []).some(
-        (action) => !action.visible || action.visible(),
-      ),
+      (this.tableConfig()?.keepCheckboxWithoutBulkActions ||
+        (this.tableConfig()?.bulkActions ?? []).some(
+          (action) => !action.visible || action.visible(),
+        )),
   );
 
   protected readonly addButtonVisible = computed(() => {
@@ -538,7 +546,7 @@ export class GmTableComponent<T> {
 
   /** The toolbar's search box — opt-in; see `GmTableConfig.showSearch`. */
   protected readonly searchVisible = computed(
-    () => this.tableConfig()?.showSearch !== false,
+    () => this.tableConfig()?.showSearch === true,
   );
 
   protected readonly searchPlaceholder = computed(
@@ -614,6 +622,16 @@ export class GmTableComponent<T> {
 
   readonly loading = input(false, { transform: booleanAttribute });
 
+  /** Announced to assistive technology while `loading` is on. */
+  readonly loadingLabel = input<string>("Loading records");
+
+  /**
+   * Placeholder rows drawn instead of the real ones while `loading` is on, so
+   * the grid's shape stays recognisable rather than collapsing to a single
+   * centred spinner.
+   */
+  readonly skeletonRows = input(5, { transform: numberAttribute });
+
   readonly emptyMessage = input<string>("No records found");
 
   /**
@@ -636,6 +654,15 @@ export class GmTableComponent<T> {
    * them.
    */
   readonly rowSelectable = input<
+    ((row: T, index: number) => boolean) | undefined
+  >(undefined);
+
+  /**
+   * Which rows get an expansion toggle, once a `gmTableRowExpansion` template
+   * is provided. Omit it and every row gets one — pass it for a grid where
+   * only some rows actually have child data to show underneath.
+   */
+  readonly rowExpandable = input<
     ((row: T, index: number) => boolean) | undefined
   >(undefined);
 
@@ -809,6 +836,22 @@ export class GmTableComponent<T> {
   protected readonly headerContent = computed(
     () => this.headerTemplate()?.template ?? null,
   );
+
+  private readonly rowExpansionDirective = contentChild(
+    GmTableRowExpansionDirective,
+  );
+
+  /** Providing the template is what turns the toggle column on at all. */
+  protected readonly rowExpansionTemplate = computed(
+    () => this.rowExpansionDirective()?.template ?? null,
+  );
+
+  protected readonly expandableTable = computed(
+    () => this.rowExpansionTemplate() !== null,
+  );
+
+  /** Row identities currently open. A `Set`, so several rows can be open at once. */
+  private readonly expandedKeys = signal<ReadonlySet<unknown>>(new Set());
 
   // ── Column reorder ───────────────────────────────────────
 
@@ -1067,14 +1110,43 @@ export class GmTableComponent<T> {
     () => !this.loading() && this.rows().length > 0,
   );
 
-  /** Selection column plus one per data column, for the state rows' colspan. */
+  /**
+   * Selection and expander columns plus one per data column, for the state
+   * rows' colspan.
+   */
   protected readonly columnCount = computed(
     () =>
-      this.resolvedColumns().length + (this.resolvedSelectionMode() ? 1 : 0),
+      this.resolvedColumns().length +
+      (this.resolvedSelectionMode() ? 1 : 0) +
+      (this.expandableTable() ? 1 : 0),
+  );
+
+  /** Just an index per placeholder row — `@for` needs something to iterate. */
+  protected readonly skeletonRowIndexes = computed(() =>
+    Array.from({ length: Math.max(0, this.skeletonRows()) }, (_, i) => i),
   );
 
   protected isRowSelectable(row: T, index: number): boolean {
     return this.resolvedRowSelectable()?.(row, index) ?? true;
+  }
+
+  // ── Row expansion ─────────────────────────────────────────────────────
+
+  protected isRowExpandable(row: T, index: number): boolean {
+    return this.rowExpandable()?.(row, index) ?? true;
+  }
+
+  protected isRowExpanded(row: T): boolean {
+    return this.expandedKeys().has(this.identity(row));
+  }
+
+  protected toggleRowExpansion(row: T): void {
+    const key = this.identity(row);
+    this.expandedKeys.update((current) => {
+      const next = new Set(current);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
   }
 
   /**

@@ -64,7 +64,14 @@
   align-items: center;
   justify-content: center;
   gap: var(--gm-space-2);
-  padding: 6px var(--gm-space-3);
+  box-sizing: border-box;
+  /* `--gm-chip-height` is unset (auto) everywhere the chip sizes itself off
+     its own padding; a caller that must line a chip up with a fixed-height
+     row — e.g. gm-multiselect's trigger — sets it instead, alongside a
+     smaller padding-y, so the pill fills that row rather than growing it. */
+  height: var(--gm-chip-height, auto);
+  padding-block: var(--gm-chip-padding-y, 6px);
+  padding-inline: var(--gm-chip-padding-x, var(--gm-space-3));
 
   border: 1px solid var(--gm-chip-border);
   border-radius: var(--gm-chip-radius);

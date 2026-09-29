@@ -1,5 +1,7 @@
 import type { Observable } from 'rxjs';
 
+import type { GmTableToolbarAlign } from './table-action.types';
+
 /**
  * The *config-driven* grid model: one object describing a feature's columns,
  * its row actions and its toolbar, handed to `gm-table` as `tableConfig`.
@@ -66,18 +68,36 @@ export interface TableModel<T> {
 
   /**
    * Which edge the actions column pins to. Logical, not left/right, so it
-   * follows `dir`. Defaults to `start`.
+   * follows `dir`. Defaults to `end`.
    */
   actionsPosition?: 'start' | 'end';
 
   /**
-   * Pins the actions column while the grid scrolls sideways. Defaults to true:
-   * the actions are the one column that has to stay reachable.
+   * Pins the actions column while the grid scrolls sideways. Defaults to
+   * false: the actions column scrolls with the rest of the row unless a
+   * table explicitly asks to keep it reachable.
    */
   actionsFrozen?: boolean;
 
   /** Header of the actions column, as a translation key. Defaults to `actions`. */
   actionsHeader?: string;
+
+  /**
+   * Which edge the toolbar's add/bulk-action buttons sit on. Defaults to
+   * `auto`, which only moves them to the end edge when nothing else — like
+   * the search box or column chooser — is already there.
+   */
+  actionsAlign?: GmTableToolbarAlign;
+
+  /**
+   * Keeps the selection checkboxes even when `bulkActions` has nothing
+   * visible to act on the selection. For a table with no bulk action of its
+   * own — e.g. one opened in a popup, where a button outside the table (like
+   * "Add") reads the current selection to link rows to a parent entity.
+   * Defaults to false: hide the checkboxes along with the empty bulk-action
+   * toolbar, since an unusable checkbox column is otherwise just noise.
+   */
+  keepCheckboxWithoutBulkActions?: boolean;
 }
 
 /** One column of a `tableConfig`. */

@@ -345,6 +345,37 @@
       </gm-card>
     </section>
 
+    <!-- ── Search ──────────────────────────────────────────────────────── -->
+    <section id="search">
+      <h2>Search</h2>
+      <p class="pg-lead">
+        Typing updates the bound control on every keystroke, like any other
+        field — <code>search</code> is a separate output that only fires once
+        the term settles for <code>debounceMs</code> (400ms by default) and is
+        de-duplicated. The component never fetches itself.
+      </p>
+
+      <gm-card
+        header="Debounced search"
+        subheader="The trailing icon swaps for a spinner while a term is settling or loading is on"
+      >
+        <div class="pg-grid">
+          <gm-search
+            label="Search people"
+            [formControl]="demoSearch"
+            placeholder="Search by name"
+            [loading]="searchIsLoading()"
+            (search)="runSearch($event)"
+          />
+
+          <p class="pg-lead">
+            Control value: <code>{{ demoSearch.value || "empty" }}</code> ·
+            results: <code>{{ searchResultNames() }}</code>
+          </p>
+        </div>
+      </gm-card>
+    </section>
+
     <!-- ── Checkbox & radio ────────────────────────────────────────────── -->
     <section id="choice">
       <h2>Checkbox &amp; radio</h2>
@@ -604,6 +635,41 @@
 
           <p class="pg-lead">
             Control value: <code>{{ limitedRoles.value ?? "null" }}</code>
+          </p>
+        </div>
+      </gm-card>
+
+      <gm-card
+        header="Overflow badge & tooltip"
+        subheader="maxSelectedLabels caps chips too — the rest collapse into one +N badge"
+      >
+        <div class="pg-grid">
+          <gm-multiselect
+            label="Roles (chip display)"
+            [formControl]="overflowRoles"
+            [options]="roleOptions"
+            optionLabel="name"
+            optionValue="id"
+            display="chip"
+            [maxSelectedLabels]="1"
+            [clearable]="true"
+          />
+
+          <gm-multiselect
+            label="Roles (menu display)"
+            [formControl]="overflowRoles"
+            [options]="roleOptions"
+            optionLabel="name"
+            optionValue="id"
+            [maxSelectedLabels]="1"
+            [clearable]="true"
+          />
+
+          <p class="pg-lead">
+            Both stop at 1 visible label and hover the control for the rest — a
+            tooltip lists every selected name, so nothing is hidden just because
+            it did not fit on the trigger. Value:
+            <code>{{ overflowRoles.value ?? "null" }}</code>
           </p>
         </div>
       </gm-card>
@@ -1053,6 +1119,22 @@
           Last result: <code>{{ dialogResult() }}</code>
         </p>
       </gm-card>
+
+      <gm-card
+        header="Shared with a screen"
+        subheader="The same content component, rendered inline instead of opened as a dialog"
+      >
+        <p class="pg-lead">
+          <code>pg-dialog-demo</code> constructor-injects
+          <code>GmDialogRef</code> and <code>GmDialogConfig</code> unmodified —
+          the same component the button above opens in an overlay. Both are
+          root-provided with a harmless default, so dropping it straight into a
+          screen like this no longer throws <code>NullInjectorError</code>; its
+          Cancel/Save buttons just call <code>close()</code> on an inert ref
+          that does nothing.
+        </p>
+        <pg-dialog-demo />
+      </gm-card>
     </section>
 
     <!-- ── Toast ───────────────────────────────────────────────────────── -->
@@ -1300,8 +1382,8 @@
       <p class="pg-lead">
         Config-driven table with sorting, filtering, selection, and a toolbar
         with actions. Use the dropdown menu to toggle table options: pin
-        actions, show/hide column chooser, enable column reordering, and lock
-        inactive rows.
+        actions, show/hide column chooser, enable column reordering, lock
+        inactive rows, align the toolbar buttons, and simulate loading.
       </p>
 
       <!-- ── Config-driven ───────────────────────────────────────────────── -->
@@ -1351,6 +1433,14 @@
         <code>create</code> — which is what a screen that creates in a dialog
         wants. Leave it off and the toolbar owns the button and navigates.
       </p>
+      <p class="pg-lead">
+        <code>loading</code> swaps every row for
+        <code>skeletonRows</code> placeholders instead of a spinner — "Simulate
+        loading" in the menu flips it on for a beat.
+        <code>actionsAlign: 'end'</code> (also in the menu) pushes
+        Add/Delete/Export to the right of the toolbar instead of sharing the
+        left edge with the search box and column chooser.
+      </p>
 
       <gm-table
         #configTable
@@ -1359,6 +1449,8 @@
         [totalRecords]="configTotal()"
         [translate]="configTranslate"
         [(selection)]="configSelection"
+        [loading]="configLoading()"
+        [skeletonRows]="3"
         [pageSize]="5"
         [pageSizeOptions]="[5, 10]"
         [minVisibleColumns]="2"
@@ -1376,8 +1468,8 @@
 
       <p class="pg-readout">
         Selected: <code>{{ configSelection().length }}</code>
-        @if (configSelection().length < 2) {
-          · tick two rows to reveal <code>Delete</code>
+        @if (configSelection().length < 1) {
+          · tick a row to reveal <code>Delete</code>
         }
         @if (configLockInactive()) {
           · <code>Inactive</code> rows cannot be ticked
@@ -1385,6 +1477,85 @@
         · <code>Inactive</code> rows keep the Delete slot but lose the button ·
         last event: <code>{{ lastConfigEvent() }}</code>
       </p>
+
+      <!-- ── Expandable rows ─────────────────────────────────────────────── -->
+      <gm-card
+        header="Expandable rows"
+        subheader="Providing a gmTableRowExpansion template is what turns the toggle column on"
+      >
+        <gm-table
+          [data]="orders"
+          [columns]="orderColumns"
+          rowKey="id"
+          [rowExpandable]="orderExpandable"
+          caption="Orders, expandable to their line items"
+        >
+          <ng-template gmTableRowExpansion let-order>
+            @if (order.items.length) {
+              <table class="pg-subtable">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of order.items; track item.name) {
+                    <tr>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.qty }}</td>
+                      <td>{{ item.price }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="pg-lead">No line items on this order.</p>
+            }
+          </ng-template>
+        </gm-table>
+
+        <p class="pg-lead">
+          There is no separate <code>expandable</code> switch — the template
+          alone turns the column on. <code>rowExpandable</code> hides the toggle
+          on a row with nothing to show, like Alex Care Clinic here.
+        </p>
+      </gm-card>
+
+      <!-- ── Selection without bulk actions ──────────────────────────────── -->
+      <gm-card
+        header="Selection without bulk actions"
+        subheader="keepCheckboxWithoutBulkActions — for a table opened in a popup"
+      >
+        <p class="pg-lead">
+          This is the popup case: the table has no <code>bulkActions</code> of
+          its own, but a button <em>outside</em> it reads the current selection
+          to link records to a parent entity. Without
+          <code>keepCheckboxWithoutBulkActions</code>, an empty
+          <code>bulkActions</code> would hide the checkboxes along with the
+          (empty) bulk-action toolbar.
+        </p>
+
+        <gm-table
+          [records]="linkCandidates"
+          [tableConfig]="linkTableConfig"
+          [totalRecords]="linkCandidates.length"
+          [(selection)]="linkSelection"
+          caption="Providers available to link"
+        />
+
+        <div class="pg-row">
+          <gm-button
+            label="Add selected"
+            [disabled]="!linkSelection().length"
+            (onClick)="addSelectedLinks()"
+          />
+          <p class="pg-lead">
+            Linked: <code>{{ linkedNames() }}</code>
+          </p>
+        </div>
+      </gm-card>
     </section>
     <!-- ── Tree ─────────────────────────────────────────────────────────── -->
     <section id="tree">
@@ -1408,7 +1579,9 @@
         >
           <ng-template gmTreeIcon let-node>
             <i
-              [class]="node.data.kind === 'question' ? 'pi pi-question' : 'pi pi-check'"
+              [class]="
+                node.data.kind === 'question' ? 'pi pi-question' : 'pi pi-check'
+              "
             ></i>
           </ng-template>
         </gm-tree>
@@ -1444,8 +1617,9 @@
         />
 
         <p class="pg-readout">
-          {{ permissionCount() }} value(s): <code>{{ permissions.value }}</code> ·
-          last event: <code>{{ lastTreeEvent() }}</code>
+          {{ permissionCount() }} value(s):
+          <code>{{ permissions.value }}</code> · last event:
+          <code>{{ lastTreeEvent() }}</code>
         </p>
       </gm-card>
 

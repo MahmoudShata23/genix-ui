@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Shared selection mark — gm-multiselect / gm-tree-check
+   --------------------------------------------------------------------------
+   A checkbox drawn on a plain element, for rows whose ARIA role (`option`,
+   `treeitem`) already carries the checked state. A real `<input>` there would
+   add a focusable control inside the row and break the pattern, so this is
+   presentational only.
+
+   Modifiers: `--checked` (tick), `--partial` (bar, for a mixed parent) and
+   `--disabled`. Colours match the native checkbox in `_choice.scss`.
+   ========================================================================== */
+
+@mixin gm-tick($selector) {
+  #{$selector} {
+    flex-shrink: 0;
+    display: inline-grid;
+    place-content: center;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--gm-gray-300);
+    border-radius: var(--gm-radius-sm);
+    background: var(--gm-white);
+
+    &::before {
+      content: '';
+      width: 0.28rem;
+      height: 0.55rem;
+      margin-top: -0.1rem;
+      border: solid var(--gm-white);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) scale(0);
+      transition: transform var(--gm-transition-fast);
+    }
+
+    &--checked,
+    &--partial {
+      background: var(--gm-primary);
+      border-color: var(--gm-primary);
+    }
+
+    &--checked::before {
+      transform: rotate(45deg) scale(1);
+    }
+
+    /* The mixed state replaces the tick with a bar. */
+    &--partial::before {
+      width: 0.55rem;
+      height: 0;
+      margin-top: 0;
+      border-width: 0 0 2px 0;
+      transform: none;
+    }
+
+    &--disabled {
+      background: var(--gm-gray-100);
+      border-color: var(--gm-gray-300);
+    }
+  }
+
+  #{$selector}--disabled#{$selector}--checked,
+  #{$selector}--disabled#{$selector}--partial {
+    background: var(--gm-gray-400);
+    border-color: var(--gm-gray-400);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #{$selector}::before {
+      transition: none;
+    }
+  }
+}

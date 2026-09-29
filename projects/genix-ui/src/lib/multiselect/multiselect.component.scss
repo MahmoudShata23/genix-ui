@@ -1,4 +1,5 @@
 @use '../core/styles/dropdown' as dropdown;
+@use '../core/styles/tick' as tick;
 
 :host {
   display: block;
@@ -61,42 +62,7 @@
 
 /* Selection mark. Presentational — the option's `aria-selected` carries the
    state, so this must not be a focusable control. */
-.gm-multiselect__tick {
-  flex-shrink: 0;
-  display: inline-grid;
-  place-content: center;
-  width: 1rem;
-  height: 1rem;
-  border: 1px solid var(--gm-gray-300);
-  border-radius: var(--gm-radius-sm);
-  background: var(--gm-white);
-
-  &::before {
-    content: '';
-    width: 0.28rem;
-    height: 0.55rem;
-    margin-top: -0.1rem;
-    border: solid var(--gm-white);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg) scale(0);
-    transition: transform var(--gm-transition-fast);
-  }
-
-  &--checked {
-    background: var(--gm-primary);
-    border-color: var(--gm-primary);
-
-    &::before {
-      transform: rotate(45deg) scale(1);
-    }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gm-multiselect__tick::before {
-    transition: none;
-  }
-}
+@include tick.gm-tick('.gm-multiselect__tick');
 
 /* An option the selection limit currently rules out. Not a disabled option:
    the limit is a state of the selection, so the row becomes selectable again

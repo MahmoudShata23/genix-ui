@@ -39,4 +39,5 @@ export * from './lib/autocomplete';
 export * from './lib/file-upload';
 export * from './lib/stepper';
 export * from './lib/order-list';
+export * from './lib/tree';
 export * from './lib/chart';

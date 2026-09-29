@@ -19,3 +19,10 @@ body {
   color: var(--gm-gray-900);
   background: var(--gm-gray-50);
 }
+
+/* The one consumer-side hook the tree demo uses: a node's `styleClass` lands
+   on its row inside the tree, so — as with PrimeNG — it is styled from global
+   CSS. Question rows in the question tree are emboldened here. */
+.pg-question {
+  font-weight: var(--gm-font-weight-semibold);
+}

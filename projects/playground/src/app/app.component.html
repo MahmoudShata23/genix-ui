@@ -1386,6 +1386,156 @@
         last event: <code>{{ lastConfigEvent() }}</code>
       </p>
     </section>
+    <!-- ── Tree ─────────────────────────────────────────────────────────── -->
+    <section id="tree">
+      <h2>Tree</h2>
+
+      <gm-card
+        header="Question tree"
+        subheader="Single selection · guide lines · always expanded · icon template"
+      >
+        <gm-tree
+          class="pg-question-tree"
+          ariaLabel="Question tree"
+          selectionMode="single"
+          [formControl]="questionNode"
+          [nodes]="questionTree"
+          optionValue="key"
+          [filter]="true"
+          filterPlaceholder="Search question or answer"
+          [showLines]="true"
+          [collapsible]="false"
+        >
+          <ng-template gmTreeIcon let-node>
+            <i
+              [class]="node.data.kind === 'question' ? 'pi pi-question' : 'pi pi-check'"
+            ></i>
+          </ng-template>
+        </gm-tree>
+
+        <p class="pg-readout">
+          Editing: <code>{{ questionNode.value }}</code>
+        </p>
+      </gm-card>
+
+      <gm-card
+        header="Permissions"
+        subheader="Bound to a FormControl · search · a non-selectable node"
+      >
+        <gm-tree
+          selectionMode="checkbox"
+          label="Granted permissions"
+          hint="Checking a module grants everything in it"
+          [formControl]="permissions"
+          [nodes]="permissionTree"
+          optionValue="key"
+          [filter]="true"
+          filterPlaceholder="Search permissions"
+          [required]="true"
+          scrollHeight="20rem"
+          [error]="
+            permissions.touched && permissions.invalid
+              ? 'Grant at least one permission'
+              : undefined
+          "
+          (valueChange)="onPermissionsChange($event)"
+          (nodeSelect)="logTreeEvent('nodeSelect', $event)"
+          (nodeUnselect)="logTreeEvent('nodeUnselect', $event)"
+        />
+
+        <p class="pg-readout">
+          {{ permissionCount() }} value(s): <code>{{ permissions.value }}</code> ·
+          last event: <code>{{ lastTreeEvent() }}</code>
+        </p>
+      </gm-card>
+
+      <div class="pg-grid">
+        <gm-card
+          header="Lazy loading"
+          subheader="Expanding emits nodeExpand — the page supplies the children"
+        >
+          <gm-tree
+            selectionMode="checkbox"
+            label="Regions"
+            [formControl]="regions"
+            [nodes]="regionTree()"
+            optionValue="key"
+            (nodeExpand)="loadRegion($event)"
+          />
+          <p class="pg-readout">
+            Value: <code>{{ regions.value }}</code>
+          </p>
+        </gm-card>
+
+        <gm-card
+          header="Custom node template"
+          subheader="No selection · per-type template · small size · strict search"
+        >
+          <div [attr.dir]="treeRtl() ? 'rtl' : null">
+            <gm-tree
+              ariaLabel="Modules (browse only)"
+              size="small"
+              [nodes]="permissionTree"
+              [filter]="true"
+              filterMode="strict"
+            >
+              <ng-template gmTreeNode="module" let-node>
+                <strong>{{ node.label }}</strong>
+                <small> · {{ node.children?.length ?? 0 }} items</small>
+              </ng-template>
+            </gm-tree>
+          </div>
+          <div class="pg-row">
+            <gm-button
+              [label]="treeRtl() ? 'LTR' : 'RTL'"
+              severity="secondary"
+              variant="text"
+              size="small"
+              (onClick)="treeRtl.set(!treeRtl())"
+            />
+          </div>
+        </gm-card>
+      </div>
+
+      <gm-card
+        header="Virtual scroll"
+        subheader="5,100 nodes — only the rows in view are rendered"
+      >
+        <gm-tree
+          selectionMode="checkbox"
+          #bigTreeRef
+          label="Providers"
+          [formControl]="bigSelection"
+          [nodes]="bigTree"
+          optionValue="key"
+          [filter]="true"
+          [virtualScroll]="true"
+          [virtualItemSize]="36"
+          scrollHeight="18rem"
+          (valueChange)="onBigSelectionChange($event)"
+        />
+        <div class="pg-row">
+          <gm-button
+            label="Expand all"
+            severity="secondary"
+            variant="text"
+            size="small"
+            (onClick)="bigTreeRef.expandAll()"
+          />
+          <gm-button
+            label="Collapse all"
+            severity="secondary"
+            variant="text"
+            size="small"
+            (onClick)="bigTreeRef.collapseAll()"
+          />
+        </div>
+        <p class="pg-readout">
+          <code>{{ bigSelectionCount() }}</code> node(s) checked
+        </p>
+      </gm-card>
+    </section>
+
     <!-- ── Long tail ─────────────────────────────────────────────────────── -->
     <section id="long-tail">
       <h2>File upload, stepper, order list, chart</h2>

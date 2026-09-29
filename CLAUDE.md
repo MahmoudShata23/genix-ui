@@ -30,6 +30,8 @@ There is **no linter and no formatter** in this workspace — don't invent an `n
 
 `tsconfig.json` maps `@globemed/genix-ui` to `dist/genix-ui`, **not** to source. The playground therefore type-checks against the generated `.d.ts` and renders from the FESM bundle, exactly as a real consumer would.
 
+`ng-package.json` sets `deleteDestPath: false`, so a rebuild overwrites `dist/genix-ui` in place rather than emptying it first — otherwise a running `ng serve` recompiles against the empty folder, fails on `Could not resolve "dist/genix-ui/styles/tokens.css"`, and does not recover. CI builds from a clean checkout, so nothing stale can reach a publish; locally, delete `dist/` after removing a component.
+
 Consequence: **`npm run build` must run before serving or building the playground.** After changing library source, rebuild — otherwise the playground is compiling against a stale public API. CI enforces this ordering (`build` → `test` → `ng build playground` → `npm publish --dry-run` → `npm pack`), so a public-API or template break fails there before it reaches the registry.
 
 Anything added to a component must be re-exported through `src/public-api.ts` (one `export *` per component folder) or consumers cannot see it.
@@ -75,6 +77,8 @@ These are design decisions, not gaps — don't "fix" them without asking:
 - `gm-autocomplete` never fetches; typing emits `search` and the app updates `suggestions`.
 - `gm-file-upload` selects files and emits `File` objects — no request, progress or retry.
 - `gm-order-list` is controlled: it never mutates `items`, it emits a reordered copy.
+- `gm-tree` never fetches: expanding a lazy node (`leaf: false`) emits `nodeExpand` and the app supplies a new `nodes` array. It never mutates `nodes` either — checkbox partial state is derived, not written back as PrimeNG's `partialSelected`.
+- `gm-tree` in `single` mode does not deselect on a second click of the selected node — it drives an editor/detail pane that should not go blank.
 - `gm-stepper` is movement, not workflow; whether the user may advance is the app's call via `[nextDisabled]`.
 - `GmFormFieldBase.errorText` renders only the explicit `error` input — mapping `ValidationErrors` to human text needs the app's i18n layer.
 - `filterChange` is not emitted when closing clears the term, so a consumer fetching on it doesn't re-fetch the unfiltered list on every close.

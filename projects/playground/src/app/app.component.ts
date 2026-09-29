@@ -66,21 +66,23 @@ import {
   GmTableActionEvent,
   GmTableActionType,
   GmTableBulkActionScope,
-  GmTableCellDirective,
   GmTableColumn,
   GmTableComponent,
-  GmTableEmptyDirective,
   GmTableFilter,
   TableModel,
   GmTableQueryEvent,
   GmTableRequest,
   GmTableSortChange,
-  GmTableToolbarComponent,
   GmTabsComponent,
   GmTextareaComponent,
   GmToggleSwitchComponent,
   GmToastService,
   GmTooltipDirective,
+  GmTreeComponent,
+  GmTreeIconDirective,
+  GmTreeNode,
+  GmTreeNodeDirective,
+  GmTreeNodeEvent,
   GmTooltipPosition,
 } from "@globemed/genix-ui";
 
@@ -181,14 +183,14 @@ interface Section {
     GmStepperComponent,
     GmTabComponent,
     GmTabLabelDirective,
-    GmTableCellDirective,
     GmTableComponent,
-    GmTableEmptyDirective,
-    GmTableToolbarComponent,
     GmTabsComponent,
     GmTextareaComponent,
     GmToggleSwitchComponent,
     GmTooltipDirective,
+    GmTreeComponent,
+    GmTreeIconDirective,
+    GmTreeNodeDirective,
   ],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.scss",
@@ -222,6 +224,7 @@ export class AppComponent {
       id: "small",
       label: "Popover, menu, switch, number, select button, autocomplete",
     },
+    { id: "tree", label: "Tree" },
     { id: "long-tail", label: "File upload, stepper, order list, chart" },
   ];
 
@@ -1346,6 +1349,172 @@ export class AppComponent {
       this.people.filter((person) =>
         person.name.toLowerCase().includes(term.toLowerCase()),
       ),
+    );
+  }
+
+  // ── Tree ────────────────────────────────────────────────────────────────
+
+  /**
+   * The medical-scoring question/answer outline: questions hold answers, and
+   * an answer can lead to a sub-question. `styleClass` marks question rows so
+   * the page can embolden them.
+   */
+  protected readonly questionTree: GmTreeNode<{ kind: "question" | "answer" }>[] =
+    [
+      {
+        key: "q1",
+        label: "Untitled question",
+        data: { kind: "question" },
+        styleClass: "pg-question",
+        children: [
+          {
+            key: "a1",
+            label: "21 to 4132",
+            data: { kind: "answer" },
+            children: [
+              {
+                key: "q2",
+                label: "Untitled question",
+                data: { kind: "question" },
+                styleClass: "pg-question",
+                children: [
+                  { key: "a2", label: "From to To", data: { kind: "answer" } },
+                  { key: "a3", label: "From 5 to 10", data: { kind: "answer" } },
+                ],
+              },
+            ],
+          },
+          { key: "a4", label: "From to To", data: { kind: "answer" } },
+        ],
+      },
+    ];
+
+  /** The node the editor pane would be showing. */
+  protected readonly questionNode = new FormControl<unknown>("q2");
+
+  protected readonly permissionTree: GmTreeNode[] = [
+    {
+      key: "claims",
+      label: "Claims",
+      icon: "pi pi-file",
+      type: "module",
+      expanded: true,
+      children: [
+        { key: "claims.view", label: "View claims" },
+        { key: "claims.edit", label: "Edit claims" },
+        {
+          key: "claims.approve",
+          label: "Approve claims",
+          children: [
+            { key: "claims.approve.low", label: "Up to 10,000" },
+            { key: "claims.approve.high", label: "Above 10,000" },
+          ],
+        },
+      ],
+    },
+    {
+      key: "policies",
+      label: "Policies",
+      icon: "pi pi-shield",
+      type: "module",
+      children: [
+        { key: "policies.view", label: "View policies" },
+        { key: "policies.renew", label: "Renew policies" },
+        {
+          key: "policies.cancel",
+          label: "Cancel policies (admin only)",
+          selectable: false,
+        },
+      ],
+    },
+    {
+      key: "reports",
+      label: "Reports",
+      icon: "pi pi-chart-bar",
+      type: "module",
+      children: [
+        { key: "reports.monthly", label: "Monthly summary" },
+        { key: "reports.audit", label: "Audit trail" },
+      ],
+    },
+  ];
+
+  /** Starts with one permission granted, to show a partial parent. */
+  protected readonly permissions = new FormControl<unknown[] | null>(
+    ["claims.view"],
+    Validators.required,
+  );
+
+  protected readonly permissionCount = signal(1);
+
+  /** Children arrive on expand, as they would from an endpoint. */
+  protected readonly regionTree = signal<GmTreeNode[]>(
+    ["Levant", "Gulf", "North Africa"].map((name) => ({
+      key: name,
+      label: name,
+      leaf: false,
+    })),
+  );
+
+  protected readonly regions = new FormControl<unknown[] | null>([]);
+
+  protected readonly treeRtl = signal(false);
+
+  protected readonly lastTreeEvent = signal("—");
+
+  /** 100 groups × 50 members — 5,100 nodes, for the virtualised tree. */
+  protected readonly bigTree: GmTreeNode[] = Array.from(
+    { length: 100 },
+    (_, g) => ({
+      key: `g${g}`,
+      label: `Provider group ${g + 1}`,
+      children: Array.from({ length: 50 }, (_, m) => ({
+        key: `g${g}-m${m}`,
+        label: `Provider ${g + 1}.${m + 1}`,
+      })),
+    }),
+  );
+
+  protected readonly bigSelection = new FormControl<unknown[] | null>([]);
+
+  protected readonly bigSelectionCount = signal(0);
+
+  protected onPermissionsChange(value: unknown): void {
+    this.permissionCount.set(Array.isArray(value) ? value.length : 0);
+  }
+
+  protected onBigSelectionChange(value: unknown): void {
+    this.bigSelectionCount.set(Array.isArray(value) ? value.length : 0);
+  }
+
+  protected logTreeEvent(name: string, event: GmTreeNodeEvent): void {
+    this.lastTreeEvent.set(`${name}: ${event.node.label}`);
+  }
+
+  /** Stands in for a request: marks the node loading, then fills it in. */
+  protected loadRegion(event: GmTreeNodeEvent): void {
+    this.logTreeEvent("nodeExpand", event);
+    const node = event.node as GmTreeNode;
+    if (node.leaf !== false || node.children?.length) {
+      return;
+    }
+    this.replaceRegion(node.key, { loading: true });
+    setTimeout(() => {
+      this.replaceRegion(node.key, {
+        loading: false,
+        leaf: true,
+        children: ["North", "Central", "South"].map((part) => ({
+          key: `${node.key}-${part}`,
+          label: `${node.label} ${part}`,
+        })),
+      });
+    }, 800);
+  }
+
+  /** A new array each time — the tree reads `nodes` as an immutable input. */
+  private replaceRegion(key: string | undefined, patch: Partial<GmTreeNode>): void {
+    this.regionTree.update((nodes) =>
+      nodes.map((node) => (node.key === key ? { ...node, ...patch } : node)),
     );
   }
 

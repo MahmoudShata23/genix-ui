@@ -322,3 +322,9 @@ code {
     font-weight: var(--gm-font-weight-semibold);
   }
 }
+
+/* The question tree sits directly in its card, which already draws the
+   border — so the tree's own panel border is switched off through its slot. */
+.pg-question-tree {
+  --gm-tree-border: none;
+}

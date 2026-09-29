@@ -1,0 +1,266 @@
+<div class="gm-tree">
+  @if (label()) {
+    <span class="gm-tree__label" [attr.id]="labelId()">
+      {{ label() }}
+      @if (required()) {
+        <span class="gm-tree__required" aria-hidden="true">*</span>
+      }
+    </span>
+  }
+
+  <div class="gm-tree__panel" [attr.aria-busy]="loading() ? 'true' : null">
+    @if (headerTemplate(); as header) {
+      <ng-container [ngTemplateOutlet]="header.template" />
+    }
+
+    @if (filter()) {
+      <div class="gm-tree__filter">
+        <span class="gm-tree__search-icon" aria-hidden="true"></span>
+        <input
+          type="text"
+          class="gm-tree__filter-input"
+          autocomplete="off"
+          [attr.placeholder]="filterPlaceholder()"
+          [attr.aria-label]="filterPlaceholder() || 'Search'"
+          [attr.aria-controls]="controlId()"
+          [disabled]="isDisabled()"
+          [value]="filterText()"
+          (input)="onFilterInput($event)"
+          (keydown)="onFilterKeydown($event)"
+        />
+      </div>
+    }
+
+    @if (loading() && loadingMode() === 'icon') {
+      <div class="gm-tree__loading">
+        <gm-spinner size="small" />
+      </div>
+    } @else if (!rows().length) {
+      <div class="gm-tree__empty">
+        @if (emptyTemplate(); as empty) {
+          <ng-container
+            [ngTemplateOutlet]="empty.template"
+            [ngTemplateOutletContext]="{ $implicit: !!term() }"
+          />
+        } @else {
+          {{ term() ? emptyFilterMessage() : emptyMessage() }}
+        }
+      </div>
+    } @else if (virtualScroll()) {
+      <!-- The CDK wraps the rendered rows in its own element, so the tree
+           semantics sit on the scroller itself, as close to the rows as the
+           virtualisation allows. -->
+      <cdk-virtual-scroll-viewport
+        class="gm-tree__tree"
+        role="tree"
+        [attr.aria-multiselectable]="multiselectable()"
+        [attr.id]="controlId()"
+        [attr.tabindex]="isDisabled() ? -1 : 0"
+        [attr.aria-labelledby]="label() ? labelId() : null"
+        [attr.aria-label]="label() ? null : ariaLabel()"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
+        [attr.aria-readonly]="readOnly() ? 'true' : null"
+        [attr.aria-activedescendant]="activeDescendant()"
+        [itemSize]="virtualItemSize()"
+        [style.height]="viewportHeight()"
+        (focus)="onTreeFocus()"
+        (blur)="onTreeBlur()"
+        (keydown)="onKeydown($event)"
+      >
+        <div
+          *cdkVirtualFor="let row of rows(); let i = index; trackBy: trackRow"
+          [class]="styleClassOf(row.entry)"
+          class="gm-tree__row"
+          role="treeitem"
+          [attr.id]="rowId(i)"
+          [style.height.px]="virtualItemSize()"
+          [style.--gm-tree-level]="row.entry.level - 1"
+          [class.gm-tree__row--active]="focused() && i === activeIndex()"
+          [class.gm-tree__row--selected]="isSelected(row.entry)"
+          [class.gm-tree__row--expanded]="row.expanded"
+          [class.gm-tree__row--unselectable]="!isSelectable(row.entry)"
+          [attr.aria-level]="row.entry.level"
+          [attr.aria-posinset]="row.posInSet"
+          [attr.aria-setsize]="row.setSize"
+          [attr.aria-expanded]="row.hasChildren && collapsible() ? row.expanded : null"
+          [attr.aria-checked]="ariaChecked(row.entry)"
+          [attr.aria-selected]="ariaSelected(row.entry)"
+          [attr.aria-disabled]="selectionMode() !== 'none' && !isSelectable(row.entry) ? 'true' : null"
+          (click)="onRowClick(row, $event)"
+        >
+          <ng-container
+            [ngTemplateOutlet]="rowBody"
+            [ngTemplateOutletContext]="{ $implicit: row }"
+          />
+        </div>
+      </cdk-virtual-scroll-viewport>
+    } @else {
+      <div
+        class="gm-tree__tree"
+        role="tree"
+        [attr.aria-multiselectable]="multiselectable()"
+        [attr.id]="controlId()"
+        [attr.tabindex]="isDisabled() ? -1 : 0"
+        [attr.aria-labelledby]="label() ? labelId() : null"
+        [attr.aria-label]="label() ? null : ariaLabel()"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
+        [attr.aria-readonly]="readOnly() ? 'true' : null"
+        [attr.aria-activedescendant]="activeDescendant()"
+        [style.max-height]="scrollHeight()"
+        (focus)="onTreeFocus()"
+        (blur)="onTreeBlur()"
+        (keydown)="onKeydown($event)"
+      >
+        @for (row of rows(); track row.entry; let i = $index) {
+          <div
+            [class]="styleClassOf(row.entry)"
+            class="gm-tree__row"
+            role="treeitem"
+            [attr.id]="rowId(i)"
+            [style.--gm-tree-level]="row.entry.level - 1"
+            [class.gm-tree__row--active]="focused() && i === activeIndex()"
+            [class.gm-tree__row--selected]="isSelected(row.entry)"
+            [class.gm-tree__row--expanded]="row.expanded"
+            [class.gm-tree__row--unselectable]="!isSelectable(row.entry)"
+            [attr.aria-level]="row.entry.level"
+            [attr.aria-posinset]="row.posInSet"
+            [attr.aria-setsize]="row.setSize"
+            [attr.aria-expanded]="row.hasChildren && collapsible() ? row.expanded : null"
+            [attr.aria-checked]="ariaChecked(row.entry)"
+            [attr.aria-selected]="ariaSelected(row.entry)"
+            [attr.aria-disabled]="selectionMode() !== 'none' && !isSelectable(row.entry) ? 'true' : null"
+            (click)="onRowClick(row, $event)"
+          >
+            <ng-container
+              [ngTemplateOutlet]="rowBody"
+              [ngTemplateOutletContext]="{ $implicit: row }"
+            />
+          </div>
+        }
+      </div>
+    }
+
+    @if (loading() && loadingMode() === 'mask') {
+      <div class="gm-tree__mask">
+        <gm-spinner size="small" />
+      </div>
+    }
+
+    @if (footerTemplate(); as footer) {
+      <ng-container [ngTemplateOutlet]="footer.template" />
+    }
+  </div>
+
+  @if (errorText()) {
+    <span class="gm-tree__error" [attr.id]="errorElementId()">
+      {{ errorText() }}
+    </span>
+  } @else if (showHint()) {
+    <span class="gm-tree__hint" [attr.id]="hintElementId()">
+      {{ hint() }}
+    </span>
+  }
+</div>
+
+<!-- The inside of one row, shared by both list branches. Everything here is
+     presentational: the row carries the treeitem semantics and the clicks. -->
+<ng-template #rowBody let-row>
+  @if (showLines() && row.entry.level > 1) {
+    <!-- One line per ancestor column that continues past this row, then this
+         row's own branch: down from its parent and across to it. -->
+    <span class="gm-tree__guides" aria-hidden="true">
+      @for (continues of row.guides; track $index) {
+        @if (continues) {
+          <span class="gm-tree__guide" [style.--gm-tree-column]="$index + 1"></span>
+        }
+      }
+      <span
+        class="gm-tree__guide"
+        [class.gm-tree__guide--end]="!row.hasNextSibling"
+        [style.--gm-tree-column]="row.entry.level - 1"
+      ></span>
+      <span class="gm-tree__elbow" [style.--gm-tree-column]="row.entry.level - 1"></span>
+    </span>
+  }
+
+  @if (collapsible()) {
+    <span
+      class="gm-tree__slot gm-tree__toggler"
+      [class.gm-tree__toggler--leaf]="!row.hasChildren"
+      aria-hidden="true"
+      (click)="onTogglerClick(row, $event)"
+    >
+      @if (isLoading(row.entry)) {
+        <gm-spinner size="small" />
+      } @else if (row.hasChildren) {
+        @if (togglerTemplate(); as toggler) {
+          <ng-container
+            [ngTemplateOutlet]="toggler.template"
+            [ngTemplateOutletContext]="{ $implicit: row.expanded, node: row.entry.node }"
+          />
+        } @else {
+          <span class="gm-tree__chevron"></span>
+        }
+      }
+    </span>
+  } @else if (isLoading(row.entry)) {
+    <span class="gm-tree__slot" aria-hidden="true"><gm-spinner size="small" /></span>
+  }
+
+  @if (isCheckbox()) {
+    <span class="gm-tree__slot" aria-hidden="true">
+      @if (checkboxTemplate(); as checkbox) {
+        <ng-container
+          [ngTemplateOutlet]="checkbox.template"
+          [ngTemplateOutletContext]="{
+            $implicit: stateOf(row.entry) === 'checked',
+            partial: stateOf(row.entry) === 'partial',
+            disabled: selectLocked() || !isSelectable(row.entry),
+            node: row.entry.node
+          }"
+        />
+      } @else {
+        <span
+          class="gm-tree__tick"
+          [class.gm-tree__tick--checked]="stateOf(row.entry) === 'checked'"
+          [class.gm-tree__tick--partial]="stateOf(row.entry) === 'partial'"
+          [class.gm-tree__tick--disabled]="isDisabled() || !isSelectable(row.entry)"
+        ></span>
+      }
+    </span>
+  }
+
+  @if (iconTemplate(); as icon) {
+    <span class="gm-tree__slot gm-tree__icon" aria-hidden="true">
+      <ng-container
+        [ngTemplateOutlet]="icon.template"
+        [ngTemplateOutletContext]="iconContext(row)"
+      />
+    </span>
+  } @else {
+    @if (iconOf(row); as icon) {
+      <span class="gm-tree__slot gm-tree__icon" aria-hidden="true">
+        <span [class]="icon"></span>
+      </span>
+    }
+  }
+
+  @if (templateFor(row.entry); as template) {
+    <span class="gm-tree__content">
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="nodeContext(row)"
+      />
+    </span>
+  } @else {
+    <!-- One line on purpose: whitespace between the parts would render as
+         spaces inside the label. -->
+    <span class="gm-tree__text">@for (part of labelParts(row.entry); track $index) {@if (part.match) {<mark class="gm-tree__match">{{ part.text }}</mark>} @else {<ng-container>{{ part.text }}</ng-container>}}</span>
+  }
+</ng-template>

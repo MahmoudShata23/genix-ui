@@ -1,0 +1,393 @@
+/* ==========================================================================
+   gm-tree
+   --------------------------------------------------------------------------
+   Rows indented by level inside a panel. Geometry and surface come from local
+   slots on the host, so a consumer can restyle a tree by overriding them on
+   it — e.g. a tree that sits inside a card of its own:
+
+       gm-tree.question-tree { --gm-tree-border: none; }
+
+   The size classes set the same slots. Every row starts with the same
+   fixed-width leading slot (toggler, checkbox or icon), which is what lets the
+   guide lines find the centre of a parent's slot from its level alone.
+   Indentation is `padding-inline-start`, so RTL needs no override; only the
+   chevron's direction is mirrored.
+   ========================================================================== */
+
+@use '../core/styles/tick' as tick;
+
+:host {
+  --gm-tree-indent: 1.5rem;
+  --gm-tree-row-height: 2.125rem;
+  --gm-tree-row-pad: var(--gm-space-2);
+  --gm-tree-lead-size: 1.25rem;
+  --gm-tree-gap: var(--gm-space-2);
+  --gm-tree-font-size: var(--gm-font-size-base);
+  --gm-tree-icon-color: var(--gm-primary);
+  --gm-tree-icon-size: 1rem;
+  --gm-tree-line-color: var(--gm-gray-300);
+  --gm-tree-border: 1px solid var(--gm-gray-200);
+  --gm-tree-selected-bg: var(--gm-primary-light);
+  --gm-tree-selected-color: var(--gm-primary-dark);
+
+  display: block;
+  font-family: var(--gm-font-family);
+}
+
+:host(.gm-tree-host--small) {
+  --gm-tree-indent: 1.25rem;
+  --gm-tree-row-height: 1.875rem;
+  --gm-tree-font-size: var(--gm-font-size-sm);
+}
+
+:host(.gm-tree-host--large) {
+  --gm-tree-indent: 1.75rem;
+  --gm-tree-row-height: 2.625rem;
+  --gm-tree-font-size: var(--gm-font-size-md);
+}
+
+.gm-tree {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.gm-tree__label {
+  font-size: var(--gm-font-size-sm);
+  font-weight: var(--gm-font-weight-medium);
+  color: var(--gm-gray-700);
+  margin-bottom: var(--gm-space-1);
+}
+
+.gm-tree__required {
+  color: var(--gm-danger);
+  margin-inline-start: var(--gm-space-1);
+}
+
+/* Positioned so the loading mask can cover it. */
+.gm-tree__panel {
+  position: relative;
+  border: var(--gm-tree-border);
+  border-radius: var(--gm-radius-md);
+  background: var(--gm-white);
+}
+
+:host(.gm-tree-host--invalid) .gm-tree__panel {
+  border-color: var(--gm-danger);
+}
+
+:host(.gm-tree-host--disabled) .gm-tree__panel {
+  background: var(--gm-gray-50);
+}
+
+/* ── Search ──────────────────────────────────────────────────────────── */
+
+.gm-tree__filter {
+  position: relative;
+  padding: var(--gm-space-2);
+}
+
+/* A magnifier drawn in CSS, so no icon font is needed. */
+.gm-tree__search-icon {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: calc(var(--gm-space-2) + var(--gm-space-3));
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: -0.45rem;
+  border: 2px solid var(--gm-gray-400);
+  border-radius: var(--gm-radius-full);
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 100%;
+    top: 100%;
+    width: 0.35rem;
+    height: 2px;
+    margin-inline-start: -0.12rem;
+    margin-top: -0.05rem;
+    background: var(--gm-gray-400);
+    transform: rotate(45deg);
+    transform-origin: 0 50%;
+  }
+}
+
+:host-context([dir='rtl']) .gm-tree__search-icon::after {
+  transform: rotate(-45deg);
+  transform-origin: 100% 50%;
+}
+
+.gm-tree__filter-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(1.5em + (var(--gm-space-2) * 2) + 2px);
+  padding: var(--gm-space-2) var(--gm-space-3);
+  padding-inline-start: calc(var(--gm-space-3) + 1.5rem);
+  border: 1px solid var(--gm-gray-300);
+  border-radius: var(--gm-radius-md);
+  background: var(--gm-white);
+  color: var(--gm-gray-800);
+  font-family: inherit;
+  font-size: var(--gm-font-size-base);
+  line-height: 1.5;
+  transition: border-color var(--gm-transition-fast),
+    box-shadow var(--gm-transition-fast);
+
+  &::placeholder {
+    color: var(--gm-gray-400);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--gm-gray-400);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--gm-primary);
+    box-shadow: 0 0 0 var(--gm-focus-ring-width) var(--gm-focus-ring-color);
+  }
+
+  &:disabled {
+    background: var(--gm-gray-100);
+    cursor: not-allowed;
+  }
+}
+
+.gm-tree__match {
+  background: var(--gm-warning-light);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* ── Rows ────────────────────────────────────────────────────────────── */
+
+.gm-tree__tree {
+  display: block;
+  padding: var(--gm-space-1);
+  overflow: auto;
+  outline: none;
+}
+
+/* The virtual viewport scrolls its own content wrapper. */
+cdk-virtual-scroll-viewport.gm-tree__tree {
+  padding: 0;
+}
+
+.gm-tree__row {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--gm-tree-gap);
+  min-height: var(--gm-tree-row-height);
+  padding-block: 0.3125rem;
+  padding-inline: calc(
+      var(--gm-tree-level, 0) * var(--gm-tree-indent) + var(--gm-tree-row-pad)
+    )
+    var(--gm-tree-row-pad);
+  border-radius: var(--gm-radius-sm);
+
+  color: var(--gm-gray-800);
+  font-size: var(--gm-tree-font-size);
+  line-height: 1.4;
+  user-select: none;
+  transition: background-color var(--gm-transition-fast),
+    color var(--gm-transition-fast);
+
+  &:hover {
+    background: var(--gm-gray-50);
+  }
+
+  &--selected,
+  &--selected:hover {
+    background: var(--gm-tree-selected-bg);
+    color: var(--gm-tree-selected-color);
+  }
+}
+
+:host(.gm-tree-host--selectable) .gm-tree__row {
+  cursor: pointer;
+}
+
+:host(.gm-tree-host--selectable) .gm-tree__row--unselectable {
+  color: var(--gm-gray-500);
+  cursor: default;
+}
+
+/* The keyboard's position. Drawn only for keyboard focus: a mouse click
+   focuses the tree too, and a ring there would read as a stray selection. */
+.gm-tree__tree:focus-visible .gm-tree__row--active {
+  box-shadow: inset 0 0 0 1px var(--gm-primary);
+}
+
+:host(.gm-tree-host--disabled) .gm-tree__row {
+  color: var(--gm-gray-500);
+  cursor: not-allowed;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+:host(.gm-tree-host--readonly) .gm-tree__row {
+  cursor: default;
+}
+
+/* Every leading element takes the same box, so rows line up by level and
+   the guide lines know where a parent's slot is centred. */
+.gm-tree__slot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: var(--gm-tree-lead-size);
+  height: var(--gm-tree-lead-size);
+}
+
+.gm-tree__toggler {
+  border-radius: var(--gm-radius-sm);
+  color: var(--gm-gray-500);
+  cursor: pointer;
+
+  &:hover:not(.gm-tree__toggler--leaf) {
+    background: var(--gm-gray-200);
+    color: var(--gm-gray-700);
+  }
+
+  &--leaf {
+    cursor: inherit;
+  }
+}
+
+/* Drawn in CSS, so no icon font is needed. Points to the inline end while
+   collapsed and down while expanded. */
+.gm-tree__chevron {
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-inline-start: -0.15rem;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(-45deg);
+  transition: transform var(--gm-transition-fast);
+}
+
+:host-context([dir='rtl']) .gm-tree__chevron {
+  margin-inline-start: 0;
+  margin-inline-end: -0.15rem;
+  transform: rotate(135deg);
+}
+
+.gm-tree__row--expanded .gm-tree__chevron,
+:host-context([dir='rtl']) .gm-tree__row--expanded .gm-tree__chevron {
+  margin-inline: 0;
+  margin-top: -0.2rem;
+  transform: rotate(45deg);
+}
+
+@include tick.gm-tick('.gm-tree__tick');
+
+.gm-tree__icon {
+  color: var(--gm-tree-icon-color);
+  font-size: var(--gm-tree-icon-size);
+  line-height: 1;
+}
+
+.gm-tree__text,
+.gm-tree__content {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gm-tree__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Guide lines ─────────────────────────────────────────────────────── */
+
+/* Column k runs through the centre of the leading slot of this row's
+   ancestor at level k. The row's own branch drops from its parent's column
+   and turns across into its own slot. */
+.gm-tree__guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gm-tree__guide,
+.gm-tree__elbow {
+  --gm-tree-guide-x: calc(
+    (var(--gm-tree-column) - 1) * var(--gm-tree-indent) + var(--gm-tree-row-pad) +
+      (var(--gm-tree-lead-size) / 2)
+  );
+
+  position: absolute;
+  inset-inline-start: var(--gm-tree-guide-x);
+}
+
+.gm-tree__guide {
+  top: 0;
+  bottom: 0;
+  border-inline-start: 1px solid var(--gm-tree-line-color);
+
+  /* The last child's branch stops where it turns. */
+  &--end {
+    bottom: 50%;
+  }
+}
+
+.gm-tree__elbow {
+  top: 50%;
+  width: calc(var(--gm-tree-indent) - (var(--gm-tree-lead-size) / 2) - 2px);
+  border-top: 1px solid var(--gm-tree-line-color);
+}
+
+/* ── States ──────────────────────────────────────────────────────────── */
+
+.gm-tree__empty {
+  padding: var(--gm-space-3);
+  color: var(--gm-gray-500);
+  font-size: var(--gm-font-size-sm);
+}
+
+.gm-tree__loading {
+  display: grid;
+  place-content: center;
+  padding: var(--gm-space-4);
+}
+
+.gm-tree__mask {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  border-radius: inherit;
+  background: rgba(var(--gm-white-rgb), 0.6);
+}
+
+.gm-tree__error {
+  font-size: var(--gm-font-size-xs);
+  color: var(--gm-danger);
+  margin-top: var(--gm-space-1);
+}
+
+.gm-tree__hint {
+  font-size: var(--gm-font-size-xs);
+  color: var(--gm-gray-500);
+  margin-top: var(--gm-space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-tree__chevron,
+  .gm-tree__row {
+    transition: none;
+  }
+}

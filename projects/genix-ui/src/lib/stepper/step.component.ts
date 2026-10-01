@@ -54,6 +54,14 @@ export class GmStepComponent {
    */
   readonly markerText = input<string>();
 
+  /**
+   * Tints the marker as "in progress" (warning colour) instead of the default
+   * neutral grey, for a `markerText` step once its count has started moving
+   * but isn't done yet (e.g. "2/5" of a review checklist). Ignored once the
+   * step is `completed`, which still shows the usual green checkmark.
+   */
+  readonly markerInProgress = input(false, { transform: booleanAttribute });
+
   readonly disabled = input(false, { transform: booleanAttribute });
 
   /**

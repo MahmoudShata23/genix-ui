@@ -113,6 +113,15 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
   /** Per-option severity for the `chip` display. Defaults to `primary`. */
   readonly chipSeverity = input<(option: GmDropdownOption) => GmSeverity>();
 
+  /**
+   * When every option is selected, shows this text as a single summary chip
+   * (`chip` display) or as the trigger's whole label (`menu` display) instead
+   * of listing every selection individually. Unset — the default — leaves
+   * existing behaviour untouched: a full selection renders exactly like any
+   * other, just longer.
+   */
+  readonly allSelectedLabel = input<string>();
+
   protected readonly headerTemplate = contentChild(GmMultiselectHeaderDirective);
 
   protected iconFor(option: GmDropdownOption): string | undefined {
@@ -145,8 +154,25 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
     this.selectedOptions().map((option) => this.labelOf(option)),
   );
 
-  /** Trigger text in `menu` display: either the labels or a count. */
+  /**
+   * True once every option is selected and `allSelectedLabel` opts into the
+   * collapsed summary — never true with no options at all, since selecting
+   * "everything" out of an empty list is not a meaningful state.
+   */
+  protected readonly isFullySelected = computed(() => {
+    const options = this.options();
+    return (
+      !!this.allSelectedLabel() &&
+      options.length > 0 &&
+      options.every((option) => this.isSelected(option))
+    );
+  });
+
+  /** Trigger text in `menu` display: the "all selected" label, the labels, or a count. */
   protected readonly summary = computed(() => {
+    if (this.isFullySelected()) {
+      return this.allSelectedLabel() ?? null;
+    }
     const labels = this.selectedLabels();
     if (!labels.length) {
       return null;
@@ -176,14 +202,20 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
    * Chips actually drawn in `display="chip"` mode. Capped at the same
    * `maxSelectedLabels` threshold `menu` display uses for its count summary,
    * so the trigger never grows without bound as the selection does — the rest
-   * collapse into one "+N" badge (`overflowChipCount`).
+   * collapse into one "+N" badge (`overflowChipCount`). Empty once
+   * `isFullySelected` — the template draws the single "all selected" chip
+   * instead of this list.
    */
   protected readonly visibleChipOptions = computed(() =>
-    this.selectedOptions().slice(0, this.maxSelectedLabels()),
+    this.isFullySelected()
+      ? []
+      : this.selectedOptions().slice(0, this.maxSelectedLabels()),
   );
 
-  protected readonly overflowChipCount = computed(
-    () => this.selectedOptions().length - this.visibleChipOptions().length,
+  protected readonly overflowChipCount = computed(() =>
+    this.isFullySelected()
+      ? 0
+      : this.selectedOptions().length - this.visibleChipOptions().length,
   );
 
   protected readonly hasValue = computed(

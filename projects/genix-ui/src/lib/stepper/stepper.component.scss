@@ -143,6 +143,18 @@
   }
 }
 
+/* A markerText step (e.g. a review checklist) once its count has started
+   moving but isn't done — tints the marker warning-orange instead of the
+   default neutral grey, taking priority over `--active`'s blue tint since
+   the step is very likely to be active while the user works through it. */
+.gm-stepper__step--progress {
+  .gm-stepper__marker {
+    border-color: var(--gm-warning);
+    background: var(--gm-warning);
+    color: var(--gm-white);
+  }
+}
+
 .gm-stepper__separator {
   flex: 1 1 auto;
   min-width: 40px;
@@ -164,9 +176,33 @@
   padding-top: var(--gm-space-4);
 }
 
-/* Narrow viewports: the labels are what has to go, not the markers. */
+/* Narrow viewports: the labels are what has to go, not the markers. Once the
+   label is gone there's no content left to justify the separator stretching
+   to fill the row (`flex: 1 1 auto` on the step) — cap it back to a small
+   fixed gap so the bare markers sit close together instead of spreading out
+   with long empty rules between them. Even fully compacted, a stepper with
+   enough steps (each marker is a fixed 36px circle — shrinking it further
+   would make it an unusably small tap target) can still be wider than a
+   narrow viewport, so the header scrolls horizontally rather than
+   overflowing its own card/viewport with no way to reach the later steps. */
 @media (max-width: 40rem) {
   .gm-stepper__info {
     display: none;
+  }
+
+  .gm-stepper__step:not(:last-child) {
+    flex: 0 1 auto;
+  }
+
+  .gm-stepper__separator {
+    flex: 0 1 auto;
+    min-width: var(--gm-space-4);
+    max-width: var(--gm-space-6);
+  }
+
+  .gm-stepper__header {
+    padding-inline: var(--gm-space-2);
+    overflow-x: auto;
+    justify-content: flex-start;
   }
 }

@@ -32,30 +32,34 @@
       <span class="gm-dropdown__placeholder">{{ placeholder() }}</span>
     } @else if (display() === 'chip') {
       <span class="gm-multiselect__chips" [gmTooltip]="hasHiddenSelections() ? allSelectedLabelsText() : null">
-        @for (option of selectedOptions(); track $index) {
-          @if (iconFor(option); as icon) {
+        @if (isFullySelected()) {
+          <gm-chip severity="secondary" [label]="allSelectedLabel()!" [removable]="false" />
+        } @else {
+          @for (option of selectedOptions(); track $index) {
+            @if (iconFor(option); as icon) {
+              <gm-chip
+                [severity]="severityFor(option)"
+                [icon]="icon"
+                [label]="labelOf(option)"
+                [removable]="false"
+              />
+            } @else {
+              <gm-chip
+                [severity]="severityFor(option)"
+                [label]="labelOf(option)"
+                [removable]="!readOnly() && !isDisabled()"
+                [removeAriaLabel]="'Remove ' + labelOf(option)"
+                (remove)="removeValue(option)"
+              />
+            }
+          }
+          @if (overflowChipCount() > 0) {
             <gm-chip
-              [severity]="severityFor(option)"
-              [icon]="icon"
-              [label]="labelOf(option)"
-              [removable]="false"
-            />
-          } @else {
-            <gm-chip
-              [severity]="severityFor(option)"
-              [label]="labelOf(option)"
-              [removable]="!readOnly() && !isDisabled()"
-              [removeAriaLabel]="'Remove ' + labelOf(option)"
-              (remove)="removeValue(option)"
+              severity="secondary"
+              [label]="'+' + overflowChipCount()"
+              [ariaLabel]="overflowChipCount() + ' more selected'"
             />
           }
-        }
-        @if (overflowChipCount() > 0) {
-          <gm-chip
-            severity="secondary"
-            [label]="'+' + overflowChipCount()"
-            [ariaLabel]="overflowChipCount() + ' more selected'"
-          />
         }
       </span>
     } @else {

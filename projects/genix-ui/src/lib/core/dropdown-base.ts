@@ -43,6 +43,21 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
   /** Property holding an option's form value. Omit to store the whole option. */
   readonly optionValue = input<string>();
 
+  /**
+   * Switches `options` from a flat list to a list of groups, each rendered as
+   * a non-interactive header row followed by its own options. Set together
+   * with `optionGroupChildren`; omit both for the (default) flat list.
+   *
+   * ```html
+   * <gm-select [options]="groups" optionGroupLabel="label"
+   *            optionGroupChildren="items" optionLabel="name" optionValue="id" />
+   * ```
+   */
+  readonly optionGroupLabel = input<string>();
+
+  /** Property holding a group's child options array. See `optionGroupLabel`. */
+  readonly optionGroupChildren = input<string>();
+
   readonly placeholder = input<string>('');
 
   readonly filter = input(false, { transform: booleanAttribute });
@@ -117,24 +132,82 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
     () => this.isDisabled() || this.readOnly() || this.loading(),
   );
 
+  /** Whether `options` holds groups (`optionGroupLabel`/`optionGroupChildren`
+   * both set) rather than a flat option list. */
+  protected readonly isGrouped = computed(
+    () => this.optionGroupLabel() !== undefined && this.optionGroupChildren() !== undefined,
+  );
+
+  /**
+   * `options` flattened to real, selectable options — identical to `options()`
+   * itself when ungrouped. Every selection/keyboard code path reads options
+   * through here (never through `options()` directly) so grouping only ever
+   * changes what the panel renders, not what can be the control's value.
+   */
+  protected readonly flatOptions = computed(() => {
+    if (!this.isGrouped()) {
+      return this.options();
+    }
+    const childrenKey = this.optionGroupChildren();
+    return this.options().flatMap(
+      (group) => (this.read(group, childrenKey) as GmDropdownOption[] | undefined) ?? [],
+    );
+  });
+
   protected readonly visibleOptions = computed(() => {
     const term = this.filterText().trim().toLowerCase();
     if (!this.filter() || !term) {
-      // Returns the input array untouched — filtering never mutates it.
-      return this.options();
+      // Returns the flattened array untouched — filtering never mutates it.
+      return this.flatOptions();
     }
     const key = this.filterBy() ?? this.optionLabel();
-    return this.options().filter((option) =>
+    return this.flatOptions().filter((option) =>
       String(this.read(option, key) ?? '')
         .toLowerCase()
         .includes(term),
     );
   });
 
+  /**
+   * Render-only group boundaries over `visibleOptions()`: for each group that
+   * still has at least one visible option after filtering, the group's label
+   * and the starting index (into `visibleOptions()`) of its first option.
+   * Empty when ungrouped — the panel template falls back to its existing
+   * flat `<li>` loop in that case, unchanged from before grouping existed.
+   */
+  protected readonly visibleGroupBoundaries = computed(() => {
+    if (!this.isGrouped()) {
+      return [];
+    }
+    const labelKey = this.optionGroupLabel();
+    const childrenKey = this.optionGroupChildren();
+    const visible = this.visibleOptions();
+
+    const boundaries: { label: string; startIndex: number }[] = [];
+    let cursor = 0;
+    for (const group of this.options()) {
+      const groupChildren =
+        (this.read(group, childrenKey) as GmDropdownOption[] | undefined) ?? [];
+      const visibleCount = groupChildren.filter((child) => visible.includes(child)).length;
+      if (visibleCount > 0) {
+        boundaries.push({ label: gmOptionLabel(group, labelKey), startIndex: cursor });
+      }
+      cursor += visibleCount;
+    }
+    return boundaries;
+  });
+
   protected readonly activeOptionId = computed(() => {
     const index = this.activeIndex();
     return index < 0 ? null : this.optionId(index);
   });
+
+  /** The group header label to render immediately before `visibleOptions()[index]`,
+   * or `null` when that option does not start a new group (including the
+   * entire ungrouped case, where `visibleGroupBoundaries()` is always empty). */
+  protected groupHeaderAt(index: number): string | null {
+    return this.visibleGroupBoundaries().find((b) => b.startIndex === index)?.label ?? null;
+  }
 
   constructor() {
     super();

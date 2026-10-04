@@ -202,6 +202,29 @@
     }
   }
 
+  .gm-dropdown__option--grouped {
+    /* Nests a group's options visually under its header instead of sitting
+       flush with it at the same indent. */
+    padding-inline-start: calc(var(--gm-space-3) + var(--gm-space-3));
+  }
+
+  .gm-dropdown__group-header {
+    padding: var(--gm-space-2) var(--gm-space-3);
+    color: var(--gm-gray-500);
+    font-size: var(--gm-font-size-xs);
+    font-weight: var(--gm-font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    /* Not the first row in the list: separate it from the previous group's
+       last option instead of just sitting flush beneath it. */
+    &:not(:first-child) {
+      margin-top: var(--gm-space-1);
+      border-top: 1px solid var(--gm-gray-100);
+      padding-top: var(--gm-space-2);
+    }
+  }
+
   .gm-dropdown__empty {
     padding: var(--gm-space-3);
     color: var(--gm-gray-500);

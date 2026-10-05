@@ -35,7 +35,7 @@ export class GmTextareaComponent extends GmFormFieldBase<string> {
 
   readonly resize = input<GmTextareaResize>('vertical');
 
-  readonly placeholder = input<string>();
+  readonly placeholder = input<string>('Enter text');
 
   readonly maxLength = input(undefined, { transform: numberAttribute });
 

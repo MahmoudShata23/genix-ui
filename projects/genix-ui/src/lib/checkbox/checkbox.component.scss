@@ -5,3 +5,18 @@
 }
 
 @include choice.gm-choice-shell('square');
+
+/* The label follows the input in the DOM, so start/top reverse the flow. */
+:host([data-label-position='start']) .gm-choice__row {
+  flex-direction: row-reverse;
+}
+
+:host([data-label-position='top']) .gm-choice__row {
+  flex-direction: column-reverse;
+  align-items: flex-start;
+}
+
+:host([data-label-position='bottom']) .gm-choice__row {
+  flex-direction: column;
+  align-items: flex-start;
+}

@@ -1,18 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from '@angular/core';
 
 import { GmButtonComponent } from '../button/button.component';
+import { GmMenuComponent } from '../menu/menu.component';
+import type { GmMenuItem } from '../menu/menu.types';
 import { GmTooltipDirective } from '../tooltip/tooltip.directive';
-import { gmActionStyle } from './table-action-registry';
-import type {
-  GmActionStyle,
-  SingleAction,
-  GmTableActionType,
-  GmTableTranslate,
-} from './table-config.types';
+import { gmResolveAction } from './table-action-registry';
+import type { GmResolvedAction } from './table-action-registry';
+import type { SingleAction, GmTableTranslate } from './table-config.types';
 
 /**
- * The icon buttons in one row's actions cell, rendered from
- * `tableConfig.singleActions`.
+ * The actions in one row's actions cell, rendered from
+ * `tableConfig.singleActions`: icon buttons for `display: 'row'` actions (the
+ * default) and one overflow menu for `display: 'menu'` ones.
  *
  * Actions keep their slot when a row hides one, so the icons in the column
  * stay in the same place from row to row — a Delete that shifts left because
@@ -21,21 +25,37 @@ import type {
 @Component({
   selector: 'gm-table-row-actions',
   standalone: true,
-  imports: [GmButtonComponent, GmTooltipDirective],
+  imports: [GmButtonComponent, GmMenuComponent, GmTooltipDirective],
   template: `
     <div class="gm-table-row-actions">
-      @for (action of relevantActions(); track action.type) {
-        @if (isVisible(action)) {
-          @let style = styleOf(action.type);
+      @for (action of rowActions(); track action.key) {
+        @if (isVisible(action.source)) {
           <gm-button
             variant="text"
             size="small"
-            [icon]="style.icon"
-            [severity]="style.color"
-            [ariaLabel]="label(style)"
-            [gmTooltip]="label(style)"
-            (onClick)="action.command(row())"
+            [icon]="action.icon"
+            [severity]="action.severity"
+            [ariaLabel]="action.text"
+            [gmTooltip]="action.text"
+            [disabled]="isDisabled(action.source)"
+            (onClick)="action.source.command(row())"
           />
+        } @else {
+          <span class="gm-table-row-actions__slot" aria-hidden="true"></span>
+        }
+      }
+      @if (hasMenu()) {
+        @if (menuItems().length) {
+          <gm-button
+            variant="text"
+            size="small"
+            severity="secondary"
+            icon="pi pi-ellipsis-v"
+            [ariaLabel]="translate()('actions')"
+            [gmTooltip]="translate()('actions')"
+            (onClick)="menu.toggle($event)"
+          />
+          <gm-menu #menu [items]="menuItems()" [ariaLabel]="translate()('actions')" />
         } @else {
           <span class="gm-table-row-actions__slot" aria-hidden="true"></span>
         }
@@ -65,30 +85,52 @@ export class GmTableRowActionsComponent<T> {
   readonly row = input.required<T>();
 
   /**
-   * Action types visible on at least one row of the current page, computed by
-   * the table across every loaded row. An action absent from this list is
-   * dropped outright — reserving a slot nobody on the page ever sees would
-   * only waste the column's width.
+   * Keys of the actions visible on at least one row of the current page,
+   * computed by the table across every loaded row. An action absent from this
+   * list is dropped outright — reserving a slot nobody on the page ever sees
+   * would only waste the column's width.
    */
-  readonly visibleActionTypes = input<readonly GmTableActionType[]>([]);
+  readonly visibleActionKeys = input<readonly string[]>([]);
 
   readonly translate = input<GmTableTranslate>((key) => key);
 
-  protected readonly relevantActions = computed(() =>
-    this.actions().filter((action) =>
-      this.visibleActionTypes().includes(action.type),
-    ),
+  private readonly relevantActions = computed(() =>
+    this.actions()
+      .map((source) => ({ source, ...this.resolve(source) }))
+      .filter((action) => this.visibleActionKeys().includes(action.key)),
+  );
+
+  protected readonly rowActions = computed(() =>
+    this.relevantActions().filter((a) => a.source.display !== 'menu'),
+  );
+
+  /** Whether any menu action exists on this page, so the trigger keeps its slot. */
+  protected readonly hasMenu = computed(() =>
+    this.relevantActions().some((a) => a.source.display === 'menu'),
+  );
+
+  protected readonly menuItems = computed<GmMenuItem[]>(() =>
+    this.relevantActions()
+      .filter((a) => a.source.display === 'menu' && this.isVisible(a.source))
+      .map((a) => ({
+        label: a.text,
+        icon: a.icon,
+        severity: a.severity,
+        disabled: this.isDisabled(a.source),
+        command: () => a.source.command(this.row()),
+      })),
   );
 
   protected isVisible(action: SingleAction<T>): boolean {
     return action.visible?.(this.row()) ?? true;
   }
 
-  protected styleOf(type: GmTableActionType): GmActionStyle {
-    return gmActionStyle(type);
+  protected isDisabled(action: SingleAction<T>): boolean {
+    return action.disabled?.(this.row()) ?? false;
   }
 
-  protected label(style: GmActionStyle): string {
-    return this.translate()(style.label);
+  private resolve(action: SingleAction<T>): GmResolvedAction & { text: string } {
+    const resolved = gmResolveAction(action);
+    return { ...resolved, text: this.translate()(resolved.label) };
   }
 }

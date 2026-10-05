@@ -40,11 +40,10 @@ import { GmTableFilterMenuComponent } from "./table-filter-menu.component";
 import { GmTableToolbarComponent } from "./table-toolbar.component";
 import { GmTableConfigCellComponent } from "./table-config-cell.component";
 import { GmTableRowActionsComponent } from "./table-row-actions.component";
-import { gmActionStyle } from "./table-action-registry";
+import { gmResolveAction } from "./table-action-registry";
 import { gmToFilterDescriptors } from "./table-config-filters";
 import { GmFilterType, GmTableBulkActionScope } from "./table-config.types";
 import type {
-  GmTableActionType,
   TableColumn,
   TableModel,
   GmTableTranslate,
@@ -313,15 +312,29 @@ export class GmTableComponent<T> {
    * nobody sees; with no rows loaded yet they all count, so the column does
    * not resize the moment the first page arrives.
    */
-  protected readonly visibleActionTypes = computed<GmTableActionType[]>(() => {
+  protected readonly visibleActionKeys = computed<string[]>(() => {
     const actions = this.configSingleActions();
     const rows = this.resolvedData();
-    if (rows.length === 0) {
-      return actions.map((action) => action.type);
-    }
     return actions
-      .filter((action) => rows.some((row) => action.visible?.(row) ?? true))
-      .map((action) => action.type);
+      .filter(
+        (action) =>
+          rows.length === 0 ||
+          rows.some((row) => action.visible?.(row) ?? true),
+      )
+      .map((action) => gmResolveAction(action).key);
+  });
+
+  /**
+   * Slots the actions cell needs: one per row-displayed action, plus one for
+   * the overflow menu however many entries it holds.
+   */
+  private readonly actionSlotCount = computed(() => {
+    const keys = new Set(this.visibleActionKeys());
+    const shown = this.configSingleActions().filter((action) =>
+      keys.has(gmResolveAction(action).key),
+    );
+    const inRow = shown.filter((action) => action.display !== "menu").length;
+    return inRow + (shown.length > inRow ? 1 : 0);
   });
 
   /**
@@ -330,7 +343,7 @@ export class GmTableComponent<T> {
    * `actionsFrozen` opt into the old pinned-start layout.
    */
   private readonly actionsColumn = computed<GmConfigColumn<T> | null>(() => {
-    const count = this.visibleActionTypes().length;
+    const count = this.actionSlotCount();
     if (count === 0) {
       return null;
     }
@@ -481,12 +494,12 @@ export class GmTableComponent<T> {
     }
 
     for (const bulk of config.bulkActions ?? []) {
-      const style = gmActionStyle(bulk.type);
+      const style = gmResolveAction(bulk);
       actions.push({
-        key: bulk.type,
+        key: style.key,
         label: translate(style.label),
         icon: style.icon,
-        severity: style.color,
+        severity: style.severity,
         variant: "text",
         scope:
           bulk.scope === GmTableBulkActionScope.GLOBAL ? "global" : "selection",

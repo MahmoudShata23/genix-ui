@@ -477,6 +477,20 @@ readonly tableConfig: TableModel<Professional> = {
 };
 ```
 
+**Custom actions.** `type` is a shortcut for the built-in icon/colour/label; any
+action can instead (or additionally, as an override) set `key`, `icon`, `label`
+(a translation key) and `severity`. Row actions take `display: 'row' | 'menu'`
+— `menu` puts them in the row's overflow menu — and `disabled: (row) => boolean`.
+Bulk actions take the same `key` / `icon` / `label` / `severity`.
+
+```ts
+singleActions: [
+  { key: 'send', icon: 'pi pi-send', label: 'Send', command: (row) => this.send(row) },
+  { key: 'archive', icon: 'pi pi-box', label: 'Archive', display: 'menu',
+    disabled: (row) => row.locked, command: (row) => this.archive(row) },
+],
+```
+
 `tableConfig` **mounts the frame the column API leaves to you**: the toolbar
 above, the paginator below, a pinned actions column, the selection column, and
 the `GmCellType` renderers. It is the same component throughout — frozen

@@ -1,5 +1,6 @@
 import type { Observable } from 'rxjs';
 
+import type { GmSeverity } from '../core/types';
 import type { GmTableToolbarAlign } from './table-action.types';
 
 /**
@@ -182,20 +183,49 @@ export interface GmActionStyle {
   label: string;
 }
 
-/** One icon button on a row. */
-export interface SingleAction<T> {
-  type: GmTableActionType;
+/** How a custom action is drawn. Any field overrides what `type` resolves to. */
+export interface GmActionAppearance {
+  /** Icon CSS class, e.g. `"pi pi-send"`. */
+  icon?: string;
+  /** Label / tooltip as a translation key (run through the table's `translate`). */
+  label?: string;
+  severity?: GmSeverity;
+}
+
+/** Where a row action is drawn. */
+export type GmTableActionDisplay = 'row' | 'menu';
+
+/**
+ * One action on a row. Either pick a built-in `type` (icon, colour and label
+ * come from the registry) or describe your own with `key` + `icon` + `label`;
+ * fields given next to a `type` override that type's defaults.
+ */
+export interface SingleAction<T> extends GmActionAppearance {
+  /** Built-in action. Optional when `key` identifies a custom action. */
+  type?: GmTableActionType;
+  /** Identity of a custom action. Defaults to `type`; one of the two is required. */
+  key?: string;
   command: (row: T) => void;
+  /**
+   * Where the action is drawn: an icon button in the row (`row`, default) or
+   * an entry in the row's overflow menu (`menu`).
+   */
+  display?: GmTableActionDisplay;
   /**
    * Shows the action only for rows that satisfy the predicate. Omit it to
    * show the action on every row (the default).
    */
   visible?: (row: T) => boolean;
+  /** Greys the action for rows that satisfy the predicate. */
+  disabled?: (row: T) => boolean;
 }
 
 /** One button in the toolbar above the grid. */
-export interface DynamicBulkAction<T> {
-  type: GmTableActionType;
+export interface DynamicBulkAction<T> extends GmActionAppearance {
+  /** Built-in action. Optional when `key` identifies a custom action. */
+  type?: GmTableActionType;
+  /** Identity of a custom action. Defaults to `type`; one of the two is required. */
+  key?: string;
   command: (rows: T[]) => void;
   scope: GmTableBulkActionScope;
   /**

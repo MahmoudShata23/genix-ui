@@ -1115,6 +1115,23 @@ export class AppComponent {
         command: (row) => this.lastConfigEvent.set(`Delete → ${row.name}`),
         visible: (row) => row.active,
       },
+      {
+        // A custom action: no built-in `type`, just a key, icon and label.
+        key: "sendReminder",
+        icon: "pi pi-send",
+        label: "Send reminder",
+        severity: "info",
+        command: (row) => this.lastConfigEvent.set(`Reminder → ${row.name}`),
+      },
+      {
+        // `display: 'menu'` moves it into the row's overflow menu.
+        key: "archive",
+        icon: "pi pi-box",
+        label: "Archive",
+        display: "menu",
+        disabled: (row) => !row.active,
+        command: (row) => this.lastConfigEvent.set(`Archive → ${row.name}`),
+      },
     ],
     bulkActions: [
       {

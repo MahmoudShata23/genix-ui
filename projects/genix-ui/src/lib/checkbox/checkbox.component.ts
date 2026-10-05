@@ -8,6 +8,9 @@ import {
 import { GmFormFieldBase } from '../core/form-field-base';
 import { gmUniqueId } from '../core/unique-id';
 
+/** Where the label sits relative to the box. */
+export type GmCheckboxLabelPosition = 'end' | 'start' | 'top' | 'bottom';
+
 /**
  * Binary checkbox over a native `<input type="checkbox">`.
  *
@@ -30,6 +33,7 @@ import { gmUniqueId } from '../core/unique-id';
     '[class.gm-choice-host--invalid]': 'hasError()',
     '[class.gm-choice-host--disabled]': 'isDisabled()',
     '[class.gm-choice-host--readonly]': 'readOnly()',
+    '[attr.data-label-position]': 'labelPosition()',
   },
 })
 export class GmCheckboxComponent extends GmFormFieldBase<boolean> {
@@ -40,7 +44,13 @@ export class GmCheckboxComponent extends GmFormFieldBase<boolean> {
    */
   readonly indeterminate = input(false, { transform: booleanAttribute });
 
-  protected readonly checked = () => this.value() === true;
+  /**
+   * Side of the box the label is drawn on. `start`/`end` are logical, so RTL
+   * flips them without an override.
+   */
+  readonly labelPosition = input<GmCheckboxLabelPosition>('end');
+
+  protected readonly checked =() => this.value() === true;
 
   protected override generateId(): string {
     return gmUniqueId('gm-checkbox');

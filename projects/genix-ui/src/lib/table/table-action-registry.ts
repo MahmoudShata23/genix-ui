@@ -3,6 +3,7 @@ import {
   GmTableActionType,
   GmTableIcon,
 } from './table-config.types';
+import type { GmSeverity } from '../core/types';
 import type { GmActionStyle } from './table-config.types';
 
 /**
@@ -113,6 +114,35 @@ export const GM_TABLE_ACTION_REGISTRY: Record<
     label: GmTableActionType.DELETE_ALL,
   },
 };
+
+/** What the table needs to identify and draw one action, built-in or custom. */
+export interface GmResolvedAction {
+  key: string;
+  icon: string;
+  severity: GmSeverity;
+  label: string;
+}
+
+/**
+ * Merges an action's own appearance over its `type`'s registry entry. A custom
+ * action (no `type`) starts from the neutral fallback, so it only needs `key`.
+ */
+export function gmResolveAction(action: {
+  type?: GmTableActionType;
+  key?: string;
+  icon?: string;
+  label?: string;
+  severity?: GmSeverity;
+}): GmResolvedAction {
+  const key = action.key ?? action.type ?? '';
+  const base = gmActionStyle((action.type ?? key) as GmTableActionType);
+  return {
+    key,
+    icon: action.icon ?? base.icon,
+    severity: action.severity ?? base.color,
+    label: action.label ?? (action.type ? base.label : key),
+  };
+}
 
 /** Falls back to a neutral ellipsis for a type no registry entry covers. */
 export function gmActionStyle(type: GmTableActionType): GmActionStyle {

@@ -7,7 +7,7 @@
     <i class="gm-chip__icon" [class]="icon()" aria-hidden="true"></i>
   }
   @if (label()) {
-    <span class="gm-chip__label">{{ label() }}</span>
+    <span class="gm-chip__label" [attr.title]="label()">{{ label() }}</span>
   }
   <ng-content />
 

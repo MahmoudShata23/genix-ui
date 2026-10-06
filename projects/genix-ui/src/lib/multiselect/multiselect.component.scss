@@ -19,8 +19,11 @@
   align-items: center;
   gap: var(--gm-space-1);
   min-width: 0;
+  /* Bounded by the trigger, so a long chip truncates rather than overflowing. */
+  max-width: 100%;
 
   gm-chip {
+    max-width: 100%;
     --gm-chip-height: calc(1.5 * var(--gm-field-font-size));
     --gm-chip-padding-y: 0px;
     --gm-chip-padding-x: var(--gm-space-2);

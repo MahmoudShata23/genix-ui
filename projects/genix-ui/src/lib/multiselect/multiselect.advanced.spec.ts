@@ -494,3 +494,49 @@ describe('gm-multiselect virtual scroll', () => {
     expect(panel()).toBeNull();
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, GmMultiselectComponent],
+  template: `
+    <div style="width: 220px">
+      <gm-multiselect
+        class="long"
+        display="chip"
+        [options]="options"
+        [formControl]="control"
+      />
+    </div>
+  `,
+})
+class LongChipHostComponent {
+  readonly options = [
+    'A deliberately very long option label that cannot possibly fit on one line of a narrow field',
+    'Short',
+  ];
+  readonly control = new FormControl<string[]>([this.options[0]]);
+}
+
+describe('gm-multiselect long chip labels', () => {
+  it('keeps a long label on one line inside the trigger', () => {
+    TestBed.configureTestingModule({ imports: [LongChipHostComponent] });
+    const fixture = TestBed.createComponent(LongChipHostComponent);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const trigger = root.querySelector('.gm-dropdown__trigger') as HTMLElement;
+    const chip = root.querySelector('gm-chip .gm-chip') as HTMLElement;
+    const label = root.querySelector('.gm-chip__label') as HTMLElement;
+
+    const triggerBox = trigger.getBoundingClientRect();
+    const chipBox = chip.getBoundingClientRect();
+
+    // Inside the trigger on both axes — it used to spill above and below.
+    expect(chipBox.width).toBeLessThanOrEqual(triggerBox.width);
+    expect(chipBox.top).toBeGreaterThanOrEqual(triggerBox.top);
+    expect(chipBox.bottom).toBeLessThanOrEqual(triggerBox.bottom);
+    // Truncated, not wrapped.
+    expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+    expect(getComputedStyle(label).textOverflow).toBe('ellipsis');
+  });
+});

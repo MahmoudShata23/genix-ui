@@ -19,6 +19,10 @@
   --gm-chip-radius: var(--gm-radius-full);
 
   display: inline-flex;
+  /* A chip never grows past the space it is placed in; a longer label is
+     truncated instead (see `.gm-chip__label`). */
+  min-width: 0;
+  max-width: 100%;
 }
 
 :host(.gm-chip-host--primary) {
@@ -57,9 +61,20 @@
   --gm-chip-border: var(--gm-gray-900);
 }
 
+/* One line, ellipsised: a chip is a fixed-height pill, and a label that wraps
+   inside it — e.g. inherited from a trigger that allows wrapping — spills out
+   over whatever sits above and below. */
+.gm-chip__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .gm-chip {
   /* Fills the host so host-level sizing (min-width, width) applies. */
   flex: 1 1 auto;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;

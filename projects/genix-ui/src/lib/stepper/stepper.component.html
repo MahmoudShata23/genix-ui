@@ -9,6 +9,7 @@
       class="gm-stepper__step"
       [class.gm-stepper__step--active]="step.active()"
       [class.gm-stepper__step--completed]="step.isCompleted()"
+      [class.gm-stepper__step--progress]="!step.isCompleted() && step.markerInProgress()"
     >
       <button
         type="button"

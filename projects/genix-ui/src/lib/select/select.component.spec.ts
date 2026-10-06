@@ -425,3 +425,131 @@ describe('gm-select filter and open events', () => {
     expect(host.terms).toEqual(['ac']);
   });
 });
+
+interface CountryGroup {
+  region: string;
+  countries: Country[];
+}
+
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, GmSelectComponent],
+  template: `
+    <gm-select
+      [formControl]="countryId"
+      [options]="groups()"
+      optionGroupLabel="region"
+      optionGroupChildren="countries"
+      optionLabel="name"
+      optionValue="id"
+      [filter]="true"
+    />
+  `,
+})
+class GroupedHostComponent {
+  readonly groups = signal<CountryGroup[]>([
+    {
+      region: 'Africa',
+      countries: [
+        { id: 1, name: 'Egypt' },
+        { id: 2, name: 'Morocco' },
+      ],
+    },
+    {
+      region: 'Middle East',
+      countries: [
+        { id: 3, name: 'UAE' },
+        { id: 4, name: 'Jordan' },
+      ],
+    },
+  ]);
+  readonly countryId = new FormControl<number | null>(null);
+}
+
+describe('gm-select grouped options', () => {
+  let fixture: ComponentFixture<GroupedHostComponent>;
+  let host: GroupedHostComponent;
+
+  const trigger = () =>
+    fixture.nativeElement.querySelector(
+      '.gm-dropdown__trigger',
+    ) as HTMLButtonElement;
+  const optionEls = () =>
+    Array.from(
+      document.querySelectorAll('.cdk-overlay-container [role="option"]'),
+    ) as HTMLElement[];
+  const headerEls = () =>
+    Array.from(
+      document.querySelectorAll('.cdk-overlay-container .gm-dropdown__group-header'),
+    ) as HTMLElement[];
+  const filterInput = () =>
+    document.querySelector(
+      '.cdk-overlay-container .gm-dropdown__filter-input',
+    ) as HTMLInputElement;
+
+  const type = (value: string) => {
+    const input = filterInput();
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [GroupedHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(GroupedHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('renders one header per group, each followed by only its own options', () => {
+    trigger().click();
+    fixture.detectChanges();
+
+    expect(headerEls().map((el) => el.textContent?.trim())).toEqual([
+      'Africa',
+      'Middle East',
+    ]);
+    expect(optionEls().map((el) => el.textContent?.trim())).toEqual([
+      'Egypt',
+      'Morocco',
+      'UAE',
+      'Jordan',
+    ]);
+  });
+
+  it('selecting a grouped option commits the real option value, not the group', () => {
+    trigger().click();
+    fixture.detectChanges();
+
+    optionEls()[2].click(); // UAE
+    fixture.detectChanges();
+
+    expect(host.countryId.value).toBe(3);
+  });
+
+  it('omits a group entirely once filtering hides all of its options', () => {
+    trigger().click();
+    fixture.detectChanges();
+    type('uae');
+
+    expect(headerEls().map((el) => el.textContent?.trim())).toEqual([
+      'Middle East',
+    ]);
+    expect(optionEls().map((el) => el.textContent?.trim())).toEqual(['UAE']);
+  });
+
+  it('keeps a group header while filtering still matches one of its options', () => {
+    trigger().click();
+    fixture.detectChanges();
+    type('mor');
+
+    expect(headerEls().map((el) => el.textContent?.trim())).toEqual([
+      'Africa',
+    ]);
+    expect(optionEls().map((el) => el.textContent?.trim())).toEqual([
+      'Morocco',
+    ]);
+  });
+});

@@ -69,7 +69,7 @@ export class GmSelectComponent extends GmDropdownBase<unknown> {
       return null;
     }
     return (
-      this.options().find((option) => this.valueForOption(option) === current) ??
+      this.flatOptions().find((option) => this.valueForOption(option) === current) ??
       null
     );
   });

@@ -135,10 +135,16 @@
     } @else {
       <ul class="gm-dropdown__list" role="listbox" [attr.id]="listboxId">
         @for (option of visibleOptions(); track $index; let i = $index) {
+          @if (groupHeaderAt(i); as header) {
+            <li class="gm-dropdown__group-header" role="presentation">
+              {{ header }}
+            </li>
+          }
           <li
             class="gm-dropdown__option"
             role="option"
             [attr.id]="optionId(i)"
+            [class.gm-dropdown__option--grouped]="isGrouped()"
             [class.gm-dropdown__option--selected]="isSelected(option)"
             [class.gm-dropdown__option--active]="i === activeIndex()"
             [attr.aria-selected]="isSelected(option)"

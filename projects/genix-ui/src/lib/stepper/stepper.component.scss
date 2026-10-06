@@ -7,6 +7,12 @@
    flips with the writing direction on its own.
    ========================================================================== */
 
+// Shared with `.gm-stepper__marker`'s own `width`/`height` and
+// `.gm-stepper__separator`'s centering offset below, so the two can never
+// drift out of sync the way two independently hand-picked values could.
+$gm-stepper-marker-size: 36px;
+$gm-stepper-separator-height: 2px;
+
 :host {
   display: block;
   font-family: var(--gm-font-family);
@@ -23,7 +29,16 @@
 
 .gm-stepper__step {
   display: flex;
-  align-items: center;
+  // `flex-start`, not `center`: once a step's label wraps onto two lines
+  // (label + sublabel), the button's box becomes taller than the marker
+  // circle alone, and centering the *step's* children against that taller
+  // box pulls the separator down past the marker's own center. Anchoring
+  // both the button and the separator to the row's top instead, then
+  // centering each independently against the marker's own height (see
+  // `.gm-stepper__button` and `.gm-stepper__separator` below), keeps the
+  // line level with the marker regardless of how tall the label/sublabel
+  // stack next to it happens to be.
+  align-items: flex-start;
   /* Only the separator grows; the labels keep their natural width. */
   flex: 0 1 auto;
   min-width: 0;
@@ -40,7 +55,12 @@
   border: 0;
 
   display: flex;
-  align-items: center;
+  // `flex-start`, not `center`: pins the marker's top edge at exactly
+  // `padding-top` regardless of how tall `.gm-stepper__info` grows (one
+  // line vs. two) — a fixed, known offset that `.gm-stepper__separator`
+  // can be centered against below, instead of a value that shifts with
+  // label/sublabel content.
+  align-items: flex-start;
   gap: var(--gm-space-3);
 
   padding: var(--gm-space-2) var(--gm-space-3);
@@ -76,8 +96,8 @@
   justify-content: center;
   flex: none;
 
-  width: 36px;
-  height: 36px;
+  width: $gm-stepper-marker-size;
+  height: $gm-stepper-marker-size;
 
   border: 2px solid var(--gm-gray-300);
   border-radius: var(--gm-radius-full);
@@ -143,12 +163,35 @@
   }
 }
 
+/* A markerText step (e.g. a review checklist) once its count has started
+   moving but isn't done — tints the marker warning-orange instead of the
+   default neutral grey, taking priority over `--active`'s blue tint since
+   the step is very likely to be active while the user works through it. */
+.gm-stepper__step--progress {
+  .gm-stepper__marker {
+    border-color: var(--gm-warning);
+    background: var(--gm-warning);
+    color: var(--gm-white);
+  }
+}
+
 .gm-stepper__separator {
   flex: 1 1 auto;
   min-width: 40px;
   max-width: 80px;
-  height: 2px;
-  margin: 0 var(--gm-space-2);
+  height: $gm-stepper-separator-height;
+  margin-inline: var(--gm-space-2);
+  // `.gm-stepper__step` and `.gm-stepper__button` are both pinned to
+  // `align-items: flex-start` above specifically so the marker's top edge
+  // sits at a fixed, known offset (the button's own `padding-top`) instead
+  // of one that shifts depending on how tall `.gm-stepper__info` grows (a
+  // single-line label vs. a label+sublabel pair). This `margin-top` centers
+  // the line on the marker's own 36px height from that fixed offset, so it
+  // stays level with the marker regardless of label length or wrapping.
+  margin-top: calc(
+    var(--gm-space-2) + ($gm-stepper-marker-size / 2) -
+      ($gm-stepper-separator-height / 2)
+  );
   background: var(--gm-gray-200);
 }
 
@@ -164,9 +207,33 @@
   padding-top: var(--gm-space-4);
 }
 
-/* Narrow viewports: the labels are what has to go, not the markers. */
+/* Narrow viewports: the labels are what has to go, not the markers. Once the
+   label is gone there's no content left to justify the separator stretching
+   to fill the row (`flex: 1 1 auto` on the step) — cap it back to a small
+   fixed gap so the bare markers sit close together instead of spreading out
+   with long empty rules between them. Even fully compacted, a stepper with
+   enough steps (each marker is a fixed 36px circle — shrinking it further
+   would make it an unusably small tap target) can still be wider than a
+   narrow viewport, so the header scrolls horizontally rather than
+   overflowing its own card/viewport with no way to reach the later steps. */
 @media (max-width: 40rem) {
   .gm-stepper__info {
     display: none;
+  }
+
+  .gm-stepper__step:not(:last-child) {
+    flex: 0 1 auto;
+  }
+
+  .gm-stepper__separator {
+    flex: 0 1 auto;
+    min-width: var(--gm-space-4);
+    max-width: var(--gm-space-6);
+  }
+
+  .gm-stepper__header {
+    padding-inline: var(--gm-space-2);
+    overflow-x: auto;
+    justify-content: flex-start;
   }
 }

@@ -63,13 +63,6 @@ export abstract class GmFormFieldBase<T>
   /** Accessible name. Only needed when there is no `label`. */
   readonly ariaLabel = input<string>();
 
-  /**
-   * Hides the hint/error row entirely — for compact contexts (e.g. a toolbar
-   * filter) where a message is never expected and its reserved space would
-   * just be dead air.
-   */
-  readonly hideMessageRow = input(false, { transform: booleanAttribute });
-
   /** Emitted on every keystroke, for use without a form control. */
   readonly valueChange = output<T | null>();
 

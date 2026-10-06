@@ -512,9 +512,24 @@ export class GmTableComponent<T> {
     return actions;
   });
 
-  protected readonly clearFiltersLabel = computed(
-    () => this.resolvedFilterLabels().clear,
+  protected readonly clearFiltersLabel = computed(() =>
+    this.translated('clearFilters', this.resolvedFilterLabels().clear),
   );
+
+  /** `{0}` is replaced with the count, as in `gm-multiselect`. */
+  protected readonly selectedColumnsLabel = computed(() =>
+    this.translated('itemsSelected', '{0} items selected'),
+  );
+
+  /**
+   * `translate(key)`, or `fallback` when it hands the key back untouched —
+   * the default identity translator, or a catalogue missing the key. Keeps the
+   * English defaults for an application that has not translated the table.
+   */
+  private translated(key: string, fallback: string): string {
+    const text = this.translate()(key);
+    return text && text !== key ? text : fallback;
+  }
 
   // ── Config-mode paging ──────────────────────────────────────────────────
 
@@ -803,10 +818,17 @@ export class GmTableComponent<T> {
   readonly filterLabels = input<Partial<GmTableFilterLabels>>({});
 
   /** Public so a `gmTableHeader` template can pass it to its own menus. */
-  readonly resolvedFilterLabels = computed<GmTableFilterLabels>(() => ({
-    ...GM_TABLE_FILTER_LABELS,
-    ...this.filterLabels(),
-  }));
+  readonly resolvedFilterLabels = computed<GmTableFilterLabels>(() => {
+    // Each default is looked up as a translation key of the same name, so a
+    // translated application gets the filter menu without `filterLabels`.
+    const translated = Object.fromEntries(
+      Object.entries(GM_TABLE_FILTER_LABELS).map(([key, text]) => [
+        key,
+        this.translated(key, text as string),
+      ]),
+    ) as unknown as GmTableFilterLabels;
+    return { ...translated, ...this.filterLabels() };
+  });
 
   readonly filtersChange = output<GmTableFiltersChangeEvent>();
 

@@ -208,6 +208,33 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
     this.activeIndex.set(
       selected >= 0 ? selected : this.visibleOptions().length ? 0 : -1,
     );
+
+    this.focusOnOpen();
+  }
+
+  /**
+   * Focus follows the open: into the search box when the panel has one, else
+   * onto the trigger (a mouse click does not focus a button in every browser,
+   * and the arrow keys are handled from there). The search box only exists once
+   * the panel has rendered, so the lookup retries for a few frames.
+   */
+  private focusOnOpen(): void {
+    if (!this.filter()) {
+      this.focusTrigger();
+      return;
+    }
+    let attempts = 5;
+    const tryFocus = () => {
+      const input = this.overlayPanel.panelElement?.querySelector<HTMLElement>(
+        '.gm-dropdown__filter-input',
+      );
+      if (input) {
+        input.focus();
+      } else if (--attempts > 0 && this.open()) {
+        requestAnimationFrame(tryFocus);
+      }
+    };
+    requestAnimationFrame(tryFocus);
   }
 
   protected close(): void {

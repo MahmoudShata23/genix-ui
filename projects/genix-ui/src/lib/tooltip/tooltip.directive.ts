@@ -33,11 +33,11 @@ const OFFSET = 8;
   selector: '[gmTooltip]',
   standalone: true,
   host: {
-    '(mouseenter)': 'show()',
+    '(mouseenter)': 'show(true)',
     '(mouseleave)': 'hide()',
     /* focusin/focusout rather than focus/blur: they bubble, so the tooltip also
        responds when the focusable element is nested inside the host. */
-    '(focusin)': 'show()',
+    '(focusin)': 'show(false)',
     '(focusout)': 'hide()',
     '(keydown.escape)': 'hide()',
     '[attr.aria-describedby]': 'describedBy',
@@ -64,6 +64,13 @@ export class GmTooltipDirective {
 
   private overlayRef: OverlayRef | null = null;
 
+  /**
+   * Set while a mouse-opened tooltip is up. `mouseleave` alone is not enough:
+   * it never arrives when the host is re-rendered or removed under the pointer,
+   * or is a disabled button, and the bubble would be stranded on screen.
+   */
+  private readonly stopWatchingPointer = { fn: null as (() => void) | null };
+
   constructor() {
     // A tooltip left attached when its host disappears would hang on screen.
     inject(DestroyRef).onDestroy(() => this.destroy());
@@ -77,7 +84,7 @@ export class GmTooltipDirective {
     return this.overlayRef ? this.tooltipId : null;
   }
 
-  protected show(): void {
+  protected show(viaMouse = false): void {
     if (this.disabled() || !this.content() || this.overlayRef) {
       return;
     }
@@ -93,13 +100,41 @@ export class GmTooltipDirective {
     const ref = this.overlayRef.attach(new ComponentPortal(GmTooltipComponent));
     ref.setInput('content', this.content() ?? '');
     ref.setInput('tooltipId', this.tooltipId);
+
+    // The bubble must never take the pointer: a large one can land on the host,
+    // and the resulting mouseleave would hide the very text being read.
+    this.overlayRef.overlayElement.style.pointerEvents = 'none';
+
+    if (viaMouse) {
+      this.watchPointer();
+    }
   }
 
   protected hide(): void {
     this.destroy();
   }
 
+  private watchPointer(): void {
+    const host = this.host.nativeElement;
+    const check = (event: Event) => {
+      const target = event.target;
+      if (!host.isConnected || !(target instanceof Node) || !host.contains(target)) {
+        this.hide();
+      }
+    };
+    document.addEventListener('mouseover', check, true);
+    window.addEventListener('blur', this.onWindowBlur);
+    this.stopWatchingPointer.fn = () => {
+      document.removeEventListener('mouseover', check, true);
+      window.removeEventListener('blur', this.onWindowBlur);
+    };
+  }
+
+  private readonly onWindowBlur = () => this.hide();
+
   private destroy(): void {
+    this.stopWatchingPointer.fn?.();
+    this.stopWatchingPointer.fn = null;
     this.overlayRef?.dispose();
     this.overlayRef = null;
   }

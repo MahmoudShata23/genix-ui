@@ -53,6 +53,7 @@ import { GmSelectValueDirective } from './select-value.directive';
   host: {
     class: 'gm-select-host gm-dropdown-host',
     '[class.gm-dropdown-host--invalid]': 'hasError()',
+    '[class.gm-field-host--invalid]': 'hasError()',
     '[class.gm-dropdown-host--open]': 'open()',
     '[class.gm-dropdown-host--filled]': 'isFilled()',
   },

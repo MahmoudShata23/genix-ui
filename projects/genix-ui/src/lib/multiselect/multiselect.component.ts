@@ -73,6 +73,7 @@ function optionalCount(
   host: {
     class: 'gm-multiselect-host gm-dropdown-host',
     '[class.gm-dropdown-host--invalid]': 'hasError()',
+    '[class.gm-field-host--invalid]': 'hasError()',
     '[class.gm-dropdown-host--open]': 'open()',
     '[class.gm-dropdown-host--filled]': 'selectedValues().length > 0',
   },

@@ -28,15 +28,13 @@
     (blur)="handleBlur()"
   ></textarea>
 
-  @if (!hideMessageRow()) {
-    <small
-      class="gm-field__message"
-      [class.gm-field__error]="!!errorText()"
-      [class.gm-field__hint]="!errorText() && showHint()"
-      [attr.id]="messageElementId()"
-      [attr.role]="errorText() ? 'alert' : null"
-    >
-      {{ messageText() }}
-    </small>
-  }
+  <small
+    class="gm-field__message"
+    [class.gm-field__error]="!!errorText()"
+    [class.gm-field__hint]="!errorText() && showHint()"
+    [attr.id]="messageElementId()"
+    [attr.role]="errorText() ? 'alert' : null"
+  >
+    {{ messageText() }}
+  </small>
 </div>

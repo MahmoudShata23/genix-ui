@@ -88,6 +88,7 @@ function hourFormatAttribute(
   host: {
     class: 'gm-datepicker-host',
     '[class.gm-datepicker-host--invalid]': 'hasError()',
+    '[class.gm-field-host--invalid]': 'hasError()',
     '[class.gm-datepicker-host--open]': 'open()',
     '[class.gm-datepicker-host--filled]': 'hasSelection()',
   },
@@ -445,9 +446,16 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
    */
   private focusActiveDay(): void {
     const id = this.dayId(this.focusedDate());
-    requestAnimationFrame(() => {
-      document.getElementById(id)?.focus();
-    });
+    let attempts = 5;
+    const tryFocus = () => {
+      const day = document.getElementById(id);
+      if (day) {
+        day.focus();
+      } else if (--attempts > 0 && this.open()) {
+        requestAnimationFrame(tryFocus);
+      }
+    };
+    requestAnimationFrame(tryFocus);
   }
 
   /** Time-only has no grid to focus, so the hour control takes it instead. */

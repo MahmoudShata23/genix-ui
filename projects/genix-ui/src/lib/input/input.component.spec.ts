@@ -147,26 +147,6 @@ describe('gm-input / gm-textarea reactive forms integration', () => {
   });
 });
 
-@Component({
-  standalone: true,
-  imports: [GmInputComponent],
-  template: `<gm-input label="Compact" [hideMessageRow]="true" />`,
-})
-class HiddenMessageRowHostComponent {}
-
-describe('gm-input hideMessageRow', () => {
-  it('omits the message row entirely', async () => {
-    await TestBed.configureTestingModule({
-      imports: [HiddenMessageRowHostComponent],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(HiddenMessageRowHostComponent);
-    fixture.detectChanges();
-
-    expect(
-      fixture.nativeElement.querySelector('.gm-field__message'),
-    ).toBeNull();
-  });
-});
 
 @Component({
   standalone: true,

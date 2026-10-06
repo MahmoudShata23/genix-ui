@@ -86,21 +86,17 @@
     </span>
   </button>
 
-  <!-- Always rendered, even with no message, so the field height stays fixed
-       when an error later appears — otherwise it pushes everything below it
-       down the moment validation fails. Can be hidden in contexts like toolbars
-       where error messages are not expected. -->
-  @if (!hideMessageRow()) {
-    <small
-      class="gm-field__message"
-      [class.gm-field__error]="!!errorText()"
-      [class.gm-field__hint]="!errorText() && showHint()"
-      [attr.id]="messageElementId()"
-      [attr.role]="errorText() ? 'alert' : null"
-    >
-      {{ messageText() }}
-    </small>
-  }
+  <!-- Always rendered but out of the flow (see the field shell), so an error
+       appearing moves nothing and a valid field leaves no gap under it. -->
+  <small
+    class="gm-field__message"
+    [class.gm-field__error]="!!errorText()"
+    [class.gm-field__hint]="!errorText() && showHint()"
+    [attr.id]="messageElementId()"
+    [attr.role]="errorText() ? 'alert' : null"
+  >
+    {{ messageText() }}
+  </small>
 </div>
 
 <!-- Rendered into a CDK overlay, but created in this component's context so

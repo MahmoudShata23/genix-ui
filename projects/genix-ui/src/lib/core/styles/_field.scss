@@ -128,17 +128,30 @@
     margin-top: var(--gm-space-1);
   }
 
-  /* The single message slot every field template renders (see e.g.
-     `gm-input`'s template): always present, even with no message, so this
-     row's height never changes with validation state — otherwise the field
-     grows, and pushes whatever is below it down, the moment an error first
-     appears. Declared after `.gm-field__error`/`.gm-field__hint` so its sizing
-     wins on the element that also carries one of those two classes for color. */
+  /* The single message slot every field template renders: always present, but
+     taken out of the flow. The error floats just below the control, so it
+     reserves no dead space under a valid field and an error appearing moves
+     nothing. A hint is persistent content and stays in the flow. The gap to
+     the next field should be at least one line of this text so an error does
+     not touch it. Declared after `.gm-field__error`/`.gm-field__hint` so its
+     sizing wins on the element that also carries one of those for colour. */
+  .gm-field {
+    position: relative;
+  }
+
   .gm-field__message {
     display: block;
-    min-height: 1.4em;
     margin-top: var(--gm-space-1);
     font-size: var(--gm-font-size-xs);
-    line-height: 1.4;
+    line-height: 1.25;
+  }
+
+  .gm-field__message:not(.gm-field__hint) {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    margin-top: 2px;
+    z-index: 1;
+    pointer-events: none;
   }
 }

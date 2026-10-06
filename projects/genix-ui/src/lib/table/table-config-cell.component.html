@@ -1,4 +1,12 @@
-@if (column().cellType === cellType.DOT) {
+@if (column().cellType === cellType.BUTTONS) {
+  <!-- Ahead of everything: a button cell has no value to be empty. -->
+  <gm-table-row-actions
+    [actions]="column().actions ?? []"
+    [visibleActionKeys]="buttonKeys()"
+    [translate]="translate()"
+    [row]="row()"
+  />
+} @else if (column().cellType === cellType.DOT) {
   <!-- A dot cell is *only* the dot: an unmapped value shows nothing rather
        than falling back to text the colour was meant to replace. -->
   @if (dotColor(); as tone) {

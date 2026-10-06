@@ -9,12 +9,14 @@ import {
 
 import { GmBadgeComponent } from '../badge/badge.component';
 import { GmTooltipDirective } from '../tooltip/tooltip.directive';
+import { gmResolveAction } from './table-action-registry';
+import { GmTableRowActionsComponent } from './table-row-actions.component';
 import {
   GmCellType,
   GmFilterType,
   GmStatusTone,
 } from './table-config.types';
-import type { TableColumn } from './table-config.types';
+import type { GmTableTranslate, TableColumn } from './table-config.types';
 import type { GmSeverity } from '../core/types';
 
 /** What a `GmCellType.SLA_STATUS` value resolves to. */
@@ -45,7 +47,12 @@ const BADGE_SEVERITY: Readonly<Record<GmStatusTone, GmSeverity>> = {
 @Component({
   selector: 'gm-table-config-cell',
   standalone: true,
-  imports: [DatePipe, GmBadgeComponent, GmTooltipDirective],
+  imports: [
+    DatePipe,
+    GmBadgeComponent,
+    GmTooltipDirective,
+    GmTableRowActionsComponent,
+  ],
   templateUrl: './table-config-cell.component.html',
   styleUrl: './table-config-cell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +62,14 @@ export class GmTableConfigCellComponent<T> {
   readonly column = input.required<TableColumn<T>>();
 
   readonly row = input.required<T>();
+
+  /** Turns an action's label key into text, for a `BUTTONS` cell. */
+  readonly translate = input<GmTableTranslate>((key) => key);
+
+  /** Every action of a `BUTTONS` cell is offered; each row's `visible` still gates it. */
+  protected readonly buttonKeys = computed(() =>
+    (this.column().actions ?? []).map((action) => gmResolveAction(action).key),
+  );
 
   /** Characters of plain text shown before the rest moves into a tooltip. */
   readonly truncateAt = input(25, { transform: numberAttribute });

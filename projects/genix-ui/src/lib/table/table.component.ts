@@ -516,6 +516,15 @@ export class GmTableComponent<T> {
     this.translated('clearFilters', this.resolvedFilterLabels().clear),
   );
 
+  /** Row-expansion toggle names — `expandRow` / `collapseRow` keys, English by default. */
+  protected readonly expandRowLabel = computed(() =>
+    this.translated("expandRow", "Expand row"),
+  );
+
+  protected readonly collapseRowLabel = computed(() =>
+    this.translated("collapseRow", "Collapse row"),
+  );
+
   /** `{0}` is replaced with the count, as in `gm-multiselect`. */
   protected readonly selectedColumnsLabel = computed(() =>
     this.translated('itemsSelected', '{0} items selected'),

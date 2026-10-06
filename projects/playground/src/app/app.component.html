@@ -1455,6 +1455,7 @@
         [pageSizeOptions]="[5, 10]"
         [minVisibleColumns]="2"
         [displayActionsInModals]="true"
+        [rowExpandable]="providerExpandable"
         minWidth="76rem"
         caption="Contracted providers, as one config object"
         (sortChange)="onConfigSort($event)"
@@ -1464,7 +1465,17 @@
         (columnReorder)="onConfigReorder($event)"
         (columnChooserRejected)="onColumnChooserRejected($event)"
         (addClicked)="lastConfigEvent.set('Add')"
-      />
+      >
+        <!-- Works in config mode too: the template alone turns the toggle
+             column on, and `rowExpandable` gates which rows get one. -->
+        <ng-template gmTableRowExpansion let-provider>
+          <p class="pg-lead">
+            <strong>{{ provider.name }}</strong> · {{ provider.type }} ·
+            {{ provider.country }}
+          </p>
+          <p class="pg-lead">{{ provider.notes }}</p>
+        </ng-template>
+      </gm-table>
 
       <p class="pg-readout">
         Selected: <code>{{ configSelection().length }}</code>

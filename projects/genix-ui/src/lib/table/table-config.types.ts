@@ -155,7 +155,7 @@ export interface TableColumn<T> {
   tooltipField?: keyof T & string;
   /** Renders the value as a link and calls this on click. */
   linkPath?: (row: T) => void;
-  /** Row actions scoped to this column, for a grid that varies them per column. */
+  /** Buttons drawn in this column's cells — used with `cellType: GmCellType.BUTTONS`. Same shape as `singleActions`, including `display: 'menu'`. */
   actions?: SingleAction<T>[];
   /** With `cellType: GmCellType.DOT`, maps the field's value (case-insensitive) to a dot colour. */
   dotColorMap?: Record<string, GmStatusTone>;
@@ -372,6 +372,14 @@ export enum GmCellType {
   /** Renders the field's value (expected to be a `string[]`) as a bulleted list, one entry per line. */
   LIST = 'list',
   STATUS_DOT = 'status_dot',
+  /**
+   * Draws the column's `actions` as buttons in the cell instead of a value —
+   * a "Preview" or "Download" button per row, inside the data, rather than in
+   * the pinned actions column. `field` is only the column's identity here, so
+   * any key of the row will do; the cell never reads its value, which also
+   * means an empty field does not render as a dash.
+   */
+  BUTTONS = 'buttons',
 }
 
 /**

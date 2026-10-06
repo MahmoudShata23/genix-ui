@@ -342,7 +342,7 @@ describe('gm-table config mode', () => {
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    menuButton('Apply').click();
+    menuButton('APPLY').click();
     fixture.detectChanges();
 
     expect(host.filterRequests.at(-1)).toEqual({
@@ -370,7 +370,7 @@ describe('gm-table config mode', () => {
     input.value = '12';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    menuButton('Apply').click();
+    menuButton('APPLY').click();
     fixture.detectChanges();
 
     const descriptor = host.filterRequests.at(-1)!.filters![0];

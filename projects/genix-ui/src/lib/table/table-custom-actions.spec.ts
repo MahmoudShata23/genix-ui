@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { GmTableComponent } from './table.component';
-import { GmTableBulkActionScope } from './table-config.types';
+import { GmCellType, GmTableBulkActionScope } from './table-config.types';
 import type { TableModel } from './table-config.types';
 
 interface Row {
@@ -79,7 +79,10 @@ describe('gm-table custom actions', () => {
   });
 
   afterEach(() => {
-    document.querySelector('.cdk-overlay-container')!.innerHTML = '';
+    const overlays = document.querySelector('.cdk-overlay-container');
+    if (overlays) {
+      overlays.innerHTML = '';
+    }
   });
 
   it('draws a keyed action with its own icon and runs its command', () => {
@@ -116,5 +119,64 @@ describe('gm-table custom actions', () => {
     )!;
     notify.click();
     expect(calls).toEqual(['notify 0']);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [GmTableComponent],
+  template: `<gm-table [records]="rows" [tableConfig]="config" [totalRecords]="2" />`,
+})
+class ButtonCellHostComponent {
+  readonly rows: Row[] = [
+    { id: '1', name: 'One' },
+    { id: '2', name: 'Two' },
+  ];
+
+  readonly config: TableModel<Row> = {
+    columns: [
+      { field: 'name', header: 'name' },
+      {
+        field: 'id',
+        header: 'documents',
+        cellType: GmCellType.BUTTONS,
+        actions: [
+          {
+            key: 'preview',
+            icon: 'pi pi-eye',
+            label: 'Preview',
+            command: (row) => calls.push(`preview ${row.id}`),
+          },
+          {
+            key: 'download',
+            label: 'Download',
+            visible: (row) => row.id === '2',
+            command: (row) => calls.push(`download ${row.id}`),
+          },
+        ],
+      },
+    ],
+  };
+}
+
+describe('gm-table BUTTONS cell', () => {
+  it('draws the column actions as buttons in the cell and runs them', () => {
+    calls.length = 0;
+    TestBed.configureTestingModule({
+      imports: [ButtonCellHostComponent],
+      providers: [provideRouter([])],
+    });
+    const fixture = TestBed.createComponent(ButtonCellHostComponent);
+    fixture.detectChanges();
+
+    const rows = (fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr');
+    const first = rows[0].querySelectorAll('gm-table-config-cell button');
+    const second = rows[1].querySelectorAll('gm-table-config-cell button');
+    // Row 1 hides "Download" via `visible`; row 2 shows both.
+    expect(first.length).toBe(1);
+    expect(second.length).toBe(2);
+
+    first[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(calls).toEqual(['preview 1']);
   });
 });

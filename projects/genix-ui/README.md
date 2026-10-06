@@ -491,6 +491,31 @@ singleActions: [
 ],
 ```
 
+**Buttons inside a cell.** `cellType: GmCellType.BUTTONS` draws the column's
+`actions` (same shape as `singleActions`: `key`/`icon`/`label`/`severity`,
+`visible`, `disabled`, `display: 'menu'`) instead of a value. `field` is only
+the column's identity — any key of the row works.
+
+```ts
+{ field: 'id', header: 'documents', cellType: GmCellType.BUTTONS,
+  sortable: false, exportable: false,
+  actions: [{ key: 'preview', icon: 'pi pi-eye', label: 'Preview',
+              command: (row) => this.preview(row) }] }
+```
+
+**Expandable rows.** Put a `gmTableRowExpansion` template inside `<gm-table>`;
+the template alone turns the toggle column on (there is no `expandable` switch),
+and `[rowExpandable]="(row, index) => boolean"` decides which rows get a toggle.
+It works with `tableConfig` and with `[columns]` alike; set `rowKey` so the open
+state survives sorting and paging.
+
+```html
+<gm-table [records]="rows()" [tableConfig]="config" rowKey="id"
+          [rowExpandable]="hasDetails">
+  <ng-template gmTableRowExpansion let-row>{{ row.notes }}</ng-template>
+</gm-table>
+```
+
 `tableConfig` **mounts the frame the column API leaves to you**: the toolbar
 above, the paginator below, a pinned actions column, the selection column, and
 the `GmCellType` renderers. It is the same component throughout — frozen

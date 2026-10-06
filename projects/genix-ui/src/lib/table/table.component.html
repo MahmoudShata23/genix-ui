@@ -247,7 +247,7 @@
                     type="button"
                     class="gm-table__expand-toggle"
                     [attr.aria-expanded]="isRowExpanded(row)"
-                    [attr.aria-label]="isRowExpanded(row) ? 'Collapse row' : 'Expand row'"
+                    [attr.aria-label]="isRowExpanded(row) ? collapseRowLabel() : expandRowLabel()"
                     (click)="toggleRowExpansion(row)"
                   >
                     <span
@@ -308,6 +308,7 @@
                   <gm-table-config-cell
                     [column]="configColumn"
                     [row]="row"
+                    [translate]="translate()"
                     [truncateAt]="truncateLimit(column)"
                   />
                 } @else if (isActionsColumn(column)) {

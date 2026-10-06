@@ -207,6 +207,7 @@ interface Section {
     GmTabComponent,
     GmTabLabelDirective,
     GmTableComponent,
+    GmTableRowExpansionDirective,
     GmTabsComponent,
     GmTextareaComponent,
     GmToggleSwitchComponent,
@@ -1102,6 +1103,33 @@ export class AppComponent {
         // Truncated prose is display, not data worth exporting.
         exportable: false,
       },
+      {
+        // Buttons *in* the data: `cellType: BUTTONS` draws this column's
+        // `actions` instead of a value. `field` is only the column's identity.
+        field: "id",
+        header: "documents",
+        cellType: GmCellType.BUTTONS,
+        sortable: false,
+        exportable: false,
+        width: "9rem",
+        actions: [
+          {
+            key: "preview",
+            icon: "pi pi-eye",
+            label: "Preview",
+            severity: "info",
+            command: (row) => this.lastConfigEvent.set(`Preview → ${row.name}`),
+          },
+          {
+            key: "download",
+            icon: "pi pi-download",
+            label: "Download",
+            // Per-row gate, like `singleActions`: the slot stays, the button goes.
+            visible: (row) => row.active,
+            command: (row) => this.lastConfigEvent.set(`Download → ${row.name}`),
+          },
+        ],
+      },
     ],
     singleActions: [
       {
@@ -1277,6 +1305,10 @@ export class AppComponent {
   ];
 
   /** Rows with nothing to show underneath get no toggle at all. */
+  /** Config-grid rows get a toggle only when they have notes to show. */
+  protected readonly providerExpandable = (provider: Provider): boolean =>
+    provider.notes.length > 0;
+
   protected readonly orderExpandable = (order: Order): boolean =>
     order.items.length > 0;
 

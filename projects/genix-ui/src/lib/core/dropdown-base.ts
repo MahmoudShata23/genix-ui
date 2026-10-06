@@ -58,11 +58,20 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
   /** Property holding a group's child options array. See `optionGroupLabel`. */
   readonly optionGroupChildren = input<string>();
 
-  readonly placeholder = input<string>('');
+  readonly placeholder = input<string>();
+
+  /** Explicit placeholder; otherwise the translated `Select {label}`. */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.fieldPlaceholder('select'),
+  );
 
   readonly filter = input(false, { transform: booleanAttribute });
 
-  readonly filterPlaceholder = input<string>('');
+  readonly filterPlaceholder = input<string>();
+
+  protected readonly filterPlaceholderText = computed(
+    () => this.filterPlaceholder() ?? this.labels().search,
+  );
 
   /** Property to match while filtering. Defaults to `optionLabel`. */
   readonly filterBy = input<string>();
@@ -71,9 +80,16 @@ export abstract class GmDropdownBase<T> extends GmFormFieldBase<T> {
 
   readonly loading = input(false, { transform: booleanAttribute });
 
-  readonly emptyMessage = input<string>('No options available');
+  readonly emptyMessage = input<string>();
 
-  readonly emptyFilterMessage = input<string>('No results found');
+  readonly emptyFilterMessage = input<string>();
+
+  /** What the panel says when there is nothing to list. */
+  protected readonly emptyText = computed(() =>
+    this.filterText()
+      ? (this.emptyFilterMessage() ?? this.labels().noResults)
+      : (this.emptyMessage() ?? this.labels().noOptions),
+  );
 
   /**
    * Renders only the rows in view, for lists long enough that a row per

@@ -35,7 +35,7 @@
 
   <gm-button
     class="gm-file-upload__choose"
-    [label]="chooseLabel()"
+    [label]="chooseLabel() ?? labels().chooseFiles"
     icon="pi pi-plus"
     severity="secondary"
     variant="outlined"
@@ -64,7 +64,7 @@
           severity="danger"
           variant="text"
           size="small"
-          [ariaLabel]="'Remove ' + file.name"
+          [ariaLabel]="removeLabel(file)"
           [disabled]="disabled()"
           (onClick)="remove(file)"
         />

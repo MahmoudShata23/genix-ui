@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 
 import { GmButtonComponent } from '../button/button.component';
+import { gmFormat, injectGmLabels } from '../core/i18n';
 import { gmUniqueId } from '../core/unique-id';
 import type { GmFileRejection } from './file-upload.types';
 
@@ -80,7 +81,13 @@ export class GmFileUploadComponent {
   /** Visible caption above the zone. */
   readonly label = input<string>();
 
-  readonly chooseLabel = input('Choose files');
+  readonly chooseLabel = input<string>();
+
+  protected readonly labels = injectGmLabels();
+
+  protected removeLabel(file: File): string {
+    return gmFormat(this.labels().remove, file.name);
+  }
 
   readonly hint = input<string>();
 

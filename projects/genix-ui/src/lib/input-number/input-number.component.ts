@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   numberAttribute,
 } from '@angular/core';
@@ -41,6 +42,12 @@ export class GmInputNumberComponent extends GmFormFieldBase<number> {
   readonly size = input<GmFieldSize>('medium');
 
   readonly placeholder = input<string>();
+
+  /** Explicit placeholder; otherwise the translated default for the label. */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.fieldPlaceholder('enter'),
+  );
+
 
   readonly min = input(undefined, { transform: numberAttribute });
 

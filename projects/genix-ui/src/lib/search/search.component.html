@@ -23,7 +23,7 @@
       [value]="value() ?? ''"
       [disabled]="isDisabled()"
       [attr.readonly]="readOnly() ? '' : null"
-      [attr.placeholder]="placeholder()"
+      [attr.placeholder]="placeholderText()"
       [attr.aria-label]="ariaLabel()"
       [attr.aria-invalid]="hasError() ? 'true' : null"
       [attr.aria-describedby]="describedBy()"
@@ -36,14 +36,14 @@
         <span
           class="gm-search__spinner"
           role="status"
-          [attr.aria-label]="loadingLabel()"
+          [attr.aria-label]="loadingLabel() ?? labels().searching"
         ></span>
       } @else if (clearable() && isFilled() && !readOnly()) {
         <!-- A real button so it is reachable and announced on its own. -->
         <button
           type="button"
           class="gm-search__clear"
-          aria-label="Clear search"
+          [attr.aria-label]="labels().clearSearch"
           [disabled]="isDisabled()"
           (click)="clear()"
         >

@@ -75,6 +75,12 @@ export class GmAutocompleteComponent extends GmFormFieldBase<unknown> {
 
   readonly placeholder = input<string>();
 
+  /** Explicit placeholder; otherwise the translated default for the label. */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.fieldPlaceholder('enter'),
+  );
+
+
   /** Shows a spinner in place of the dropdown affordance. */
   readonly loading = input(false, { transform: booleanAttribute });
 
@@ -84,7 +90,7 @@ export class GmAutocompleteComponent extends GmFormFieldBase<unknown> {
   /** Characters required before `search` fires. */
   readonly minLength = input(1, { transform: numberAttribute });
 
-  readonly emptyMessage = input<string>('No results found');
+  readonly emptyMessage = input<string>();
 
   /** The current term. The application answers by updating `suggestions`. */
   readonly search = output<string>();

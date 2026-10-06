@@ -9,6 +9,7 @@ export * from './lib/core/form-field-base';
 export * from './lib/core/dropdown-base';
 export * from './lib/core/overlay-panel';
 export * from './lib/core/option-reader';
+export * from './lib/core/i18n';
 export * from './lib/button';
 export * from './lib/input';
 export * from './lib/search';

@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 
+import { gmFormat, injectGmLabels } from './i18n';
 import type { GmSize } from './types';
 
 /** Size step shared by every text-entry control. */
@@ -70,6 +71,23 @@ export abstract class GmFormFieldBase<T>
     self: true,
     optional: true,
   });
+
+  /** The application's translated built-in texts. */
+  protected readonly labels = injectGmLabels();
+
+  /**
+   * Default placeholder: `Enter {label}` / `Select {label}`, or the bare verb
+   * when there is no label. Translated through `provideGmLabels`.
+   */
+  protected fieldPlaceholder(kind: 'enter' | 'select'): string {
+    const labels = this.labels();
+    const label = this.label();
+    const [withLabel, bare] =
+      kind === 'enter'
+        ? [labels.enter, labels.enterText]
+        : [labels.select, labels.selectText];
+    return label ? gmFormat(withLabel, label) : bare;
+  }
 
   /* protected so subclasses reuse this instead of injecting a second one. */
   protected readonly destroyRef = inject(DestroyRef);

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   numberAttribute,
 } from '@angular/core';
@@ -35,7 +36,13 @@ export class GmTextareaComponent extends GmFormFieldBase<string> {
 
   readonly resize = input<GmTextareaResize>('vertical');
 
-  readonly placeholder = input<string>('Enter text');
+  readonly placeholder = input<string>();
+
+  /** Explicit placeholder; otherwise the translated default for the label. */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.fieldPlaceholder('enter'),
+  );
+
 
   readonly maxLength = input(undefined, { transform: numberAttribute });
 

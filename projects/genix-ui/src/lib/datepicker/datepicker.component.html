@@ -29,7 +29,7 @@
     @if (displayText()) {
       <span class="gm-datepicker__value">{{ displayText() }}</span>
     } @else {
-      <span class="gm-datepicker__placeholder">{{ placeholder() }}</span>
+      <span class="gm-datepicker__placeholder">{{ placeholderText() }}</span>
     }
 
     <span class="gm-datepicker__actions">
@@ -38,7 +38,7 @@
         <button
           type="button"
           class="gm-datepicker__clear"
-          aria-label="Clear date"
+          [attr.aria-label]="labels().clearDate"
           [disabled]="isDisabled()"
           (click)="clear($event)"
         >
@@ -76,7 +76,7 @@
         <button
           type="button"
           class="gm-datepicker__nav"
-          aria-label="Previous month"
+          [attr.aria-label]="labels().previousMonth"
           [disabled]="!canGoBack()"
           (click)="shiftMonth(-1)"
         >
@@ -89,7 +89,7 @@
         <button
           type="button"
           class="gm-datepicker__nav"
-          aria-label="Next month"
+          [attr.aria-label]="labels().nextMonth"
           [disabled]="!canGoForward()"
           (click)="shiftMonth(1)"
         >
@@ -150,10 +150,10 @@
     @if (hasTime()) {
       <!-- Native selects: keyboard operation, screen-reader support and the
            mobile wheel picker all come from the platform. -->
-      <div class="gm-datepicker__time" role="group" aria-label="Time">
+      <div class="gm-datepicker__time" role="group" [attr.aria-label]="labels().time">
         <select
           class="gm-datepicker__time-select"
-          aria-label="Hour"
+          [attr.aria-label]="labels().hour"
           [disabled]="isDisabled() || readOnly()"
           (change)="setHour($any($event.target).value)"
         >
@@ -168,7 +168,7 @@
 
         <select
           class="gm-datepicker__time-select"
-          aria-label="Minute"
+          [attr.aria-label]="labels().minute"
           [disabled]="isDisabled() || readOnly()"
           (change)="setMinute($any($event.target).value)"
         >
@@ -182,7 +182,7 @@
         @if (hourFormat() === 12) {
           <select
             class="gm-datepicker__time-select"
-            aria-label="AM or PM"
+            [attr.aria-label]="labels().amPm"
             [disabled]="isDisabled() || readOnly()"
             (change)="setMeridiem($any($event.target).value)"
           >
@@ -198,14 +198,14 @@
         <gm-button
           variant="text"
           size="small"
-          [label]="todayLabel()"
+          [label]="todayLabel() ?? labels().today"
           (onClick)="selectToday()"
         />
         <gm-button
           variant="text"
           size="small"
           severity="secondary"
-          [label]="clearLabel()"
+          [label]="clearLabel() ?? labels().clear"
           (onClick)="clear()"
         />
       </div>

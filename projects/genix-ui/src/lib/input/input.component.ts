@@ -41,6 +41,11 @@ export class GmInputComponent extends GmFormFieldBase<string | number> {
 
   readonly placeholder = input<string>();
 
+  /** Explicit placeholder; otherwise the translated default for the label. */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.fieldPlaceholder('enter'),
+  );
+
   readonly maxLength = input(undefined, { transform: numberAttribute });
 
   readonly minLength = input(undefined, { transform: numberAttribute });
@@ -74,7 +79,7 @@ export class GmInputComponent extends GmFormFieldBase<string | number> {
   readonly loading = input(false, { transform: booleanAttribute });
 
   /** Names the wait for a screen reader; the spinner itself is a status role. */
-  readonly loadingLabel = input<string>('Loading');
+  readonly loadingLabel = input<string>();
 
   /**
    * Whether anything occupies the trailing slot. The padding that keeps the

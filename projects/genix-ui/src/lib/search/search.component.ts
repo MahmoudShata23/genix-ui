@@ -43,7 +43,13 @@ import { gmUniqueId } from '../core/unique-id';
 export class GmSearchComponent extends GmFormFieldBase<string> {
   readonly size = input<GmFieldSize>('medium');
 
-  readonly placeholder = input<string>('');
+  readonly placeholder = input<string>();
+
+  /** Explicit placeholder; otherwise the translated "Search". */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.labels().search,
+  );
+
 
   /** Icon class for the leading magnifier glyph. */
   readonly icon = input<string>('pi pi-search');
@@ -64,7 +70,7 @@ export class GmSearchComponent extends GmFormFieldBase<string> {
    */
   readonly loading = input(false, { transform: booleanAttribute });
 
-  readonly loadingLabel = input<string>('Searching');
+  readonly loadingLabel = input<string>();
 
   /**
    * The settled term: debounced and de-duplicated, so a handler can fetch on

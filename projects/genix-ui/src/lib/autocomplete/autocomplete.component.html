@@ -22,7 +22,7 @@
       [value]="query()"
       [disabled]="isDisabled()"
       [attr.readonly]="readOnly() ? '' : null"
-      [attr.placeholder]="placeholder()"
+      [attr.placeholder]="placeholderText()"
       [attr.aria-expanded]="open()"
       [attr.aria-controls]="open() ? listboxId : null"
       [attr.aria-activedescendant]="activeOptionId()"
@@ -38,13 +38,13 @@
 
     <span class="gm-autocomplete__actions">
       @if (loading()) {
-        <gm-spinner size="small" ariaLabel="Searching" />
+        <gm-spinner size="small" [ariaLabel]="labels().searching" />
       } @else if (clearable() && hasValue() && !readOnly()) {
         <!-- A real button so it is reachable and announced on its own. -->
         <button
           type="button"
           class="gm-autocomplete__clear"
-          aria-label="Clear selection"
+          [attr.aria-label]="labels().clearSelection"
           [disabled]="isDisabled()"
           (click)="clear($event)"
         >
@@ -97,7 +97,7 @@
         </li>
       } @empty {
         <li class="gm-autocomplete__empty" role="presentation">
-          {{ loading() ? '' : emptyMessage() }}
+          {{ loading() ? '' : (emptyMessage() ?? labels().noResults) }}
         </li>
       }
     </ul>

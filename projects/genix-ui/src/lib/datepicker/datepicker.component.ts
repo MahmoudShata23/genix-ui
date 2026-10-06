@@ -94,7 +94,12 @@ function hourFormatAttribute(
   },
 })
 export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
-  readonly placeholder = input<string>('');
+  readonly placeholder = input<string>();
+
+  /** Explicit placeholder; otherwise the translated `Select {label}`. */
+  protected readonly placeholderText = computed(
+    () => this.placeholder() ?? this.fieldPlaceholder('select'),
+  );
 
   /** Display pattern. Tokens: `dd`, `MM`, `yyyy`, `yy`. */
   readonly dateFormat = input<string>('dd/MM/yyyy');
@@ -112,9 +117,9 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
   /** 0 = Sunday. */
   readonly firstDayOfWeek = input(0);
 
-  readonly todayLabel = input<string>('Today');
+  readonly todayLabel = input<string>();
 
-  readonly clearLabel = input<string>('Clear');
+  readonly clearLabel = input<string>();
 
   /** Adds hour/minute controls below the calendar; the value carries the time. */
   readonly showTime = input(false, { transform: booleanAttribute });

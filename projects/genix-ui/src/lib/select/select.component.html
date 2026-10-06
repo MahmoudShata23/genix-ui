@@ -40,19 +40,19 @@
         }
       </span>
     } @else {
-      <span class="gm-dropdown__placeholder">{{ placeholder() }}</span>
+      <span class="gm-dropdown__placeholder">{{ placeholderText() }}</span>
     }
 
     <span class="gm-dropdown__actions">
       @if (loading()) {
-        <gm-spinner size="small" ariaLabel="Loading options" />
+        <gm-spinner size="small" [ariaLabel]="labels().loadingOptions" />
       } @else {
         @if (clearable() && hasValue() && !readOnly()) {
           <!-- A real button so it is reachable and announced on its own. -->
           <button
             type="button"
             class="gm-dropdown__clear"
-            aria-label="Clear selection"
+            [attr.aria-label]="labels().clearSelection"
             [disabled]="isDisabled()"
             (click)="clear($event)"
           >
@@ -87,8 +87,8 @@
           type="text"
           class="gm-dropdown__filter-input"
           autocomplete="off"
-          [attr.placeholder]="filterPlaceholder()"
-          [attr.aria-label]="filterPlaceholder() || 'Filter options'"
+          [attr.placeholder]="filterPlaceholderText()"
+          [attr.aria-label]="filterPlaceholder() || labels().filterOptions"
           [value]="filterText()"
           (input)="onFilterInput($event)"
         />
@@ -99,7 +99,7 @@
       <!-- Still a listbox, so `aria-controls` on the trigger always resolves. -->
       <ul class="gm-dropdown__list" role="listbox" [attr.id]="listboxId">
         <li class="gm-dropdown__empty" role="presentation">
-          {{ filterText() ? emptyFilterMessage() : emptyMessage() }}
+          {{ emptyText() }}
         </li>
       </ul>
     } @else if (virtualScroll()) {

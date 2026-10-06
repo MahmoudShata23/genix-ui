@@ -583,6 +583,28 @@ Some PrimeNG pieces have no Genix component because they need none:
 Form controls implement `ControlValueAccessor`, so they bind with
 `formControlName` / `[(ngModel)]` and pick up validity state from the control.
 
+## Translating the built-in text
+
+Everything a form field writes itself — placeholders, "Clear selection", "No results found", the date picker's month buttons, "+N more selected" — comes from one place. Register your translations once, in `app.config.ts`:
+
+```ts
+import { provideGmLabels } from '@globemed/genix-ui';
+
+providers: [
+  // A function, so it re-renders when the language signal changes.
+  provideGmLabels(() => ({
+    enter: t('enter'),            // "أدخل {0}"  -> placeholder "أدخل الاسم"
+    select: t('select'),          // "اختر {0}"
+    noResults: t('noResults'),
+    clearSelection: t('clearSelection'),
+    itemsSelected: t('itemsSelected'),   // "{0} عناصر"
+    // ...any key of GmLabels; what you leave out stays English
+  })),
+]
+```
+
+A field's default placeholder is `enter`/`select` filled with its `label` (`label="Name"` → "Enter Name"), or `enterText`/`selectText` when it has no label. An explicit `placeholder`, `emptyMessage`, `todayLabel` … input on one field still wins. Text you pass yourself (`label`, `hint`, `error`, option text) is not touched — translate it before binding. The table keeps its own `[translate]` function.
+
 ## Developing and releasing
 
 See the [workspace README](../../README.md).

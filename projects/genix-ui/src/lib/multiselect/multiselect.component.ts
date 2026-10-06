@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 
 import { GmDropdownBase, type GmDropdownOption } from '../core/dropdown-base';
+import { gmFormat } from '../core/i18n';
 import { gmUniqueId } from '../core/unique-id';
 import { GmChipComponent } from '../chip/chip.component';
 import { GmSpinnerComponent } from '../spinner/spinner.component';
@@ -88,11 +89,11 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
   readonly maxSelectedLabels = input(3, { transform: numberAttribute });
 
   /** Count summary text; `{0}` is replaced with the number selected. */
-  readonly selectedItemsLabel = input<string>('{0} items selected');
+  readonly selectedItemsLabel = input<string>();
 
   readonly showToggleAll = input(true, { transform: booleanAttribute });
 
-  readonly toggleAllLabel = input<string>('Select all');
+  readonly toggleAllLabel = input<string>();
 
   /**
    * Most selections allowed. Omit for no limit.
@@ -180,7 +181,10 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
     }
     return labels.length <= this.maxSelectedLabels()
       ? labels.join(', ')
-      : this.selectedItemsLabel().replace('{0}', String(labels.length));
+      : gmFormat(
+          this.selectedItemsLabel() ?? this.labels().itemsSelected,
+          labels.length,
+        );
   });
 
   /**
@@ -211,6 +215,14 @@ export class GmMultiselectComponent extends GmDropdownBase<unknown[]> {
     this.isFullySelected()
       ? []
       : this.selectedOptions().slice(0, this.maxSelectedLabels()),
+  );
+
+  protected removeLabel(option: GmDropdownOption): string {
+    return gmFormat(this.labels().remove, this.labelOf(option));
+  }
+
+  protected readonly moreSelectedLabel = computed(() =>
+    gmFormat(this.labels().moreSelected, this.overflowChipCount()),
   );
 
   protected readonly overflowChipCount = computed(() =>

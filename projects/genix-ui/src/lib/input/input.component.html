@@ -29,7 +29,7 @@
       [value]="value() ?? ''"
       [disabled]="isDisabled()"
       [attr.readonly]="readOnly() ? '' : null"
-      [attr.placeholder]="placeholder()"
+      [attr.placeholder]="placeholderText()"
       [attr.autocomplete]="autocomplete()"
       [attr.maxlength]="maxLength() ?? null"
       [attr.minlength]="minLength() ?? null"
@@ -45,7 +45,7 @@
       <span
         class="gm-input__icon gm-input__icon--end gm-input__spinner"
         role="status"
-        [attr.aria-label]="loadingLabel()"
+        [attr.aria-label]="loadingLabel() ?? labels().loading"
       ></span>
     } @else if (iconEnd()) {
       <i

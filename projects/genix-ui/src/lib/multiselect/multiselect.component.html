@@ -29,13 +29,13 @@
     (keydown)="onKeydown($event)"
   >
     @if (!hasValue()) {
-      <span class="gm-dropdown__placeholder">{{ placeholder() }}</span>
+      <span class="gm-dropdown__placeholder">{{ placeholderText() }}</span>
     } @else if (display() === 'chip') {
       <span class="gm-multiselect__chips" [gmTooltip]="hasHiddenSelections() ? allSelectedLabelsText() : null">
         @if (isFullySelected()) {
           <gm-chip severity="secondary" [label]="allSelectedLabel()!" [removable]="false" />
         } @else {
-          @for (option of selectedOptions(); track $index) {
+          @for (option of visibleChipOptions(); track $index) {
             @if (iconFor(option); as icon) {
               <gm-chip
                 [severity]="severityFor(option)"
@@ -48,7 +48,7 @@
                 [severity]="severityFor(option)"
                 [label]="labelOf(option)"
                 [removable]="!readOnly() && !isDisabled()"
-                [removeAriaLabel]="'Remove ' + labelOf(option)"
+                [removeAriaLabel]="removeLabel(option)"
                 (remove)="removeValue(option)"
               />
             }
@@ -57,7 +57,7 @@
             <gm-chip
               severity="secondary"
               [label]="'+' + overflowChipCount()"
-              [ariaLabel]="overflowChipCount() + ' more selected'"
+              [ariaLabel]="moreSelectedLabel()"
             />
           }
         }
@@ -71,14 +71,14 @@
 
     <span class="gm-dropdown__actions">
       @if (loading()) {
-        <gm-spinner size="small" ariaLabel="Loading options" />
+        <gm-spinner size="small" [ariaLabel]="labels().loadingOptions" />
       } @else {
         @if (clearable() && hasValue() && !readOnly()) {
           <!-- A real button so it is reachable and announced on its own. -->
           <button
             type="button"
             class="gm-dropdown__clear"
-            aria-label="Clear selection"
+            [attr.aria-label]="labels().clearSelection"
             [disabled]="isDisabled()"
             (click)="clear($event)"
           >
@@ -113,8 +113,8 @@
           type="text"
           class="gm-dropdown__filter-input"
           autocomplete="off"
-          [attr.placeholder]="filterPlaceholder()"
-          [attr.aria-label]="filterPlaceholder() || 'Filter options'"
+          [attr.placeholder]="filterPlaceholderText()"
+          [attr.aria-label]="filterPlaceholder() || labels().filterOptions"
           [value]="filterText()"
           (input)="onFilterInput($event)"
         />
@@ -138,7 +138,7 @@
           [class.gm-multiselect__tick--checked]="allVisibleSelected()"
           aria-hidden="true"
         ></span>
-        {{ toggleAllLabel() }}
+        {{ toggleAllLabel() ?? labels().selectAll }}
       </button>
     }
 
@@ -151,7 +151,7 @@
         [attr.id]="listboxId"
       >
         <li class="gm-dropdown__empty" role="presentation">
-          {{ filterText() ? emptyFilterMessage() : emptyMessage() }}
+          {{ emptyText() }}
         </li>
       </ul>
     } @else if (virtualScroll()) {

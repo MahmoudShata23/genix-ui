@@ -1108,6 +1108,16 @@
         <div class="pg-row">
           <gm-button label="Edit provider" (onClick)="openDialog()" />
           <gm-button
+            label="Open from start"
+            variant="outlined"
+            (onClick)="openDialog('start')"
+          />
+          <gm-button
+            label="Open from end"
+            variant="outlined"
+            (onClick)="openDialog('end')"
+          />
+          <gm-button
             label="Undismissable"
             severity="secondary"
             variant="outlined"

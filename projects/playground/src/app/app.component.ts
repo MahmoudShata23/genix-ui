@@ -30,6 +30,7 @@ import {
   GmChipComponent,
   GmDatepickerComponent,
   GmDateRange,
+  GmDialogPosition,
   GmDialogService,
   GmFileRejection,
   GmFileUploadComponent,
@@ -1349,7 +1350,7 @@ export class AppComponent {
   protected readonly dialogResult = signal("nothing yet");
 
   /** The everyday case: hand data in, get a result back. */
-  protected openDialog(): void {
+  protected openDialog(position: GmDialogPosition = "middle"): void {
     const ref = this.dialogService.open<
       PgDialogDemoComponent,
       ProviderDraft,
@@ -1357,6 +1358,7 @@ export class AppComponent {
     >(PgDialogDemoComponent, {
       header: "Edit provider",
       width: "480px",
+      position,
       data: { name: "Nile Diagnostics", country: "Egypt" },
       dismissableMask: true,
     });

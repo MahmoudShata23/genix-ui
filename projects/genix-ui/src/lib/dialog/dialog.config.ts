@@ -28,6 +28,13 @@ import { Injectable } from '@angular/core';
  * @template D Type of `data`. Defaults to `any` so `config.data` stays as
  *   permissive as the PrimeNG original when a caller does not name a type.
  */
+/**
+ * Where the dialog sits. `'middle'` is a centred modal; `'start'` and `'end'`
+ * dock a full-height panel to the inline start/end edge (left/right in LTR,
+ * mirrored in RTL).
+ */
+export type GmDialogPosition = 'start' | 'middle' | 'end';
+
 @Injectable({ providedIn: 'root' })
 export class GmDialogConfig<D = any> {
   /** Payload handed to the opened component. Read as `config.data`. */
@@ -47,6 +54,13 @@ export class GmDialogConfig<D = any> {
 
   /** Overrides the viewport-relative cap the dialog applies by default. */
   maxHeight?: string;
+
+  /**
+   * `'start'` / `'end'` render a side panel spanning the full page height,
+   * flush against that edge. Default `'middle'`. `height` and `maxHeight` are
+   * ignored for side panels.
+   */
+  position?: GmDialogPosition;
 
   /** Show the header close button. Default `true`. */
   closable?: boolean;

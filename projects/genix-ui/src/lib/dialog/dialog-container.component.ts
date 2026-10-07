@@ -55,6 +55,9 @@ export class GmDialogContainerComponent {
   /** Ties the panel's `aria-labelledby` to the rendered title. */
   protected readonly headerId = gmUniqueId('gm-dialog-title');
 
+  /** Side panels span the full page height, so `height` / `maxHeight` don't apply. */
+  protected readonly isSidePanel = this.config.position === 'start' || this.config.position === 'end';
+
   protected readonly panelClasses = [
     ...(typeof this.config.panelClass === 'string'
       ? [this.config.panelClass]

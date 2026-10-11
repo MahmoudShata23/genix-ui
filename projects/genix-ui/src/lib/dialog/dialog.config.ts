@@ -81,6 +81,13 @@ export class GmDialogConfig<D = any> {
   /** Extra class(es) on the dialog panel, for per-dialog layout tweaks. */
   panelClass?: string | string[];
 
+  /**
+   * Writing direction. Defaults to the document's (`<html dir>` / `<body dir>`),
+   * which is what a dialog rendered under <body> can actually see; set it when
+   * `dir` is applied to an app element instead.
+   */
+  direction?: 'ltr' | 'rtl';
+
   /** Accessible name when there is no `header` to name the dialog. */
   ariaLabel?: string;
 }

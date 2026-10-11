@@ -1,3 +1,4 @@
+import { Directionality } from '@angular/cdk/bidi';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { CdkPortalOutlet, ComponentPortal } from '@angular/cdk/portal';
 import {
@@ -51,6 +52,9 @@ export class GmDialogContainerComponent {
     null,
     inject(Injector),
   );
+
+  /** Resolved direction, applied on the backdrop so everything inside inherits it. */
+  protected readonly dir = this.config.direction ?? inject(Directionality).value;
 
   /** Ties the panel's `aria-labelledby` to the rendered title. */
   protected readonly headerId = gmUniqueId('gm-dialog-title');

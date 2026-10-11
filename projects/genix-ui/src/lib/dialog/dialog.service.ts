@@ -1,3 +1,4 @@
+import { Directionality } from "@angular/cdk/bidi";
 import { ESCAPE, hasModifierKey } from "@angular/cdk/keycodes";
 import { Overlay } from "@angular/cdk/overlay";
 import { ComponentPortal, ComponentType } from "@angular/cdk/portal";
@@ -30,6 +31,7 @@ import { GM_DIALOG_CONTENT } from "./dialog.tokens";
 export class GmDialogService {
   private readonly overlay = inject(Overlay);
   private readonly injector = inject(Injector);
+  private readonly directionality = inject(Directionality);
 
   /**
    * @param component Component to render inside the dialog.
@@ -50,7 +52,13 @@ export class GmDialogService {
     // renders and centres itself (see `GmDialogContainerComponent`). What the
     // overlay is here for is the out-of-tree host element, the disposal
     // lifecycle, and `keydownEvents()`.
-    const overlayRef = this.overlay.create();
+    //
+    // `direction` is explicit because the overlay host lives under <body>, out
+    // of reach of a `dir` set on an app element; without it the pane (and every
+    // `:host-context([dir='rtl'])` rule inside the dialog) renders LTR.
+    const overlayRef = this.overlay.create({
+      direction: config.direction ?? this.directionality.value,
+    });
     const ref = new GmDialogRef<R, D>(overlayRef, config.data);
 
     // Subscribed even when `closeOnEscape` is off, and the flag checked inside:

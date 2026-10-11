@@ -49,8 +49,12 @@ describe('gm-datepicker', () => {
     ) as HTMLButtonElement[];
   const dayByText = (text: string) =>
     days().find((d) => d.textContent?.trim() === text && !d.classList.contains('gm-datepicker__day--outside'))!;
-  const monthLabel = () =>
-    (panel()!.querySelector('.gm-datepicker__month') as HTMLElement).textContent!.trim();
+  const monthLabel = () => {
+    const [month, year] = Array.from(
+      panel()!.querySelectorAll('.gm-datepicker__jump-select'),
+    ) as HTMLSelectElement[];
+    return `${month.value}/${year.value}`;
+  };
 
   const open = (sel = '.main') => {
     trigger(sel).click();

@@ -83,8 +83,33 @@
           <span class="gm-datepicker__chevron gm-datepicker__chevron--prev" aria-hidden="true"></span>
         </button>
 
-        <!-- aria-live so the month change is announced during keyboard paging. -->
-        <span class="gm-datepicker__month" aria-live="polite">{{ monthLabel() }}</span>
+        <!-- Native selects: jump to any month/year without paging. -->
+        <div class="gm-datepicker__jump">
+          <select
+            #monthSelect
+            class="gm-datepicker__jump-select"
+            [attr.aria-label]="labels().month"
+            (change)="jumpTo(monthSelect.value, yearSelect.value)"
+          >
+            @for (name of monthNames(); track $index) {
+              <option [value]="$index" [selected]="$index === viewMonth().getMonth()">
+                {{ name }}
+              </option>
+            }
+          </select>
+          <select
+            #yearSelect
+            class="gm-datepicker__jump-select"
+            [attr.aria-label]="labels().year"
+            (change)="jumpTo(monthSelect.value, yearSelect.value)"
+          >
+            @for (year of yearOptions(); track year) {
+              <option [value]="year" [selected]="year === viewMonth().getFullYear()">
+                {{ year }}
+              </option>
+            }
+          </select>
+        </div>
 
         <button
           type="button"

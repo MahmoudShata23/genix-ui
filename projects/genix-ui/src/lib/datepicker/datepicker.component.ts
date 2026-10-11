@@ -28,6 +28,7 @@ import {
   gmIsOutOfRange,
   gmIsSameDay,
   gmMonthGrid,
+  gmParseDate,
   gmStartOfDay,
   gmToday,
   gmWithTime,
@@ -36,6 +37,7 @@ import type {
   GmDateRange,
   GmDatepickerHourFormat,
   GmDatepickerSelectionMode,
+  GmDatepickerValueFormat,
 } from './datepicker.types';
 
 /**
@@ -101,8 +103,20 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
     () => this.placeholder() ?? this.fieldPlaceholder('select'),
   );
 
-  /** Display pattern. Tokens: `dd`, `MM`, `yyyy`, `yy`. */
+  /** Display pattern. Tokens: `dd`, `MM`, `MMM`, `MMMM`, `yyyy`, `yy`. */
   readonly dateFormat = input<string>('dd/MM/yyyy');
+
+  /**
+   * Shape of the control value: `date` (default), `iso`, `utc`, `timestamp`,
+   * `unix`, or a pattern such as `yyyy-MM-dd`. Independent of `dateFormat`,
+   * which only controls what the user sees. `valueChange` still emits a `Date`.
+   */
+  readonly valueFormat = input<GmDatepickerValueFormat>('date');
+
+  /** First/last year offered by the year dropdown; default to min/max date, else -100/+20 years. */
+  readonly minYear = input<number | null>(null);
+
+  readonly maxYear = input<number | null>(null);
 
   readonly minDate = input<Date | null>(null);
 
@@ -240,6 +254,26 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
     }).format(this.viewMonth()),
   );
 
+  protected readonly monthNames = computed(() => {
+    const formatter = new Intl.DateTimeFormat(undefined, { month: 'long' });
+    return Array.from({ length: 12 }, (_, m) => formatter.format(new Date(2024, m, 1)));
+  });
+
+  /** Always includes the year on screen, so the select can show it. */
+  protected readonly yearOptions = computed(() => {
+    const current = this.viewMonth().getFullYear();
+    const thisYear = new Date().getFullYear();
+    const from = Math.min(
+      this.minYear() ?? this.minDate()?.getFullYear() ?? thisYear - 100,
+      current,
+    );
+    const to = Math.max(
+      this.maxYear() ?? this.maxDate()?.getFullYear() ?? thisYear + 20,
+      current,
+    );
+    return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+  });
+
   /** Names the overlay: there is no month to announce when it is time only. */
   protected readonly panelLabel = computed(() =>
     this.timeOnly() ? 'Time' : this.monthLabel(),
@@ -316,12 +350,71 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
   override writeValue(value: Date | GmDateRange | null): void {
     if (this.isRange()) {
       const [start, end] = Array.isArray(value) ? value : [null, null];
-      super.writeValue([gmCoerceDate(start), gmCoerceDate(end)]);
+      super.writeValue([
+        gmCoerceDate(this.readExternal(start)),
+        gmCoerceDate(this.readExternal(end)),
+      ]);
       return;
     }
-    super.writeValue(
-      this.hasTime() ? gmCoerceDateTime(value) : gmCoerceDate(value),
-    );
+    const date = this.readExternal(value);
+    super.writeValue(this.hasTime() ? gmCoerceDateTime(date) : gmCoerceDate(date));
+  }
+
+  /** Emits the control value in `valueFormat` rather than always as a `Date`. */
+  override registerOnChange(fn: (value: Date | GmDateRange | null) => void): void {
+    super.registerOnChange((value) => {
+      const convert = (date: Date | null) => this.writeExternal(date);
+      const out = Array.isArray(value)
+        ? [convert(value[0]), convert(value[1])]
+        : convert(value as Date | null);
+      fn(out as unknown as Date | GmDateRange | null);
+    });
+  }
+
+  /** A Date → the shape `valueFormat` asks for. */
+  private writeExternal(date: Date | null): unknown {
+    if (!date) {
+      return null;
+    }
+    const format = this.valueFormat();
+    switch (format) {
+      case 'date':
+        return date;
+      case 'iso':
+        return this.timeOnly()
+          ? gmFormatDate(date, 'HH:mm')
+          : gmFormatDate(date, this.hasTime() ? 'yyyy-MM-ddTHH:mm' : 'yyyy-MM-dd');
+      case 'utc':
+        return date.toISOString();
+      case 'timestamp':
+        return date.getTime();
+      case 'unix':
+        return Math.floor(date.getTime() / 1000);
+      default:
+        return gmFormatDate(date, format);
+    }
+  }
+
+  /**
+   * Anything an API might hand back → a Date (or a string the coercers read):
+   * epoch numbers, zoned ISO strings, and `valueFormat` patterns. Zone-less
+   * strings pass through untouched so the calendar day never shifts.
+   */
+  private readExternal(raw: unknown): unknown {
+    if (typeof raw === 'number') {
+      return new Date(this.valueFormat() === 'unix' ? raw * 1000 : raw);
+    }
+    if (typeof raw !== 'string') {
+      return raw;
+    }
+    if (/\d(?:Z|[+-]\d{2}:?\d{2})$/.test(raw)) {
+      return new Date(raw);
+    }
+    const format = this.valueFormat();
+    if (!['date', 'iso', 'utc', 'timestamp', 'unix'].includes(format)) {
+      return gmParseDate(raw, format) ?? raw;
+    }
+    return raw;
   }
 
   private formatValue(date: Date): string {
@@ -573,6 +666,16 @@ export class GmDatepickerComponent extends GmFormFieldBase<Date | GmDateRange> {
 
   protected shiftMonth(delta: number): void {
     this.viewMonth.set(gmAddMonths(this.viewMonth(), delta));
+  }
+
+  /** Jumps straight to a month and/or year from the header dropdowns. */
+  protected jumpTo(rawMonth: string, rawYear: string): void {
+    const month = Number(rawMonth);
+    const year = Number(rawYear);
+    const day = Math.min(this.focusedDate().getDate(), new Date(year, month + 1, 0).getDate());
+    const target = gmClamp(new Date(year, month, day), this.minDate(), this.maxDate());
+    this.viewMonth.set(target);
+    this.focusedDate.set(target);
   }
 
   /** Prev/next are pointless when the whole neighbouring month is out of range. */

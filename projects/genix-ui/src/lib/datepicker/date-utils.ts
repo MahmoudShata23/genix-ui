@@ -99,19 +99,74 @@ export function gmMonthGrid(
   return Array.from({ length: 42 }, (_, i) => gmAddDays(start, i));
 }
 
+const TOKEN = /yyyy|yy|MMMM|MMM|MM|dd|HH|mm/g;
+
 /**
- * Formats a calendar date. Supports the tokens this app needs — `dd`, `MM`,
- * `yyyy`, `yy` — and leaves any other characters as separators.
+ * Formats a date. Tokens: `yyyy`, `yy`, `MMMM` (January), `MMM` (Jan), `MM`,
+ * `dd`, `HH`, `mm`. Any other characters are kept as separators.
  *
- * Longest tokens are replaced first so `yyyy` is never treated as two `yy`.
+ * One pass over the pattern, so a replaced value (a month name, say) is never
+ * re-scanned for tokens.
  */
 export function gmFormatDate(date: Date, pattern: string): string {
   const pad = (n: number) => String(n).padStart(2, '0');
-  return pattern
-    .replace(/yyyy/g, String(date.getFullYear()))
-    .replace(/yy/g, pad(date.getFullYear() % 100))
-    .replace(/MM/g, pad(date.getMonth() + 1))
-    .replace(/dd/g, pad(date.getDate()));
+  return pattern.replace(TOKEN, (token) => {
+    switch (token) {
+      case 'yyyy':
+        return String(date.getFullYear());
+      case 'yy':
+        return pad(date.getFullYear() % 100);
+      case 'MMMM':
+        return new Intl.DateTimeFormat(undefined, { month: 'long' }).format(date);
+      case 'MMM':
+        return new Intl.DateTimeFormat(undefined, { month: 'short' }).format(date);
+      case 'MM':
+        return pad(date.getMonth() + 1);
+      case 'dd':
+        return pad(date.getDate());
+      case 'HH':
+        return pad(date.getHours());
+      default:
+        return pad(date.getMinutes());
+    }
+  });
+}
+
+/**
+ * Reads text written with `gmFormatDate` back into a date. Only the numeric
+ * tokens can be read back; a pattern with month names yields null.
+ */
+export function gmParseDate(text: string, pattern: string): Date | null {
+  if (/MMM/.test(pattern)) {
+    return null;
+  }
+  const order: string[] = [];
+  let source = '';
+  let last = 0;
+  for (const match of pattern.matchAll(TOKEN)) {
+    source += pattern.slice(last, match.index).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    source += match[0] === 'yyyy' ? '(\\d{4})' : '(\\d{2})';
+    order.push(match[0]);
+    last = match.index + match[0].length;
+  }
+  source += pattern.slice(last).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const found = new RegExp(`^${source}$`).exec(text.trim());
+  if (!found) {
+    return null;
+  }
+  const part = (token: string) => {
+    const at = order.indexOf(token);
+    return at < 0 ? null : Number(found[at + 1]);
+  };
+  const year = part('yyyy') ?? (part('yy') !== null ? 2000 + (part('yy') as number) : null);
+  const month = part('MM');
+  const day = part('dd');
+  if (year === null || month === null || day === null) {
+    return null;
+  }
+  const date = new Date(year, month - 1, day, part('HH') ?? 0, part('mm') ?? 0);
+  return date.getMonth() === month - 1 ? date : null;
 }
 
 /**

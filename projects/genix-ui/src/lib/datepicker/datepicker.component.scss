@@ -149,6 +149,16 @@
   color: var(--gm-gray-900);
 }
 
+.gm-datepicker__jump {
+  display: flex;
+  gap: var(--gm-space-1);
+}
+
+.gm-datepicker__jump-select {
+  font-weight: var(--gm-font-weight-semibold);
+  text-align: start;
+}
+
 .gm-datepicker__nav {
   appearance: none;
   display: inline-flex;
@@ -294,7 +304,8 @@
 
 /* A native <select>, given the field shell's border, radius and focus ring so
    it sits with the rest of the design system rather than looking pasted in. */
-.gm-datepicker__time-select {
+.gm-datepicker__time-select,
+.gm-datepicker__jump-select {
   appearance: none;
   padding: var(--gm-space-1) var(--gm-space-3);
   border: 1px solid var(--gm-gray-300);

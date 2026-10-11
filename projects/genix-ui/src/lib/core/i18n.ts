@@ -49,6 +49,8 @@ export interface GmLabels {
   clear: string;
   previousMonth: string;
   nextMonth: string;
+  month: string;
+  year: string;
   time: string;
   hour: string;
   minute: string;
@@ -85,6 +87,8 @@ export const GM_DEFAULT_LABELS: GmLabels = {
   clear: 'Clear',
   previousMonth: 'Previous month',
   nextMonth: 'Next month',
+  month: 'Month',
+  year: 'Year',
   time: 'Time',
   hour: 'Hour',
   minute: 'Minute',

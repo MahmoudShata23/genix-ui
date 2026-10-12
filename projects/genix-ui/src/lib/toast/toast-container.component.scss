@@ -61,18 +61,19 @@
   display: flex;
   align-items: flex-start;
   gap: var(--gm-space-3);
-  padding: var(--gm-space-4);
+  padding: var(--gm-space-4) var(--gm-space-5);
   pointer-events: auto;
-  background: var(--gm-toast-bg);
   color: var(--gm-toast-fg);
   /* The accent bar is the severity cue that survives a colour-vision
      difference, alongside the icon. */
   border: 1px solid var(--gm-toast-accent);
   border-inline-start: var(--gm-space-1) solid var(--gm-toast-accent);
-  border-radius: var(--gm-radius-md);
+  border-radius: var(--gm-radius-lg);
   box-shadow: var(--gm-shadow-lg);
   font-family: var(--gm-font-family);
   font-size: var(--gm-font-size-sm);
+  background: var(--gm-white);
+  min-width: 300px;
 
   /* ---- Severities ---------------------------------------------------- */
 
@@ -130,4 +131,69 @@
 
 .gm-toast__close {
   flex: 0 0 auto;
+}
+
+// <------------------------------ toaster style --------------------------------->
+
+::ng-deep .gm-toast-container {
+  position: fixed;
+  top: var(--gm-space-6);
+  right: var(--gm-space-6);
+  z-index: var(--gm-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gm-space-3);
+}
+
+::ng-deep .gm-toast {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--gm-space-3) !important;
+  padding: var(--gm-space-4) var(--gm-space-5) !important;
+  border-radius: var(--gm-radius-lg) !important;
+  box-shadow: var(--gm-shadow-lg) !important;
+  background: var(--gm-white) !important;
+  min-width: 300px !important;
+  animation: slideInRight 0.3s ease !important;
+
+  &-success {
+    border-left: 4px solid var(--gm-success) !important;
+  }
+
+  &-error {
+    border-left: 4px solid var(--gm-danger) !important;
+  }
+
+  &-pending {
+    border-left: 4px solid var(--gm-warning) !important;
+    background: var(--gm-warning-light) !important;
+  }
+
+  &-warning {
+    border-left: 4px solid var(--gm-warning) !important;
+  }
+
+  &-info {
+    border-left: 4px solid var(--gm-info) !important;
+  }
+}
+
+::ng-deep .gm-toast-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gm-gray-400);
+  padding: 4px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }

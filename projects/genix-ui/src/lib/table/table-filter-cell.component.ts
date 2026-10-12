@@ -174,7 +174,8 @@ export class GmTableFilterCellComponent {
   }
 
   protected asArray(value: unknown): unknown[] {
-    return Array.isArray(value) ? value : [];
+    const NO_SELECTION: readonly unknown[] = [];
+    return Array.isArray(value) ? value : (NO_SELECTION as unknown[]);
   }
 
   protected asDate(value: unknown): Date | null {

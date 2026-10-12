@@ -5,6 +5,12 @@
     every component, resolved from <code>dist/genix-ui</code> — the published
     build output
   </span>
+  <gm-button
+    [label]="direction() === 'ltr' ? 'Switch to RTL' : 'Switch to LTR'"
+    variant="outlined"
+    size="small"
+    (onClick)="toggleDirection()"
+  />
 </header>
 
 <div class="pg-layout">
@@ -1107,6 +1113,16 @@
       >
         <div class="pg-row">
           <gm-button label="Edit provider" (onClick)="openDialog()" />
+          <gm-button
+            label="Open from start"
+            variant="outlined"
+            (onClick)="openDialog('start')"
+          />
+          <gm-button
+            label="Open from end"
+            variant="outlined"
+            (onClick)="openDialog('end')"
+          />
           <gm-button
             label="Undismissable"
             severity="secondary"

@@ -275,6 +275,30 @@ describe('GmDialogService', () => {
     expect(panel.style.maxHeight).toBe('80vh');
   });
 
+  it('centres by default and docks a full-height panel for start / end', () => {
+    const first = dialog.open(ContentComponent, {});
+    render();
+    expect(query('.gm-dialog-backdrop--start')).toBeNull();
+    expect(query('.gm-dialog-backdrop--end')).toBeNull();
+    first.close();
+    render();
+
+    const second = dialog.open(ContentComponent, { position: 'end', height: '100px' });
+    render();
+    const panel = query<HTMLElement>('.gm-dialog')!;
+    expect(query('.gm-dialog-backdrop--end')).not.toBeNull();
+    expect(panel.style.height).toBe('');
+    expect(panel.getBoundingClientRect().height).toBe(window.innerHeight);
+    expect(panel.getBoundingClientRect().right).toBe(document.documentElement.clientWidth);
+    second.close();
+    render();
+
+    dialog.open(ContentComponent, { position: 'start' });
+    render();
+    expect(query('.gm-dialog-backdrop--start')).not.toBeNull();
+    expect(query<HTMLElement>('.gm-dialog')!.getBoundingClientRect().left).toBe(0);
+  });
+
   it('drops the header row when there is nothing to put in it', () => {
     dialog.open(ContentComponent, { closable: false });
     render();

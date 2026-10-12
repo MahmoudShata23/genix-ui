@@ -1,3 +1,4 @@
+import { Directionality } from '@angular/cdk/bidi';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { CdkPortalOutlet, ComponentPortal } from '@angular/cdk/portal';
 import {
@@ -52,8 +53,14 @@ export class GmDialogContainerComponent {
     inject(Injector),
   );
 
+  /** Resolved direction, applied on the backdrop so everything inside inherits it. */
+  protected readonly dir = this.config.direction ?? inject(Directionality).value;
+
   /** Ties the panel's `aria-labelledby` to the rendered title. */
   protected readonly headerId = gmUniqueId('gm-dialog-title');
+
+  /** Side panels span the full page height, so `height` / `maxHeight` don't apply. */
+  protected readonly isSidePanel = this.config.position === 'start' || this.config.position === 'end';
 
   protected readonly panelClasses = [
     ...(typeof this.config.panelClass === 'string'

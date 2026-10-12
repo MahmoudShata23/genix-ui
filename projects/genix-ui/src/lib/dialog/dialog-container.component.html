@@ -2,7 +2,10 @@
      and be found by the trap's descendant lookup. -->
 <div
   class="gm-dialog-backdrop"
+  [attr.dir]="dir"
   [class.gm-dialog-backdrop--dimmed]="config.modal"
+  [class.gm-dialog-backdrop--start]="config.position === 'start'"
+  [class.gm-dialog-backdrop--end]="config.position === 'end'"
   cdkTrapFocus
   [cdkTrapFocusAutoCapture]="true"
   (click)="handleBackdropClick($event)"
@@ -17,9 +20,9 @@
     tabindex="-1"
     cdkFocusInitial
     [style.width]="config.width"
-    [style.height]="config.height"
+    [style.height]="isSidePanel ? null : config.height"
     [style.max-width]="config.maxWidth"
-    [style.max-height]="config.maxHeight"
+    [style.max-height]="isSidePanel ? null : config.maxHeight"
   >
     @if (config.header || config.closable) {
       <div class="gm-dialog__header">

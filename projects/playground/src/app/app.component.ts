@@ -30,6 +30,7 @@ import {
   GmChipComponent,
   GmDatepickerComponent,
   GmDateRange,
+  GmDialogPosition,
   GmDialogService,
   GmFileRejection,
   GmFileUploadComponent,
@@ -1126,7 +1127,8 @@ export class AppComponent {
             label: "Download",
             // Per-row gate, like `singleActions`: the slot stays, the button goes.
             visible: (row) => row.active,
-            command: (row) => this.lastConfigEvent.set(`Download → ${row.name}`),
+            command: (row) =>
+              this.lastConfigEvent.set(`Download → ${row.name}`),
           },
         ],
       },
@@ -1346,10 +1348,23 @@ export class AppComponent {
 
   private readonly dialogService = inject(GmDialogService);
 
+  protected readonly direction = signal<"ltr" | "rtl">("ltr");
+
+  /**
+   * Flips `<html dir>` so the page mirrors, and hands the same direction to
+   * dialogs explicitly — `Directionality` reads the document once at start-up,
+   * so it would not notice a runtime change.
+   */
+  protected toggleDirection(): void {
+    const next = this.direction() === "ltr" ? "rtl" : "ltr";
+    this.direction.set(next);
+    document.documentElement.dir = next;
+  }
+
   protected readonly dialogResult = signal("nothing yet");
 
   /** The everyday case: hand data in, get a result back. */
-  protected openDialog(): void {
+  protected openDialog(position: GmDialogPosition = "middle"): void {
     const ref = this.dialogService.open<
       PgDialogDemoComponent,
       ProviderDraft,
@@ -1357,6 +1372,8 @@ export class AppComponent {
     >(PgDialogDemoComponent, {
       header: "Edit provider",
       width: "480px",
+      position,
+      direction: this.direction(),
       data: { name: "Nile Diagnostics", country: "Egypt" },
       dismissableMask: true,
     });
@@ -1376,6 +1393,7 @@ export class AppComponent {
     >(PgDialogDemoComponent, {
       header: "Only the buttons close this one",
       width: "480px",
+      direction: this.direction(),
       data: { name: "Locked", country: "Egypt" },
       closable: false,
       closeOnEscape: false,
